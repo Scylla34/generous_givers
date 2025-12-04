@@ -1,0 +1,102 @@
+'use client'
+
+import Link from 'next/link'
+import { Heart, Mail, Phone, MapPin } from 'lucide-react'
+
+export default function Footer() {
+  return (
+    <footer className="bg-gray-900 text-gray-300">
+      <div className="container mx-auto px-4 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* About */}
+          <div>
+            <div className="flex items-center space-x-2 mb-4">
+              <Heart className="w-6 h-6 text-primary-500 fill-current" />
+              <span className="text-lg font-bold text-white">
+                General Givers
+              </span>
+            </div>
+            <p className="text-sm">
+              Supporting children and communities through charitable giving and
+              sustainable projects.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2">
+              <li>
+                <Link href="/about" className="text-sm hover:text-primary-400 transition">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/projects" className="text-sm hover:text-primary-400 transition">
+                  Our Projects
+                </Link>
+              </li>
+              <li>
+                <Link href="/donate" className="text-sm hover:text-primary-400 transition">
+                  Donate
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="text-sm hover:text-primary-400 transition">
+                  Contact
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Contact Us</h3>
+            <ul className="space-y-3">
+              <li className="flex items-center space-x-2 text-sm">
+                <Mail className="w-4 h-4" />
+                <span>info@generalgivers.org</span>
+              </li>
+              <li className="flex items-center space-x-2 text-sm">
+                <Phone className="w-4 h-4" />
+                <span>+1 (555) 123-4567</span>
+              </li>
+              <li className="flex items-start space-x-2 text-sm">
+                <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+                <span>123 Charity Lane, Hope City, HC 12345</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h3 className="text-white font-semibold mb-4">Stay Updated</h3>
+            <p className="text-sm mb-4">
+              Get updates on our latest projects and impact.
+            </p>
+            <form className="space-y-2">
+              <input
+                type="email"
+                placeholder="Your email"
+                className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:outline-none focus:border-primary-500"
+              />
+              <button
+                type="submit"
+                className="w-full bg-primary-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-primary-700 transition"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+          <p>
+            &copy; {new Date().getFullYear()} General Givers Family Foundation.
+            All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+  )
+}
