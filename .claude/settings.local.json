@@ -7,7 +7,12 @@
       "Bash(npm install:*)",
       "Bash(npm run dev:*)",
       "Bash(mvn clean:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)",
+      "Bash(timeout 90 npm run build:*)",
+      "Bash(timeout 120 npm run build:*)"
     ],
     "deny": [],
     "ask": []

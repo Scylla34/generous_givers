@@ -15,8 +15,6 @@ import {
   X,
   LogOut,
   User,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { Button } from './ui/button'
@@ -31,6 +29,7 @@ import {
 import { Avatar, AvatarFallback } from './ui/avatar'
 import { Separator } from './ui/separator'
 import { cn } from '@/lib/utils'
+import { useSessionTimeout } from '@/hooks/useSessionTimeout'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -44,11 +43,13 @@ interface NavItem {
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true) // Collapsed by default
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Hidden by default on mobile
   const pathname = usePathname()
   const router = useRouter()
   const { user, clearAuth } = useAuthStore()
+
+  // Initialize session timeout
+  useSessionTimeout()
 
   const navigation: NavItem[] = [
     {
@@ -125,31 +126,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 transition-all duration-300',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          'lg:translate-x-0',
-          sidebarCollapsed ? 'lg:w-20' : 'lg:w-64',
-          'w-64'
+          'fixed inset-y-0 left-0 z-50 flex flex-col bg-white border-r border-gray-200 transition-transform duration-300 w-64',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo Section */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200">
-          {!sidebarCollapsed && (
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">GG</span>
-              </div>
-              <span className="font-semibold text-gray-900">GenerousGivers</span>
-            </Link>
-          )}
-          {sidebarCollapsed && (
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center mx-auto">
+          <Link href="/dashboard" className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">GG</span>
             </div>
-          )}
+            <span className="font-semibold text-gray-900">GenerousGivers</span>
+          </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700"
           >
             <X className="w-6 h-6" />
           </button>
@@ -164,136 +155,79 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => setSidebarOpen(false)}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
                   isActive
                     ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-700 hover:bg-gray-100',
-                  sidebarCollapsed && 'justify-center'
+                    : 'text-gray-700 hover:bg-gray-100'
                 )}
-                title={sidebarCollapsed ? item.name : ''}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
-                {!sidebarCollapsed && <span>{item.name}</span>}
+                <span>{item.name}</span>
               </Link>
             )
           })}
         </nav>
 
-        {/* Collapse Button (Desktop) */}
-        <div className="hidden lg:block p-4 border-t border-gray-200">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="w-full justify-center"
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="w-5 h-5" />
-            ) : (
-              <>
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                <span>Collapse</span>
-              </>
-            )}
-          </Button>
-        </div>
-
         {/* User Section */}
         <div className="p-4 border-t border-gray-200">
-          {!sidebarCollapsed ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-primary-100 text-primary-700 text-sm">
-                      {user ? getInitials(user.name) : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 text-left">
-                    <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                    <p className="text-xs text-gray-500">{user?.role.replace('_', ' ')}</p>
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile" className="cursor-pointer">
-                    <User className="w-4 h-4 mr-2" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center justify-center w-full">
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback className="bg-primary-100 text-primary-700 text-sm">
-                      {user ? getInitials(user.name) : 'U'}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>{user?.name}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link href="/dashboard/profile" className="cursor-pointer">
-                    <User className="w-4 h-4 mr-2" />
-                    Profile
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={handleLogout}
-                  className="text-red-600 focus:text-red-600 cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-3 w-full px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <Avatar className="w-8 h-8">
+                  <AvatarFallback className="bg-primary-100 text-primary-700 text-sm">
+                    {user ? getInitials(user.name) : 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 text-left">
+                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
+                  <p className="text-xs text-gray-500">{user?.role.replace('_', ' ')}</p>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/profile" className="cursor-pointer">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-red-600 focus:text-red-600 cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
 
       {/* Main Content */}
-      <div
-        className={cn(
-          'transition-all duration-300',
-          'lg:pl-64',
-          sidebarCollapsed && 'lg:pl-20'
-        )}
-      >
+      <div className="min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200">
           <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden text-gray-500 hover:text-gray-700"
-            >
-              <Menu className="w-6 h-6" />
-            </button>
-            <div className="hidden lg:block">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="text-gray-500 hover:text-gray-700"
+                aria-label="Open menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
               <h2 className="text-lg font-semibold text-gray-900">
                 {filteredNavigation.find((item) => item.href === pathname)?.name ||
                   'Dashboard'}
               </h2>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">Welcome, {user?.name}</span>
+              <span className="text-sm text-gray-600 hidden sm:block">Welcome, {user?.name}</span>
             </div>
           </div>
         </header>
@@ -304,7 +238,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-gray-200 bg-white">
+        {/* <footer className="border-t border-gray-200 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="text-sm text-gray-600">
@@ -328,7 +262,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </div>
             </div>
           </div>
-        </footer>
+        </footer> */}
       </div>
     </div>
   )

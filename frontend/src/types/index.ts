@@ -31,6 +31,13 @@ export interface CreateUserRequest {
   role: UserRole
 }
 
+export interface UpdateUserRequest {
+  name?: string
+  email?: string
+  phone?: string
+  password?: string
+}
+
 export interface ChangePasswordRequest {
   currentPassword: string
   newPassword: string

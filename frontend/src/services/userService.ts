@@ -36,10 +36,3 @@ export const userService = {
     return response.data
   },
 }
-
-export interface UpdateUserRequest {
-  name?: string
-  email?: string
-  phone?: string
-  password?: string
-}

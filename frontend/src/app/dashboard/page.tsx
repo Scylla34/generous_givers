@@ -137,7 +137,7 @@ export default function DashboardPage() {
           Welcome back, {user?.name}!
         </h1>
         <p className="text-gray-600 mt-2">
-          Here's what's happening with your foundation today.
+          Here&apos;s what&apos;s happening with your foundation today.
         </p>
       </div>
 

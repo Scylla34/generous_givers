@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { projectService } from '@/services/projectService'
 import { donationService } from '@/services/donationService'
 import { DonationRequest } from '@/types'
 import { useSearchParams } from 'next/navigation'
 
-export default function DonatePage() {
+function DonateForm() {
   const searchParams = useSearchParams()
   const projectId = searchParams.get('project')
 
@@ -177,5 +177,13 @@ export default function DonatePage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function DonatePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-gray-500">Loading...</div></div>}>
+      <DonateForm />
+    </Suspense>
   )
 }

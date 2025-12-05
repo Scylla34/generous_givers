@@ -2,6 +2,8 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { donationService } from '@/services/donationService'
+import { Donation } from '@/types'
+import { DataTable } from '@/components/ui/data-table'
 import { format } from 'date-fns'
 
 export default function DonationsPage() {
@@ -20,74 +22,77 @@ export default function DonationsPage() {
 
   const totalAmount = donations?.reduce((sum, d) => sum + d.amount, 0) || 0
 
+  const columns = [
+    {
+      header: 'Donor',
+      accessor: (donation: Donation) => (
+        <div>
+          <div className="text-sm font-medium text-gray-900">
+            {donation.donorName || 'Anonymous'}
+          </div>
+          <div className="text-sm text-gray-500">{donation.email}</div>
+        </div>
+      ),
+    },
+    {
+      header: 'Amount',
+      accessor: (donation: Donation) => (
+        <span className="text-sm font-semibold text-gray-900">
+          KSh {donation.amount.toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      header: 'Project',
+      accessor: (donation: Donation) => (
+        <span className="text-sm text-gray-600">
+          {donation.projectTitle || 'General Fund'}
+        </span>
+      ),
+    },
+    {
+      header: 'Date',
+      accessor: (donation: Donation) => (
+        <span className="text-sm text-gray-600">
+          {format(new Date(donation.date), 'MMM dd, yyyy')}
+        </span>
+      ),
+    },
+    {
+      header: 'Status',
+      accessor: (donation: Donation) => (
+        <span
+          className={`px-2 py-1 text-xs font-semibold rounded-full ${
+            donation.status === 'COMPLETED'
+              ? 'bg-green-100 text-green-800'
+              : donation.status === 'PENDING'
+              ? 'bg-yellow-100 text-yellow-800'
+              : donation.status === 'FAILED'
+              ? 'bg-red-100 text-red-800'
+              : 'bg-gray-100 text-gray-800'
+          }`}
+        >
+          {donation.status}
+        </span>
+      ),
+    },
+  ]
+
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <div className="space-y-6">
+      <div>
         <h1 className="text-3xl font-bold text-gray-900">Donations</h1>
-        <p className="text-gray-600 mt-2">
-          Total Donations: ${totalAmount.toLocaleString()}
+        <p className="text-lg text-gray-600 mt-2">
+          Total Donations: <span className="font-semibold text-primary-600">KSh {totalAmount.toLocaleString()}</span>
         </p>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Donor
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Amount
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Project
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Date
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {donations?.map((donation) => (
-              <tr key={donation.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div>
-                    <div className="text-sm font-medium text-gray-900">
-                      {donation.donorName || 'Anonymous'}
-                    </div>
-                    <div className="text-sm text-gray-500">{donation.email}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                  ${donation.amount.toLocaleString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {donation.projectTitle || 'General Fund'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {format(new Date(donation.date), 'MMM dd, yyyy')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      donation.status === 'COMPLETED'
-                        ? 'bg-green-100 text-green-800'
-                        : donation.status === 'PENDING'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {donation.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        data={donations || []}
+        columns={columns}
+        searchPlaceholder="Search donations by donor name, email, or project..."
+        itemsPerPage={15}
+      />
     </div>
   )
 }

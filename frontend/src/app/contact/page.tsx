@@ -14,7 +14,7 @@ export default function ContactPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Get In Touch</h2>
             <p className="text-gray-700 mb-8">
               We would love to hear from you! Whether you have questions, want to get
-              involved, or need more information about our work, please don't hesitate to
+              involved, or need more information about our work, please don&apos;t hesitate to
               reach out.
             </p>
 

@@ -3,12 +3,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { childrenHomeService } from '@/services/childrenHomeService'
-import { Plus, Edit, Trash2, X } from 'lucide-react'
+import { ChildrenHome } from '@/types'
+import { Plus, Edit, Trash2, X, MapPin, Phone } from 'lucide-react'
+import { DataTable } from '@/components/ui/data-table'
+import { toast } from 'sonner'
 
 export default function ChildrenHomesPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [editingHome, setEditingHome] = useState<any | null>(null)
+  const [editingHome, setEditingHome] = useState<ChildrenHome | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -27,6 +30,10 @@ export default function ChildrenHomesPage() {
       queryClient.invalidateQueries({ queryKey: ['childrenHomes'] })
       setIsModalOpen(false)
       resetForm()
+      toast.success('Children&apos;s home added successfully!')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to add home')
     },
   })
 
@@ -37,6 +44,10 @@ export default function ChildrenHomesPage() {
       queryClient.invalidateQueries({ queryKey: ['childrenHomes'] })
       setIsModalOpen(false)
       resetForm()
+      toast.success('Children&apos;s home updated successfully!')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to update home')
     },
   })
 
@@ -44,6 +55,10 @@ export default function ChildrenHomesPage() {
     mutationFn: childrenHomeService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childrenHomes'] })
+      toast.success('Children&apos;s home deleted successfully!')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to delete home')
     },
   })
 
@@ -66,7 +81,7 @@ export default function ChildrenHomesPage() {
     }
   }
 
-  const handleEdit = (home: any) => {
+  const handleEdit = (home: ChildrenHome) => {
     setEditingHome(home)
     setFormData({
       name: home.name,
@@ -83,6 +98,60 @@ export default function ChildrenHomesPage() {
     }
   }
 
+  const columns = [
+    {
+      header: 'Name',
+      accessor: (home: ChildrenHome) => (
+        <span className="font-medium text-gray-900">{home.name}</span>
+      ),
+    },
+    {
+      header: 'Location',
+      accessor: (home: ChildrenHome) => (
+        <div className="flex items-center gap-2 text-gray-600">
+          <MapPin className="w-4 h-4" />
+          <span className="text-sm">{home.location || '-'}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Contact',
+      accessor: (home: ChildrenHome) => (
+        <div className="flex items-center gap-2 text-gray-600">
+          <Phone className="w-4 h-4" />
+          <span className="text-sm">{home.contact || '-'}</span>
+        </div>
+      ),
+    },
+    {
+      header: 'Notes',
+      accessor: (home: ChildrenHome) => (
+        <span className="text-sm text-gray-600 line-clamp-2">{home.notes || '-'}</span>
+      ),
+    },
+    {
+      header: 'Actions',
+      accessor: (home: ChildrenHome) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleEdit(home)}
+            className="text-blue-600 hover:text-blue-900"
+            title="Edit home"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleDelete(home.id)}
+            className="text-red-600 hover:text-red-900"
+            title="Delete home"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -92,9 +161,9 @@ export default function ChildrenHomesPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Children's Homes</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-900">Children&apos;s Homes</h1>
         <button
           onClick={() => {
             resetForm()
@@ -107,50 +176,16 @@ export default function ChildrenHomesPage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {homes?.map((home) => (
-          <div key={home.id} className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-3">{home.name}</h3>
-
-            {home.location && (
-              <p className="text-sm text-gray-600 mb-2">
-                <span className="font-medium">Location:</span> {home.location}
-              </p>
-            )}
-
-            {home.contact && (
-              <p className="text-sm text-gray-600 mb-2">
-                <span className="font-medium">Contact:</span> {home.contact}
-              </p>
-            )}
-
-            {home.notes && (
-              <p className="text-sm text-gray-700 mt-3 line-clamp-3">{home.notes}</p>
-            )}
-
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={() => handleEdit(home)}
-                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
-              >
-                <Edit className="w-4 h-4" />
-                Edit
-              </button>
-              <button
-                onClick={() => handleDelete(home.id)}
-                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <DataTable
+        data={homes || []}
+        columns={columns}
+        searchPlaceholder="Search by name, location, or contact..."
+        itemsPerPage={10}
+      />
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {editingHome ? 'Edit Home' : 'Add Home'}
@@ -169,7 +204,7 @@ export default function ChildrenHomesPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
+                  Name *
                 </label>
                 <input
                   type="text"
@@ -178,7 +213,8 @@ export default function ChildrenHomesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="Enter home name"
                 />
               </div>
 
@@ -192,7 +228,8 @@ export default function ChildrenHomesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="Enter location"
                 />
               </div>
 
@@ -206,7 +243,8 @@ export default function ChildrenHomesPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, contact: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="Phone or email"
                 />
               </div>
 
@@ -215,12 +253,13 @@ export default function ChildrenHomesPage() {
                   Notes
                 </label>
                 <textarea
-                  rows={4}
+                  rows={3}
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData({ ...formData, notes: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="Additional notes..."
                 />
               </div>
 
@@ -234,7 +273,7 @@ export default function ChildrenHomesPage() {
                     ? 'Saving...'
                     : editingHome
                     ? 'Update'
-                    : 'Create'}
+                    : 'Add'}
                 </button>
                 <button
                   type="button"

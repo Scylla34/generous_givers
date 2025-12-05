@@ -1,21 +1,41 @@
 export default function AboutPage() {
   return (
     <div className="min-h-screen">
-      <div className="bg-primary-600 text-white py-20">
-        <div className="container mx-auto px-4">
+
+      {/* Video Header */}
+      <div className="relative h-[300px] md:h-[400px] flex items-center justify-center text-white overflow-hidden">
+
+        {/* Video background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/videos/m.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-primary-700/60"></div>
+
+        {/* Text */}
+        <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">About Us</h1>
-          <p className="text-xl">Making a difference in the lives of children</p>
+          <p className="text-xl">Making a difference in the lives of the unfortunate</p>
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
+
+          {/* Mission */}
           <section className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Mission</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              The General Givers Family Foundation is dedicated to improving the lives of
-              orphaned and vulnerable children through direct support, educational programs,
-              and sustainable community development initiatives.
+              The General Givers Family Foundation is dedicated to inspire positive action and help create an
+                environment of love, respect, and cooperation in our society.
             </p>
             <p className="text-gray-700 leading-relaxed">
               We believe that every child deserves access to basic necessities, quality
@@ -23,6 +43,7 @@ export default function AboutPage() {
             </p>
           </section>
 
+          {/* Vision */}
           <section className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Vision</h2>
             <p className="text-gray-700 leading-relaxed">
@@ -32,16 +53,18 @@ export default function AboutPage() {
             </p>
           </section>
 
+          {/* What We Do */}
           <section className="mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">What We Do</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Direct Support</h3>
                 <p className="text-gray-700">
-                  Regular visits and donations to children's homes, providing essential
+                  Regular visits and donations to children&apos;s homes, providing essential
                   supplies, food, and clothing.
                 </p>
               </div>
+
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Education</h3>
                 <p className="text-gray-700">
@@ -49,6 +72,7 @@ export default function AboutPage() {
                   quality learning opportunities.
                 </p>
               </div>
+
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Healthcare</h3>
                 <p className="text-gray-700">
@@ -56,10 +80,9 @@ export default function AboutPage() {
                   healthcare and nutrition.
                 </p>
               </div>
+
               <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Community Development
-                </h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Community Development</h3>
                 <p className="text-gray-700">
                   Building sustainable programs that empower communities to support
                   vulnerable children.
@@ -68,6 +91,7 @@ export default function AboutPage() {
             </div>
           </section>
 
+          {/* Get Involved */}
           <section>
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Get Involved</h2>
             <p className="text-gray-700 leading-relaxed mb-6">
@@ -75,6 +99,7 @@ export default function AboutPage() {
               spreading awareness, your support helps us create lasting change in the lives
               of children in need.
             </p>
+
             <div className="flex gap-4">
               <a
                 href="/donate"
@@ -90,8 +115,9 @@ export default function AboutPage() {
               </a>
             </div>
           </section>
+
         </div>
       </div>
     </div>
-  )
+  );
 }

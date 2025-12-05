@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
 import { CreateUserRequest, User, UserRole } from '@/types'
 import { Plus, Edit, Trash2, X } from 'lucide-react'
+import { DataTable } from '@/components/ui/data-table'
+import { toast } from 'sonner'
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
@@ -29,6 +31,10 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setIsModalOpen(false)
       resetForm()
+      toast.success('User created successfully!')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to create user')
     },
   })
 
@@ -39,6 +45,10 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setIsModalOpen(false)
       resetForm()
+      toast.success('User updated successfully!')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to update user')
     },
   })
 
@@ -46,6 +56,10 @@ export default function UsersPage() {
     mutationFn: userService.deactivate,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
+      toast.success('User deactivated successfully!')
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || 'Failed to deactivate user')
     },
   })
 
@@ -94,6 +108,71 @@ export default function UsersPage() {
     }
   }
 
+  const columns = [
+    {
+      header: 'Name',
+      accessor: (user: User) => (
+        <span className="font-medium text-gray-900">{user.name}</span>
+      ),
+    },
+    {
+      header: 'Email',
+      accessor: (user: User) => (
+        <span className="text-gray-600">{user.email}</span>
+      ),
+    },
+    {
+      header: 'Phone',
+      accessor: (user: User) => (
+        <span className="text-gray-600">{user.phone || '-'}</span>
+      ),
+    },
+    {
+      header: 'Role',
+      accessor: (user: User) => (
+        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+          {user.role}
+        </span>
+      ),
+    },
+    {
+      header: 'Status',
+      accessor: (user: User) => (
+        <span
+          className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+            user.isActive
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
+          }`}
+        >
+          {user.isActive ? 'Active' : 'Inactive'}
+        </span>
+      ),
+    },
+    {
+      header: 'Actions',
+      accessor: (user: User) => (
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleEdit(user)}
+            className="text-blue-600 hover:text-blue-900"
+            title="Edit user"
+          >
+            <Edit className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => handleDelete(user.id)}
+            className="text-red-600 hover:text-red-900"
+            disabled={!user.isActive}
+            title="Deactivate user"
+          >
+            <Trash2 className="w-5 h-5" />
+          </button>
+        </div>
+      ),
+    },
+  ]
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -103,8 +182,8 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
         <button
           onClick={() => {
@@ -118,84 +197,16 @@ export default function UsersPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Email
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Phone
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {users?.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  {user.name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.email}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {user.phone || '-'}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span
-                    className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      user.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}
-                  >
-                    {user.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEdit(user)}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      <Edit className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(user.id)}
-                      className="text-red-600 hover:text-red-900"
-                      disabled={!user.isActive}
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        data={users || []}
+        columns={columns}
+        searchPlaceholder="Search users by name, email, or phone..."
+        itemsPerPage={10}
+      />
 
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">
                 {editingUser ? 'Edit User' : 'Create User'}
@@ -214,7 +225,7 @@ export default function UsersPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
+                  Name *
                 </label>
                 <input
                   type="text"
@@ -223,13 +234,14 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="Enter full name"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  Email *
                 </label>
                 <input
                   type="email"
@@ -238,7 +250,8 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="email@example.com"
                 />
               </div>
 
@@ -252,7 +265,8 @@ export default function UsersPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                  placeholder="+254 700 000 000"
                 />
               </div>
 
@@ -260,7 +274,7 @@ export default function UsersPage() {
                 <>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Temporary Password
+                      Temporary Password *
                     </label>
                     <input
                       type="password"
@@ -272,13 +286,14 @@ export default function UsersPage() {
                           temporaryPassword: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
+                      placeholder="Enter temporary password"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Role
+                      Role *
                     </label>
                     <select
                       value={formData.role}
@@ -288,7 +303,7 @@ export default function UsersPage() {
                           role: e.target.value as UserRole,
                         })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
                     >
                       <option value="MEMBER">Member</option>
                       <option value="TREASURER">Treasurer</option>

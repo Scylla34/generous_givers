@@ -6,8 +6,8 @@ import { Heart, Mail, Phone, MapPin } from 'lucide-react'
 export default function Footer() {
   return (
     <footer className="bg-gray-900 text-gray-300">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* About */}
           <div>
             <div className="flex items-center space-x-2 mb-4">
@@ -17,8 +17,8 @@ export default function Footer() {
               </span>
             </div>
             <p className="text-sm">
-              Supporting children and communities through charitable giving and
-              sustainable projects.
+              Inspiring positive action and help create an
+                environment of love, respect, and cooperation in our society.
             </p>
           </div>
 
@@ -90,7 +90,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
+        <div className="border-t border-gray-800 mt-6 pt-6 text-center text-sm">
           <p>
             &copy; {new Date().getFullYear()} General Givers Family Foundation.
             All rights reserved.
