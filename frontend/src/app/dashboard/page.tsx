@@ -3,11 +3,33 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { Users, FolderOpen, DollarSign, TrendingUp, MapPin, BarChart3, Loader2 } from 'lucide-react'
+import {
+  Users,
+  FolderOpen,
+  DollarSign,
+  TrendingUp,
+  MapPin,
+  BarChart3,
+  Heart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Calendar,
+  HandHeart,
+} from 'lucide-react'
 import { dashboardService } from '@/services/dashboardService'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
+import { Bar, BarChart, XAxis, YAxis, Area, AreaChart, CartesianGrid } from 'recharts'
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
+import { cn } from '@/lib/utils'
 
 interface DashboardStats {
   totalProjects: number
@@ -28,6 +50,20 @@ interface RecentActivity {
   color: string
 }
 
+const donationsChartConfig = {
+  amount: {
+    label: 'Donations',
+    color: '#0ea5e9',
+  },
+} satisfies ChartConfig
+
+const projectsChartConfig = {
+  projects: {
+    label: 'Projects',
+    color: '#8b5cf6',
+  },
+} satisfies ChartConfig
+
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useAuthStore()
@@ -35,8 +71,10 @@ export default function DashboardPage() {
   const [activities, setActivities] = useState<RecentActivity[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     fetchDashboardData()
   }, [])
 
@@ -52,8 +90,8 @@ export default function DashboardPage() {
 
       setStats(statsData)
       setActivities(activitiesData)
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to load dashboard data'
+    } catch {
+      const errorMessage = 'Failed to load dashboard data'
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -75,6 +113,12 @@ export default function DashboardPage() {
       case 'reports':
         router.push('/dashboard/reports')
         break
+      case 'donations':
+        router.push('/dashboard/donations')
+        break
+      case 'children-homes':
+        router.push('/dashboard/children-homes')
+        break
       default:
         break
     }
@@ -82,74 +126,193 @@ export default function DashboardPage() {
 
   const formatCurrency = (amount: string) => {
     const num = parseFloat(amount)
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(num)
   }
 
+  const parseChange = (change: string): { value: number; isPositive: boolean } => {
+    const match = change.match(/([+-]?\d+(?:\.\d+)?)/);
+    const value = match ? parseFloat(match[1]) : 0;
+    const isPositive = !change.includes('-') && value > 0;
+    return { value: Math.abs(value), isPositive };
+  }
+
+  // Sample chart data - in production this would come from API
+  const donationsChartData = [
+    { month: 'Jan', amount: 12000 },
+    { month: 'Feb', amount: 18000 },
+    { month: 'Mar', amount: 15000 },
+    { month: 'Apr', amount: 22000 },
+    { month: 'May', amount: 28000 },
+    { month: 'Jun', amount: 25000 },
+  ]
+
+  const projectsChartData = [
+    { month: 'Jan', projects: 2 },
+    { month: 'Feb', projects: 3 },
+    { month: 'Mar', projects: 2 },
+    { month: 'Apr', projects: 4 },
+    { month: 'May', projects: 3 },
+    { month: 'Jun', projects: 5 },
+  ]
+
   const statsConfig = [
     {
       name: 'Total Projects',
       value: stats?.totalProjects || 0,
-      change: stats?.projectsChange || 'Loading...',
+      change: stats?.projectsChange || '+0',
       icon: FolderOpen,
-      color: 'bg-blue-500',
+      gradient: 'from-blue-500 to-blue-600',
+      bgGradient: 'from-blue-50 to-blue-100',
     },
     {
       name: 'Total Donations',
-      value: stats ? formatCurrency(stats.totalDonations) : '$0',
-      change: stats?.donationsChange || 'Loading...',
+      value: stats ? formatCurrency(stats.totalDonations) : 'KES 0',
+      change: stats?.donationsChange || '+0',
       icon: DollarSign,
-      color: 'bg-green-500',
+      gradient: 'from-emerald-500 to-emerald-600',
+      bgGradient: 'from-emerald-50 to-emerald-100',
     },
     {
-      name: 'Active Users',
+      name: 'Active Members',
       value: stats?.activeUsers || 0,
-      change: stats?.usersChange || 'Loading...',
+      change: stats?.usersChange || '+0',
       icon: Users,
-      color: 'bg-purple-500',
+      gradient: 'from-violet-500 to-violet-600',
+      bgGradient: 'from-violet-50 to-violet-100',
     },
     {
       name: 'Monthly Growth',
       value: stats?.monthlyGrowth || '0%',
-      change: 'Trending up',
+      change: 'Trending',
       icon: TrendingUp,
-      color: 'bg-orange-500',
+      gradient: 'from-amber-500 to-amber-600',
+      bgGradient: 'from-amber-50 to-amber-100',
     },
   ]
 
+  // Role-based quick actions
+  const getQuickActions = () => {
+    const actions = []
+
+    if (user?.role === 'SUPER_USER') {
+      actions.push({
+        key: 'users',
+        label: 'Manage Users',
+        icon: Users,
+        description: 'Add or manage members',
+      })
+    }
+
+    if (['SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL'].includes(user?.role || '')) {
+      actions.push({
+        key: 'projects',
+        label: 'View Projects',
+        icon: FolderOpen,
+        description: 'Manage charitable projects',
+      })
+      actions.push({
+        key: 'visits',
+        label: 'Record Visits',
+        icon: MapPin,
+        description: 'Log community visits',
+      })
+      actions.push({
+        key: 'children-homes',
+        label: "Children's Homes",
+        icon: Heart,
+        description: 'Manage beneficiaries',
+      })
+    }
+
+    if (['SUPER_USER', 'CHAIRPERSON', 'TREASURER'].includes(user?.role || '')) {
+      actions.push({
+        key: 'donations',
+        label: 'Donations',
+        icon: DollarSign,
+        description: 'Track contributions',
+      })
+      actions.push({
+        key: 'reports',
+        label: 'View Reports',
+        icon: BarChart3,
+        description: 'Financial analytics',
+      })
+    }
+
+    return actions
+  }
+
+  const quickActions = getQuickActions()
+
+  const getActivityColor = (color: string) => {
+    const colors: Record<string, string> = {
+      blue: 'bg-blue-500',
+      green: 'bg-green-500',
+      purple: 'bg-purple-500',
+      amber: 'bg-amber-500',
+      red: 'bg-red-500',
+    }
+    return colors[color] || 'bg-primary-500'
+  }
+
+  const formatRoleName = (role: string) => {
+    return role.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase())
+  }
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <Spinner className="w-8 h-8 text-primary-600" />
+        <p className="text-gray-500 text-sm">Loading dashboard...</p>
       </div>
     )
   }
 
   return (
-    <div>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
-          Welcome back, {user?.name}!
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Here&apos;s what&apos;s happening with your foundation today.
-        </p>
+    <div className="space-y-6">
+      {/* Welcome Header */}
+      <div className={cn(
+        "transition-all duration-500",
+        mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+      )}>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Welcome back, {user?.name?.split(' ')[0]}!
+            </h1>
+            <p className="text-gray-500 mt-1 flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              {new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-primary-50 rounded-full">
+            <HandHeart className="w-4 h-4 text-primary-600" />
+            <span className="text-sm font-medium text-primary-700">
+              {formatRoleName(user?.role || '')}
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-          {error}
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
+          <span>{error}</span>
           <Button
-            variant="link"
+            variant="ghost"
             size="sm"
             onClick={fetchDashboardData}
-            className="ml-2 text-red-700 hover:text-red-800"
+            className="text-red-700 hover:text-red-800 hover:bg-red-100"
           >
             Retry
           </Button>
@@ -157,110 +320,230 @@ export default function DashboardPage() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {statsConfig.map((stat) => {
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statsConfig.map((stat, index) => {
           const Icon = stat.icon
+          const { value, isPositive } = parseChange(stat.change)
           return (
-            <div
+            <Card
               key={stat.name}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition"
+              className={cn(
+                "border-0 shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden",
+                mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+              )}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`${stat.color} w-12 h-12 rounded-lg flex items-center justify-center`}
-                >
-                  <Icon className="w-6 h-6 text-white" />
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className={cn(
+                    "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
+                    stat.gradient
+                  )}>
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  {stat.change !== 'Trending' && (
+                    <div className={cn(
+                      "flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full",
+                      isPositive
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-red-100 text-red-700"
+                    )}>
+                      {isPositive ? (
+                        <ArrowUpRight className="w-3 h-3" />
+                      ) : (
+                        <ArrowDownRight className="w-3 h-3" />
+                      )}
+                      {value}%
+                    </div>
+                  )}
                 </div>
-              </div>
-              <h3 className="text-gray-600 text-sm font-medium mb-1">
-                {stat.name}
-              </h3>
-              <p className="text-2xl font-bold text-gray-900 mb-1">
-                {stat.value}
-              </p>
-              <p className="text-sm text-gray-500">{stat.change}</p>
-            </div>
+                <div className="mt-4">
+                  <p className="text-sm font-medium text-gray-500">{stat.name}</p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
+                </div>
+              </CardContent>
+            </Card>
           )
         })}
       </div>
 
-      {/* Content Grid */}
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Donations Chart */}
+        <Card className={cn(
+          "border-0 shadow-md transition-all duration-500",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        )} style={{ transitionDelay: '400ms' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="w-5 h-5 text-emerald-500" />
+              Donations Overview
+            </CardTitle>
+            <CardDescription>Monthly donation trends</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={donationsChartConfig} className="h-[200px] w-full">
+              <AreaChart data={donationsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="donationsGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                  tickFormatter={(value) => `${value / 1000}k`}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#0ea5e9"
+                  strokeWidth={2}
+                  fill="url(#donationsGradient)"
+                />
+              </AreaChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        {/* Projects Chart */}
+        <Card className={cn(
+          "border-0 shadow-md transition-all duration-500",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        )} style={{ transitionDelay: '500ms' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-violet-500" />
+              Projects Activity
+            </CardTitle>
+            <CardDescription>Monthly project count</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={projectsChartConfig} className="h-[200px] w-full">
+              <BarChart data={projectsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: '#6b7280', fontSize: 12 }}
+                />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar
+                  dataKey="projects"
+                  fill="#8b5cf6"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Bottom Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Recent Activity
-          </h2>
-          {activities.length === 0 ? (
-            <p className="text-gray-500 text-sm">No recent activities</p>
-          ) : (
-            <div className="space-y-4">
-              {activities.map((activity) => (
-                <div key={activity.id} className="flex items-start space-x-3 pb-4 border-b last:border-0">
-                  <div className={`w-2 h-2 bg-${activity.color}-500 rounded-full mt-2`}></div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {activity.title}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {activity.description} - {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
-                    </p>
+        <Card className={cn(
+          "border-0 shadow-md transition-all duration-500",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        )} style={{ transitionDelay: '600ms' }}>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Latest updates from the organization</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activities.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <Heart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <p>No recent activities</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {activities.slice(0, 5).map((activity) => (
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-3 pb-4 border-b last:border-0 last:pb-0"
+                  >
+                    <div className={cn(
+                      "w-2 h-2 rounded-full mt-2 flex-shrink-0",
+                      getActivityColor(activity.color)
+                    )} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {activity.title}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        {activity.description}
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {user?.role === 'SUPER_USER' && (
-              <button
-                onClick={() => handleQuickAction('users')}
-                className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left cursor-pointer"
-              >
-                <Users className="w-6 h-6 text-primary-600 mb-2" />
-                <p className="text-sm font-medium text-gray-900">Manage Users</p>
-              </button>
-            )}
-            {['SUPER_USER', 'CHAIRMAN', 'SECRETARY'].includes(user?.role || '') && (
-              <button
-                onClick={() => handleQuickAction('projects')}
-                className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left cursor-pointer"
-              >
-                <FolderOpen className="w-6 h-6 text-primary-600 mb-2" />
-                <p className="text-sm font-medium text-gray-900">
-                  View Projects
-                </p>
-              </button>
-            )}
-            {['SUPER_USER', 'CHAIRMAN', 'SECRETARY'].includes(user?.role || '') && (
-              <button
-                onClick={() => handleQuickAction('visits')}
-                className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left cursor-pointer"
-              >
-                <MapPin className="w-6 h-6 text-primary-600 mb-2" />
-                <p className="text-sm font-medium text-gray-900">
-                  View Visits
-                </p>
-              </button>
-            )}
-            {['SUPER_USER', 'CHAIRMAN', 'TREASURER'].includes(user?.role || '') && (
-              <button
-                onClick={() => handleQuickAction('reports')}
-                className="p-4 border-2 border-gray-200 rounded-lg hover:border-primary-500 hover:bg-primary-50 transition text-left cursor-pointer"
-              >
-                <BarChart3 className="w-6 h-6 text-primary-600 mb-2" />
-                <p className="text-sm font-medium text-gray-900">
-                  View Reports
-                </p>
-              </button>
-            )}
-          </div>
+        <Card className={cn(
+          "border-0 shadow-md transition-all duration-500",
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        )} style={{ transitionDelay: '700ms' }}>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Shortcuts to common tasks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              {quickActions.map((action) => {
+                const Icon = action.icon
+                return (
+                  <button
+                    key={action.key}
+                    onClick={() => handleQuickAction(action.key)}
+                    className="p-4 border-2 border-gray-100 rounded-xl hover:border-primary-200 hover:bg-primary-50 transition-all duration-200 text-left group"
+                  >
+                    <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center mb-3 group-hover:bg-primary-200 transition-colors">
+                      <Icon className="w-5 h-5 text-primary-600" />
+                    </div>
+                    <p className="text-sm font-medium text-gray-900">{action.label}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{action.description}</p>
+                  </button>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Motto Footer */}
+      <div className={cn(
+        "text-center py-6 transition-all duration-500",
+        mounted ? "opacity-100" : "opacity-0"
+      )} style={{ transitionDelay: '800ms' }}>
+        <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-primary-50 to-primary-100 rounded-full">
+          <Heart className="w-5 h-5 text-primary-500" />
+          <span className="text-sm font-medium text-primary-700">
+            &ldquo;Service to Humanity is Service to God&rdquo;
+          </span>
+          <Heart className="w-5 h-5 text-primary-500" />
         </div>
       </div>
     </div>

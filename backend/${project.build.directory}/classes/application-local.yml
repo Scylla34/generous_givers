@@ -1,0 +1,13 @@
+spring:
+  jpa:
+    show-sql: true
+
+  devtools:
+    restart:
+      enabled: true
+
+logging:
+  level:
+    com.generalgivers: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG

@@ -39,8 +39,8 @@ export default function ProjectsPage() {
       resetForm()
       toast.success('Project created successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to create project')
+    onError: () => {
+      toast.error('Failed to create project')
     },
   })
 
@@ -53,8 +53,8 @@ export default function ProjectsPage() {
       resetForm()
       toast.success('Project updated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update project')
+    onError: () => {
+      toast.error('Failed to update project')
     },
   })
 
@@ -64,8 +64,8 @@ export default function ProjectsPage() {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       toast.success('Project deleted successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to delete project')
+    onError: () => {
+      toast.error('Failed to delete project')
     },
   })
 
@@ -159,7 +159,7 @@ export default function ProjectsPage() {
     {
       header: 'Raised',
       accessor: (project: Project) => (
-        <span className="text-sm font-semibold text-primary-600">
+        <span className="text-sm font-semibold text-blue-600">
           {formatCurrency(project.fundsRaised)}
         </span>
       ),
@@ -171,7 +171,7 @@ export default function ProjectsPage() {
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-200 rounded-full h-2">
               <div
-                className="bg-primary-600 h-2 rounded-full"
+                className="bg-blue-600 h-2 rounded-full"
                 style={{ width: `${Math.min(project.percentFunded, 100)}%` }}
               />
             </div>
@@ -222,7 +222,7 @@ export default function ProjectsPage() {
             resetForm()
             setIsModalOpen(true)
           }}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Create Project
@@ -237,7 +237,7 @@ export default function ProjectsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as ProjectStatus | 'ALL')}
-            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
           >
             <option value="ALL">All Projects</option>
             <option value="DRAFT">Draft</option>
@@ -377,7 +377,7 @@ export default function ProjectsPage() {
                 <button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Saving...'

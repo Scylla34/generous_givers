@@ -9,7 +9,7 @@ export function formatCurrency(amount: number): string {
  * Format date safely to avoid hydration errors
  * Returns empty string during SSR, formatted date on client
  */
-export function formatDateSafe(date: Date | string, formatStr: string = 'MMM dd, yyyy'): string {
+export function formatDateSafe(date: Date | string): string {
   if (typeof window === 'undefined') {
     return '' // Return empty during SSR to avoid hydration mismatch
   }

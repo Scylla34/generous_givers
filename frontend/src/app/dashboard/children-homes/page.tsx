@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { childrenHomeService } from '@/services/childrenHomeService'
-import { ChildrenHome } from '@/types'
+import { ChildrenHome, ChildrenHomeRequest } from '@/types'
 import { Plus, Edit, Trash2, X, MapPin, Phone } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { toast } from 'sonner'
@@ -32,13 +32,13 @@ export default function ChildrenHomesPage() {
       resetForm()
       toast.success('Children&apos;s home added successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to add home')
+    onError: () => {
+      toast.error('Failed to add home')
     },
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: ChildrenHomeRequest }) =>
       childrenHomeService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['childrenHomes'] })
@@ -46,8 +46,8 @@ export default function ChildrenHomesPage() {
       resetForm()
       toast.success('Children&apos;s home updated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update home')
+    onError: () => {
+      toast.error('Failed to update home')
     },
   })
 
@@ -57,8 +57,8 @@ export default function ChildrenHomesPage() {
       queryClient.invalidateQueries({ queryKey: ['childrenHomes'] })
       toast.success('Children&apos;s home deleted successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to delete home')
+    onError: () => {
+      toast.error('Failed to delete home')
     },
   })
 

@@ -1,4 +1,4 @@
-export default function AboutPage() {
+export default function AboutPage(): React.ReactElement {
   return (
     <div className="min-h-screen">
 

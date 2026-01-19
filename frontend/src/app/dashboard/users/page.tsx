@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
-import { CreateUserRequest, User, UserRole } from '@/types'
+import { CreateUserRequest, User, UserRole, UpdateUserRequest } from '@/types'
 import { Plus, Edit, Trash2, X } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { toast } from 'sonner'
@@ -17,7 +17,7 @@ export default function UsersPage() {
     email: '',
     temporaryPassword: '',
     phone: '',
-    role: 'MEMBER',
+    role: 'COMMITTEE_MEMBER',
   })
 
   const { data: users, isLoading } = useQuery({
@@ -33,13 +33,13 @@ export default function UsersPage() {
       resetForm()
       toast.success('User created successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to create user')
+    onError: () => {
+      toast.error('Failed to create user')
     },
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserRequest }) =>
       userService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
@@ -47,8 +47,8 @@ export default function UsersPage() {
       resetForm()
       toast.success('User updated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update user')
+    onError: () => {
+      toast.error('Failed to update user')
     },
   })
 
@@ -58,8 +58,8 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success('User deactivated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to deactivate user')
+    onError: () => {
+      toast.error('Failed to deactivate user')
     },
   })
 
@@ -69,7 +69,7 @@ export default function UsersPage() {
       email: '',
       temporaryPassword: '',
       phone: '',
-      role: 'MEMBER',
+      role: 'COMMITTEE_MEMBER',
     })
     setEditingUser(null)
   }
@@ -190,7 +190,7 @@ export default function UsersPage() {
             resetForm()
             setIsModalOpen(true)
           }}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Create User
@@ -305,10 +305,13 @@ export default function UsersPage() {
                       }
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
                     >
-                      <option value="MEMBER">Member</option>
+                      <option value="COMMITTEE_MEMBER">Committee Member</option>
+                      <option value="ORGANIZING_SECRETARY">Organizing Secretary</option>
                       <option value="TREASURER">Treasurer</option>
-                      <option value="SECRETARY">Secretary</option>
-                      <option value="CHAIRMAN">Chairman</option>
+                      <option value="VICE_SECRETARY">Vice Secretary</option>
+                      <option value="SECRETARY_GENERAL">Secretary General</option>
+                      <option value="VICE_CHAIRPERSON">Vice Chairperson</option>
+                      <option value="CHAIRPERSON">Chairperson</option>
                       <option value="SUPER_USER">Super User</option>
                     </select>
                   </div>
@@ -319,7 +322,7 @@ export default function UsersPage() {
                 <button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
+                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Saving...'

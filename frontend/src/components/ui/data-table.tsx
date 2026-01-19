@@ -19,14 +19,14 @@ interface DataTableProps<T> {
   itemsPerPage?: number
 }
 
-export function DataTable<T extends Record<string, any>>({
+export function DataTable<T extends Record<string, unknown>>({
   data,
   columns,
   searchable = true,
   searchPlaceholder = 'Search...',
   onSearch,
   itemsPerPage = 10,
-}: DataTableProps<T>) {
+}: DataTableProps<T>): React.ReactElement {
   const [searchQuery, setSearchQuery] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
 
@@ -59,11 +59,11 @@ export function DataTable<T extends Record<string, any>>({
     setCurrentPage(1)
   }, [searchQuery])
 
-  const renderCell = (column: Column<T>, row: T) => {
+  const renderCell = (column: Column<T>, row: T): React.ReactNode => {
     if (typeof column.accessor === 'function') {
       return column.accessor(row)
     }
-    return row[column.accessor]
+    return String(row[column.accessor])
   }
 
   return (

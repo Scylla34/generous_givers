@@ -39,7 +39,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @Builder.Default
-    private UserRole role = UserRole.MEMBER;
+    private UserRole role = UserRole.COMMITTEE_MEMBER;
 
     @Column(name = "is_active")
     @Builder.Default

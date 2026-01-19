@@ -24,7 +24,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping("/funds-by-month")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
     @Operation(summary = "Get monthly funds report", description = "Get aggregated donations by month for a given year")
     public ResponseEntity<List<MonthlyFundsReport>> getMonthlyFundsReport(
             @RequestParam(defaultValue = "2025") int year) {
@@ -32,14 +32,14 @@ public class ReportController {
     }
 
     @GetMapping("/projects-progress")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
     @Operation(summary = "Get project progress report", description = "Get all projects with funding progress")
     public ResponseEntity<List<ProjectProgressReport>> getProjectProgressReport() {
         return ResponseEntity.ok(reportService.getProjectProgressReport());
     }
 
     @GetMapping("/users-roles")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON')")
     @Operation(summary = "Get user role statistics", description = "Get user count by role and active status")
     public ResponseEntity<List<UserRoleReport>> getUserRoleReport() {
         return ResponseEntity.ok(reportService.getUserRoleReport());

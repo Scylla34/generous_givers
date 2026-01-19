@@ -26,21 +26,21 @@ public class ChildrenHomeController {
     private final ChildrenHomeService childrenHomeService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get all children homes", description = "Retrieve list of all children homes")
     public ResponseEntity<List<ChildrenHomeResponse>> getAllChildrenHomes() {
         return ResponseEntity.ok(childrenHomeService.getAllChildrenHomes());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get children home by ID", description = "Retrieve children home details by ID")
     public ResponseEntity<ChildrenHomeResponse> getChildrenHomeById(@PathVariable UUID id) {
         return ResponseEntity.ok(childrenHomeService.getChildrenHomeById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Create children home", description = "Add a new children home")
     public ResponseEntity<ChildrenHomeResponse> createChildrenHome(
             @Valid @RequestBody ChildrenHomeRequest request) {
@@ -49,7 +49,7 @@ public class ChildrenHomeController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Update children home", description = "Update children home details")
     public ResponseEntity<ChildrenHomeResponse> updateChildrenHome(
             @PathVariable UUID id,

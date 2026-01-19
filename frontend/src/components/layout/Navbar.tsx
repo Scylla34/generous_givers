@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { Menu, X, Heart } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Navbar() {
@@ -30,9 +31,15 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Heart className="w-8 h-8 text-primary-600 fill-current" />
+            <Image
+              src="/logo/logo.jpg"
+              alt="Generous Givers Family"
+              width={48}
+              height={48}
+              className="rounded-full"
+            />
             <span className="text-xl font-bold text-gray-900">
-              Generous Givers
+              Generous Givers Family
             </span>
           </Link>
 

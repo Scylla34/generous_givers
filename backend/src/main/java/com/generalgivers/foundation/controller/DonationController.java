@@ -27,7 +27,7 @@ public class DonationController {
     private final DonationService donationService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Get all donations", description = "Retrieve list of all donations (Admin only)")
     public ResponseEntity<List<DonationResponse>> getAllDonations() {
@@ -35,7 +35,7 @@ public class DonationController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Get donation by ID", description = "Retrieve donation details by ID")
     public ResponseEntity<DonationResponse> getDonationById(@PathVariable UUID id) {
@@ -66,7 +66,7 @@ public class DonationController {
     }
 
     @GetMapping("/total")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Get total donations", description = "Get total amount of all donations")
     public ResponseEntity<BigDecimal> getTotalDonations() {
