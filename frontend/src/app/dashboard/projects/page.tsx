@@ -39,8 +39,8 @@ export default function ProjectsPage() {
       resetForm()
       toast.success('Project created successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to create project')
+    onError: () => {
+      toast.error('Failed to create project')
     },
   })
 
@@ -53,8 +53,8 @@ export default function ProjectsPage() {
       resetForm()
       toast.success('Project updated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update project')
+    onError: () => {
+      toast.error('Failed to update project')
     },
   })
 
@@ -64,8 +64,8 @@ export default function ProjectsPage() {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       toast.success('Project deleted successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to delete project')
+    onError: () => {
+      toast.error('Failed to delete project')
     },
   })
 

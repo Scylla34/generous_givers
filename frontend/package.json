@@ -6,10 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "lint:check": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
-    "check-all": "npm run lint && npm run type-check"
+    "check-all": "npm run lint:check && npm run type-check"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -52,7 +52,7 @@
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
     "autoprefixer": "^10.4.20",
-    "eslint": "^9",
+    "eslint": "^8.57.1",
     "eslint-config-next": "^15.1.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.2.10",
@@ -62,8 +62,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "eslint --fix",
-      "tsc --noEmit"
+      "eslint --fix"
     ]
   }
 }

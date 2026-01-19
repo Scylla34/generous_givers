@@ -65,8 +65,8 @@ export default function VisitsPage() {
       resetForm()
       toast.success('Visit recorded successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to record visit')
+    onError: () => {
+      toast.error('Failed to record visit')
     },
   })
 

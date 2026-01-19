@@ -17,7 +17,6 @@ import {
   User,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import { Button } from './ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +26,6 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
 import { Avatar, AvatarFallback } from './ui/avatar'
-import { Separator } from './ui/separator'
 import { cn } from '@/lib/utils'
 import { useSessionTimeout } from '@/hooks/useSessionTimeout'
 
@@ -38,7 +36,7 @@ interface DashboardLayoutProps {
 interface NavItem {
   name: string
   href: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   roles?: string[]
 }
 

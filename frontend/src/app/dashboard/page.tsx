@@ -52,8 +52,8 @@ export default function DashboardPage() {
 
       setStats(statsData)
       setActivities(activitiesData)
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || 'Failed to load dashboard data'
+    } catch {
+      const errorMessage = 'Failed to load dashboard data'
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {

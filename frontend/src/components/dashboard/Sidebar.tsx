@@ -19,7 +19,7 @@ import {
 interface NavItem {
   name: string
   href: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   roles: string[]
 }
 

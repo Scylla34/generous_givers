@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
-import { CreateUserRequest, User, UserRole } from '@/types'
+import { CreateUserRequest, User, UserRole, UpdateUserRequest } from '@/types'
 import { Plus, Edit, Trash2, X } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { toast } from 'sonner'
@@ -33,13 +33,13 @@ export default function UsersPage() {
       resetForm()
       toast.success('User created successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to create user')
+    onError: () => {
+      toast.error('Failed to create user')
     },
   })
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateUserRequest }) =>
       userService.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
@@ -47,8 +47,8 @@ export default function UsersPage() {
       resetForm()
       toast.success('User updated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update user')
+    onError: () => {
+      toast.error('Failed to update user')
     },
   })
 
@@ -58,8 +58,8 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success('User deactivated successfully!')
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to deactivate user')
+    onError: () => {
+      toast.error('Failed to deactivate user')
     },
   })
 

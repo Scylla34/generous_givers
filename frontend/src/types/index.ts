@@ -4,7 +4,7 @@ export type ProjectStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED'
 
 export type DonationStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
-export interface User {
+export interface User extends Record<string, unknown> {
   id: string
   name: string
   email: string
@@ -48,7 +48,7 @@ export interface LoginRequest {
   password: string
 }
 
-export interface Project {
+export interface Project extends Record<string, unknown> {
   id: string
   title: string
   description?: string
@@ -72,7 +72,7 @@ export interface ProjectRequest {
   endDate?: string
 }
 
-export interface Donation {
+export interface Donation extends Record<string, unknown> {
   id: string
   donorUserId?: string
   donorName?: string
@@ -94,7 +94,7 @@ export interface DonationRequest {
   projectId?: string
 }
 
-export interface ChildrenHome {
+export interface ChildrenHome extends Record<string, unknown> {
   id: string
   name: string
   location?: string
@@ -103,7 +103,14 @@ export interface ChildrenHome {
   createdAt: string
 }
 
-export interface Visit {
+export interface ChildrenHomeRequest {
+  name: string
+  location?: string
+  contact?: string
+  notes?: string
+}
+
+export interface Visit extends Record<string, unknown> {
   id: string
   visitDate: string
   location?: string

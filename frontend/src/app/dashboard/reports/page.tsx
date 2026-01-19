@@ -3,7 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { reportService } from '@/services/reportService'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { Download, FileSpreadsheet, FileText } from 'lucide-react'
+import { FileSpreadsheet, FileText } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
