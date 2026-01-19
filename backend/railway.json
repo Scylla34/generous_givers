@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "java -Dspring.profiles.active=prod -jar target/*.jar",
+    "healthcheckPath": "/api/v1/actuator/health",
+    "healthcheckTimeout": 300,
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
