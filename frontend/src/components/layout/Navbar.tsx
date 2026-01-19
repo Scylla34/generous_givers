@@ -32,7 +32,7 @@ export default function Navbar() {
           <Link href="/" className="flex items-center space-x-2">
             <Heart className="w-8 h-8 text-primary-600 fill-current" />
             <span className="text-xl font-bold text-gray-900">
-              General Givers
+              Generous Givers
             </span>
           </Link>
 

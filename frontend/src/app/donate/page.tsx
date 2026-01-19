@@ -58,13 +58,13 @@ function DonateForm() {
 
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-lg shadow-md p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Donation Form</h2>
+          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+            <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Donation Form</h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Your Name
+                <label className="block text-base font-semibold text-gray-800 mb-3">
+                  Your Name *
                 </label>
                 <input
                   type="text"
@@ -73,14 +73,14 @@ function DonateForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, donorName: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="John Doe"
+                  className="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  placeholder="Enter your full name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email Address
+                <label className="block text-base font-semibold text-gray-800 mb-3">
+                  Email Address *
                 </label>
                 <input
                   type="email"
@@ -89,34 +89,37 @@ function DonateForm() {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="john@example.com"
+                  className="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white"
+                  placeholder="your.email@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Donation Amount (USD)
+                <label className="block text-base font-semibold text-gray-800 mb-3">
+                  Donation Amount (USD) *
                 </label>
-                <input
-                  type="number"
-                  required
-                  min="1"
-                  step="0.01"
-                  value={formData.amount || ''}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      amount: parseFloat(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="100.00"
-                />
+                <div className="relative">
+                  <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl font-bold text-gray-600">$</span>
+                  <input
+                    type="number"
+                    required
+                    min="1"
+                    step="0.01"
+                    value={formData.amount || ''}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        amount: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full pl-12 pr-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white"
+                    placeholder="100.00"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-base font-semibold text-gray-800 mb-3">
                   Project (Optional)
                 </label>
                 <select
@@ -127,7 +130,7 @@ function DonateForm() {
                       projectId: e.target.value || undefined,
                     })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white appearance-none cursor-pointer"
                 >
                   <option value="">General Fund</option>
                   {projects?.map((project) => (
@@ -136,35 +139,35 @@ function DonateForm() {
                     </option>
                   ))}
                 </select>
-                <p className="text-sm text-gray-500 mt-1">
-                  Choose a specific project or contribute to our general fund
+                <p className="text-sm text-gray-600 mt-2 ml-1">
+                  💡 Choose a specific project or contribute to our general fund
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Payment Method
+                <label className="block text-base font-semibold text-gray-800 mb-3">
+                  Payment Method *
                 </label>
                 <select
                   value={formData.method}
                   onChange={(e) =>
                     setFormData({ ...formData, method: e.target.value })
                   }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="w-full px-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white appearance-none cursor-pointer"
                 >
-                  <option value="Credit Card">Credit Card</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                  <option value="PayPal">PayPal</option>
-                  <option value="Cash">Cash</option>
+                  <option value="Credit Card">💳 Credit Card</option>
+                  <option value="Bank Transfer">🏦 Bank Transfer</option>
+                  <option value="PayPal">💰 PayPal</option>
+                  <option value="Cash">💵 Cash</option>
                 </select>
               </div>
 
               <button
                 type="submit"
                 disabled={createMutation.isPending}
-                className="w-full bg-primary-600 text-white px-6 py-4 rounded-lg hover:bg-primary-700 transition text-lg font-semibold disabled:opacity-50"
+                className="w-full bg-primary-600 text-white px-8 py-5 rounded-xl hover:bg-primary-700 focus:ring-4 focus:ring-primary-200 transition-all duration-200 text-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
               >
-                {createMutation.isPending ? 'Processing...' : 'Donate Now'}
+                {createMutation.isPending ? '⏳ Processing...' : '❤️ Donate Now'}
               </button>
             </form>
           </div>

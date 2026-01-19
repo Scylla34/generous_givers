@@ -22,7 +22,7 @@ export default function Home() {
 <section className="relative h-[90vh] flex items-center">
   {/* Background Video */}
   <video
-    src="/videos/t.mp4"      // <-- change to your file
+    src="/videos/t.mp4"    
     autoPlay
     loop
     muted

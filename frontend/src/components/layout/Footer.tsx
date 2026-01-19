@@ -13,7 +13,7 @@ export default function Footer() {
             <div className="flex items-center space-x-2 mb-4">
               <Heart className="w-6 h-6 text-primary-500 fill-current" />
               <span className="text-lg font-bold text-white">
-                General Givers
+                Generous Givers
               </span>
             </div>
             <p className="text-sm">
@@ -55,7 +55,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li className="flex items-center space-x-2 text-sm">
                 <Mail className="w-4 h-4" />
-                <span>info@generalgivers.org</span>
+                <span>info@Generousgivers.org</span>
               </li>
               <li className="flex items-center space-x-2 text-sm">
                 <Phone className="w-4 h-4" />
@@ -92,7 +92,7 @@ export default function Footer() {
 
         <div className="border-t border-gray-800 mt-6 pt-6 text-center text-sm">
           <p>
-            &copy; {new Date().getFullYear()} General Givers Family Foundation.
+            &copy; {new Date().getFullYear()} Generous Givers Family Foundation.
             All rights reserved.
           </p>
         </div>
