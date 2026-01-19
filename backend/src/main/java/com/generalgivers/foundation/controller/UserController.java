@@ -28,7 +28,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get all users", description = "Retrieve list of all users (Admin only)")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
@@ -74,7 +74,7 @@ public class UserController {
     }
 
     @GetMapping("/role/{role}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get users by role", description = "Retrieve users filtered by role")
     public ResponseEntity<List<UserResponse>> getUsersByRole(@PathVariable UserRole role) {
         return ResponseEntity.ok(userService.getUsersByRole(role));

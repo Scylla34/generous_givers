@@ -1,4 +1,15 @@
-export type UserRole = 'SUPER_USER' | 'CHAIRMAN' | 'SECRETARY' | 'TREASURER' | 'MEMBER'
+/**
+ * User roles as defined in the Generous Givers Family Constitution (Article 5.2)
+ */
+export type UserRole =
+  | 'SUPER_USER'           // System administrator (full access)
+  | 'CHAIRPERSON'          // The Chairperson - leads the organization
+  | 'VICE_CHAIRPERSON'     // Vice-Chairperson - assumes chair duties when absent
+  | 'SECRETARY_GENERAL'    // Secretary General - maintains records & minutes
+  | 'VICE_SECRETARY'       // Vice Secretary - assists secretary
+  | 'TREASURER'            // Treasurer - manages finances
+  | 'ORGANIZING_SECRETARY' // Organizing Secretary - coordinates events
+  | 'COMMITTEE_MEMBER'     // Committee Members - general support
 
 export type ProjectStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED'
 

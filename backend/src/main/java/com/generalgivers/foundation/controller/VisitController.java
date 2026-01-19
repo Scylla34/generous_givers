@@ -29,21 +29,21 @@ public class VisitController {
     private final VisitService visitService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get all visits", description = "Retrieve list of all visits")
     public ResponseEntity<List<VisitResponse>> getAllVisits() {
         return ResponseEntity.ok(visitService.getAllVisits());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get visit by ID", description = "Retrieve visit details by ID")
     public ResponseEntity<VisitResponse> getVisitById(@PathVariable UUID id) {
         return ResponseEntity.ok(visitService.getVisitById(id));
     }
 
     @GetMapping("/date-range")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get visits by date range", description = "Retrieve visits within a date range")
     public ResponseEntity<List<VisitResponse>> getVisitsByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
@@ -52,14 +52,14 @@ public class VisitController {
     }
 
     @GetMapping("/children-home/{childrenHomeId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Get visits by children home", description = "Retrieve visits for a specific children home")
     public ResponseEntity<List<VisitResponse>> getVisitsByChildrenHome(@PathVariable UUID childrenHomeId) {
         return ResponseEntity.ok(visitService.getVisitsByChildrenHome(childrenHomeId));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Create visit", description = "Record a new visit")
     public ResponseEntity<VisitResponse> createVisit(
             @Valid @RequestBody VisitRequest request,
@@ -70,7 +70,7 @@ public class VisitController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @Operation(summary = "Update visit", description = "Update visit details")
     public ResponseEntity<VisitResponse> updateVisit(
             @PathVariable UUID id,
@@ -79,7 +79,7 @@ public class VisitController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON')")
     @Operation(summary = "Delete visit", description = "Delete a visit record")
     public ResponseEntity<Void> deleteVisit(@PathVariable UUID id) {
         visitService.deleteVisit(id);

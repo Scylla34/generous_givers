@@ -51,7 +51,7 @@ public class ProjectController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create project", description = "Create a new project (Admin only)")
     public ResponseEntity<ProjectResponse> createProject(
@@ -63,7 +63,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN', 'SECRETARY')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update project", description = "Update project details (Admin only)")
     public ResponseEntity<ProjectResponse> updateProject(
@@ -73,7 +73,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRMAN')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete project", description = "Delete a project (Admin only)")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {

@@ -17,17 +17,9 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       setAuth: (user, accessToken) => {
         set({ user, accessToken })
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('accessToken', accessToken)
-          localStorage.setItem('user', JSON.stringify(user))
-        }
       },
       clearAuth: () => {
         set({ user: null, accessToken: null })
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('user')
-        }
       },
       isAuthenticated: () => {
         return !!get().accessToken && !!get().user
