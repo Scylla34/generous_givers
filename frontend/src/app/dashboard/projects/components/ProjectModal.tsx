@@ -91,13 +91,13 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl">
-        <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <h2 className="text-2xl font-bold text-gray-900">
+        <div className="flex justify-between items-center p-6 border-b-2 border-primary-100 bg-gradient-to-r from-primary-50 to-primary-100">
+          <h2 className="text-2xl font-bold text-primary-900">
             {project ? 'Edit Project' : 'Create New Project'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-white/50 transition-all duration-200"
+            className="text-primary-400 hover:text-primary-600 p-2 rounded-full hover:bg-primary-100/50 transition-all duration-200"
           >
             <X className="w-6 h-6" />
           </button>
@@ -197,8 +197,8 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
             </div>
 
             {/* Help Text */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-800">
+            <div className="bg-primary-50 border-2 border-primary-200 rounded-lg p-4">
+              <p className="text-sm text-primary-900">
                 <strong>Tip:</strong> Set clear start and end dates to help track project progress and deadlines.
                 The target amount should reflect the total funding needed to complete the project successfully.
               </p>
@@ -217,7 +217,7 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-medium hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg disabled:hover:shadow-none"
+              className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg font-medium hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-lg disabled:hover:shadow-none"
             >
               {isLoading ? (
                 <span className="flex items-center gap-2">

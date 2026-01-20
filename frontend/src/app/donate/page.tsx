@@ -6,6 +6,7 @@ import { projectService } from '@/services/projectService'
 import { donationService } from '@/services/donationService'
 import { DonationRequest } from '@/types'
 import { useSearchParams } from 'next/navigation'
+// import { formatCurrency } from '@/lib/format'
 
 function DonateForm() {
   const searchParams = useSearchParams()
@@ -96,15 +97,15 @@ function DonateForm() {
 
               <div>
                 <label className="block text-base font-semibold text-gray-800 mb-3">
-                  Donation Amount (USD) *
+                  Donation Amount (KSh) *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl font-bold text-gray-600">$</span>
+                  <span className="absolute left-5 top-1/2 transform -translate-y-1/2 text-xl font-bold text-gray-600">KSh</span>
                   <input
                     type="number"
                     required
                     min="1"
-                    step="0.01"
+                    step="1"
                     value={formData.amount || ''}
                     onChange={(e) =>
                       setFormData({
@@ -112,8 +113,8 @@ function DonateForm() {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full pl-12 pr-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white"
-                    placeholder="100.00"
+                    className="w-full pl-16 pr-5 py-4 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 transition-all duration-200 bg-gray-50 focus:bg-white"
+                    placeholder="5000"
                   />
                 </div>
               </div>

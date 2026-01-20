@@ -166,8 +166,8 @@ export default function DashboardPage() {
       value: stats?.totalProjects || 0,
       change: stats?.projectsChange || '+0',
       icon: FolderOpen,
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-50 to-blue-100',
+      gradient: 'from-primary-500 to-primary-600',
+      bgGradient: 'from-primary-50 to-primary-100',
     },
     {
       name: 'Total Donations',
@@ -251,7 +251,7 @@ export default function DashboardPage() {
 
   const getActivityColor = (color: string) => {
     const colors: Record<string, string> = {
-      blue: 'bg-blue-500',
+      primary: 'bg-primary-500',
       green: 'bg-green-500',
       purple: 'bg-purple-500',
       amber: 'bg-amber-500',
@@ -422,11 +422,11 @@ export default function DashboardPage() {
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )} style={{ transitionDelay: '500ms' }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-cyan-300">
+            <CardTitle className="flex items-center gap-2">
               <FolderOpen className="w-5 h-5 text-violet-500" />
               Projects Activity
             </CardTitle>
-            <CardDescription className="text-cyan-300">Monthly project count</CardDescription>
+            <CardDescription>Monthly project count</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={projectsChartConfig} className="h-[200px] w-full">

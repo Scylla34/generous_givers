@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { projectService } from '@/services/projectService'
 import Link from 'next/link'
+import { formatCurrency } from '@/lib/format'
 
 export default function ProjectsPage() {
   const { data: projects, isLoading } = useQuery({
@@ -44,8 +45,8 @@ export default function ProjectsPage() {
 
                 <div className="mb-4">
                   <div className="flex justify-between text-sm text-gray-600 mb-2">
-                    <span>Raised: ${project.fundsRaised.toLocaleString()}</span>
-                    <span>Goal: ${project.targetAmount.toLocaleString()}</span>
+                    <span>Raised: {formatCurrency(project.fundsRaised)}</span>
+                    <span>Goal: {formatCurrency(project.targetAmount)}</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div

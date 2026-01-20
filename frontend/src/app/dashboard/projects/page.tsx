@@ -112,7 +112,7 @@ export default function ProjectsPage() {
         <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
         <button
           onClick={handleCreateNew}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2 whitespace-nowrap"
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2 whitespace-nowrap"
         >
           <Plus className="w-5 h-5" />
           Create Project

@@ -3,6 +3,7 @@ package com.generalgivers.foundation.controller;
 import com.generalgivers.foundation.dto.report.MonthlyFundsReport;
 import com.generalgivers.foundation.dto.report.ProjectProgressReport;
 import com.generalgivers.foundation.dto.report.UserRoleReport;
+import com.generalgivers.foundation.dto.report.UserReportDto;
 import com.generalgivers.foundation.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -44,4 +45,12 @@ public class ReportController {
     public ResponseEntity<List<UserRoleReport>> getUserRoleReport() {
         return ResponseEntity.ok(reportService.getUserRoleReport());
     }
+
+    @GetMapping("/users")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON')")
+    @Operation(summary = "Get users report", description = "Get detailed report of all users with their roles and status")
+    public ResponseEntity<List<UserReportDto>> getUsersReport() {
+        return ResponseEntity.ok(reportService.getUsersReport());
+    }
 }
+

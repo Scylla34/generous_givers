@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import { MonthlyFundsReport, ProjectProgressReport, UserRoleReport } from '@/types'
+import { MonthlyFundsReport, ProjectProgressReport, UserRoleReport, UserReport } from '@/types'
 
 export const reportService = {
   getMonthlyFunds: async (year: number): Promise<MonthlyFundsReport[]> => {
@@ -14,6 +14,11 @@ export const reportService = {
 
   getUserRoles: async (): Promise<UserRoleReport[]> => {
     const { data } = await api.get('/reports/user-roles')
+    return data
+  },
+
+  getUsersReport: async (): Promise<UserReport[]> => {
+    const { data } = await api.get('/reports/users')
     return data
   },
 }

@@ -49,16 +49,16 @@ export function DatePicker({
           variant="outline"
           disabled={disabled}
           className={cn(
-            'w-full justify-start text-left font-normal h-12 bg-gray-50 border-2 border-gray-200 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500',
+            'w-full justify-start text-left font-normal h-12 bg-primary-50 border-2 border-primary-200 hover:bg-primary-100 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-primary-900 hover:border-primary-300',
             !value && 'text-gray-500',
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 text-gray-400" />
+          <CalendarIcon className="mr-2 h-4 w-4 text-primary-500" />
           {value ? format(value, 'PPP') : <span>{placeholder}</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-3 bg-white border-2 border-primary-200 shadow-lg rounded-lg" align="start">
         <Calendar
           mode="single"
           selected={value}
