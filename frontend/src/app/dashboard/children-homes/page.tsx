@@ -135,7 +135,7 @@ export default function ChildrenHomesPage() {
         <div className="flex gap-2">
           <button
             onClick={() => handleEdit(home)}
-            className="text-blue-600 hover:text-blue-900"
+            className="text-primary-600 hover:text-primary-900"
             title="Edit home"
           >
             <Edit className="w-4 h-4" />

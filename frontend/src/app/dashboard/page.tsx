@@ -166,8 +166,8 @@ export default function DashboardPage() {
       value: stats?.totalProjects || 0,
       change: stats?.projectsChange || '+0',
       icon: FolderOpen,
-      gradient: 'from-blue-500 to-blue-600',
-      bgGradient: 'from-blue-50 to-blue-100',
+      gradient: 'from-primary-500 to-primary-600',
+      bgGradient: 'from-primary-50 to-primary-100',
     },
     {
       name: 'Total Donations',
@@ -251,7 +251,7 @@ export default function DashboardPage() {
 
   const getActivityColor = (color: string) => {
     const colors: Record<string, string> = {
-      blue: 'bg-blue-500',
+      primary: 'bg-primary-500',
       green: 'bg-green-500',
       purple: 'bg-purple-500',
       amber: 'bg-amber-500',

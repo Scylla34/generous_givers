@@ -38,4 +38,13 @@ public class AuthController {
         authService.changePassword(userEmail, request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/refresh")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Refresh token", description = "Refresh JWT token")
+    public ResponseEntity<AuthResponse> refreshToken(Authentication authentication) {
+        String userEmail = authentication.getName();
+        AuthResponse response = authService.refreshToken(userEmail);
+        return ResponseEntity.ok(response);
+    }
 }

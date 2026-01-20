@@ -2,7 +2,7 @@
 
 import { useState, ReactNode } from 'react'
 import Link from 'next/link'
-// import Image from 'next/image'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -13,7 +13,7 @@ import {
   Home,
   FileText,
   Menu,
-  // X,
+  X,
   LogOut,
   User,
   Bell,
@@ -130,14 +130,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'flex flex-col bg-white border-r border-gray-200 shadow-lg transition-all duration-300',
+          'flex flex-col bg-white border-r border-primary-100 shadow-lg transition-all duration-300',
           sidebarWidth,
           'fixed inset-y-0 left-0 z-50 lg:relative lg:z-auto',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
         {/* Logo Section */}
-        {/* <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+        <div className="flex h-16 items-center justify-between px-4 border-b border-primary-100 bg-gradient-to-r from-primary-600 to-primary-700">
           {!sidebarCollapsed && (
             <Link href="/dashboard" className="flex items-center space-x-3">
               <Image
@@ -167,13 +167,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <X className="w-5 h-5" />
           </button>
-        </div> */}
+        </div>
 
         {/* Collapse Toggle - Desktop Only */}
-        <div className="hidden lg:flex justify-end p-2 border-b border-gray-100">
+        <div className="hidden lg:flex justify-end p-2 border-b border-primary-100">
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition-colors"
+            className="p-1.5 rounded-md hover:bg-primary-50 text-primary-500 hover:text-primary-700 transition-colors"
           >
             {sidebarCollapsed ? (
               <ChevronRight className="w-4 h-4" />
@@ -196,15 +196,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 className={cn(
                   'group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 relative',
                   isActive
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-600'
-                    : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600',
+                    ? 'bg-primary-50 text-primary-700 border-r-2 border-primary-600'
+                    : 'text-gray-700 hover:bg-primary-50 hover:text-primary-600',
                   sidebarCollapsed && 'justify-center px-2'
                 )}
                 title={sidebarCollapsed ? item.name : undefined}
               >
                 <Icon className={cn(
                   'w-5 h-5 flex-shrink-0 transition-colors',
-                  isActive ? 'text-blue-600' : 'text-gray-500 group-hover:text-blue-600'
+                  isActive ? 'text-primary-600' : 'text-gray-500 group-hover:text-primary-600'
                 )} />
                 {!sidebarCollapsed && <span>{item.name}</span>}
               </Link>
@@ -217,7 +217,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
               <Avatar className="w-10 h-10">
-                <AvatarFallback className="bg-blue-100 text-blue-700 font-semibold">
+                <AvatarFallback className="bg-primary-100 text-primary-700 font-semibold">
                   {user ? getInitials(user.name) : 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -248,12 +248,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Header */}
-        <header className="flex-shrink-0 h-16 bg-white border-b border-gray-200 shadow-sm">
+        <header className="flex-shrink-0 h-16 bg-white border-b border-primary-100 shadow-sm">
           <div className="flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setSidebarOpen(true)}
-                className="text-gray-600 hover:text-gray-900 lg:hidden p-2 rounded-lg hover:bg-gray-100"
+                className="text-gray-600 hover:text-primary-600 lg:hidden p-2 rounded-lg hover:bg-primary-50"
                 aria-label="Open menu"
               >
                 <Menu className="w-5 h-5" />
@@ -271,9 +271,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                  <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-50 transition-colors">
                     <Avatar className="w-8 h-8">
-                      <AvatarFallback className="bg-blue-100 text-blue-700 text-xs font-semibold">
+                      <AvatarFallback className="bg-primary-100 text-primary-700 text-xs font-semibold">
                         {user ? getInitials(user.name) : 'U'}
                       </AvatarFallback>
                     </Avatar>
@@ -312,24 +312,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
 
         {/* Footer */}
-        <footer className="flex-shrink-0 border-t border-gray-200 bg-white">
+        <footer className="flex-shrink-0 border-t border-primary-100 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="text-sm text-gray-600">
                 © {new Date().getFullYear()} Generous Givers Foundation. All rights reserved.
               </div>
               <div className="flex gap-6 text-sm">
-                <Link href="/about" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <Link href="/about" className="text-gray-600 hover:text-primary-600 transition-colors">
                   About
                 </Link>
-                <Link href="/contact" className="text-gray-600 hover:text-blue-600 transition-colors">
+                <Link href="/contact" className="text-gray-600 hover:text-primary-600 transition-colors">
                   Contact
                 </Link>
                 <a
                   href={`${process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')}/swagger-ui/index.html`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-blue-600 transition-colors"
+                  className="text-gray-600 hover:text-primary-600 transition-colors"
                 >
                   API Docs
                 </a>

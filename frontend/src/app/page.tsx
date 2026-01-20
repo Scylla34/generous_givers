@@ -5,19 +5,28 @@ import { ArrowRight, MapPin, Calendar } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { visitService } from '@/services/visitService'
 import { formatDateSafe } from '@/lib/format'
+import { useAuthStore } from '@/store/authStore'
 
 export default function Home() {
+  const { isAuthenticated } = useAuthStore()
+  const isLoggedIn = isAuthenticated()
+
   const { data: visits } = useQuery({
     queryKey: ['recent-visits'],
     queryFn: async () => {
       const allVisits = await visitService.getAll()
-      return allVisits.slice(0, 6) // Get 6 most recent visits
+      return allVisits.slice(0, 6)
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    enabled: isLoggedIn,
+    retry: false,
   })
 
   return (
     <main className="min-h-screen">
-      {/* Hero Section */}
       {/* Hero Section with Video Background */}
 <section className="relative h-[90vh] flex items-center">
   {/* Background Video */}
@@ -138,6 +147,7 @@ export default function Home() {
                   {/* Image Gallery */}
                   {visit.photos && visit.photos.length > 0 ? (
                     <div className="relative h-48 bg-gray-200">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={visit.photos[0]}
                         alt={visit.childrenHomeName || visit.location || 'Visit'}

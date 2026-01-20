@@ -9,13 +9,22 @@ export function formatCurrency(amount: number): string {
  * Format date safely to avoid hydration errors
  * Returns empty string during SSR, formatted date on client
  */
-export function formatDateSafe(date: Date | string): string {
+export function formatDateSafe(date: Date | string | undefined | null): string {
+  if (!date) {
+    return ''
+  }
+
   if (typeof window === 'undefined') {
     return '' // Return empty during SSR to avoid hydration mismatch
   }
 
   // Client-side formatting
   const dateObj = typeof date === 'string' ? new Date(date) : date
+
+  // Validate that dateObj is a valid Date
+  if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+    return ''
+  }
 
   // Simple date formatting to avoid dependency issues
   const options: Intl.DateTimeFormatOptions = {

@@ -83,7 +83,7 @@ export default function DonationsPage() {
       <div>
         <h1 className="text-3xl font-bold text-gray-900">Donations</h1>
         <p className="text-lg text-gray-600 mt-2">
-          Total Donations: <span className="font-semibold text-blue-600">KSh {totalAmount.toLocaleString()}</span>
+          Total Donations: <span className="font-semibold text-primary-600">KSh {totalAmount.toLocaleString()}</span>
         </p>
       </div>
 

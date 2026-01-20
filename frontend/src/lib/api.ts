@@ -6,6 +6,13 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1
 // Flag to prevent infinite redirects
 let isRedirecting = false
 
+// Reset redirect flag after navigation completes
+const resetRedirectFlag = () => {
+  setTimeout(() => {
+    isRedirecting = false
+  }, 2000)
+}
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -29,16 +36,24 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if ((error.response?.status === 401 || error.response?.status === 403) && !isRedirecting) {
+    const isAuthEndpoint = error.config?.url?.includes('/auth/')
+
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !isRedirecting &&
+      !isAuthEndpoint
+    ) {
       isRedirecting = true
-      // Clear auth data and redirect to home
-      const { clearAuth } = useAuthStore.getState()
-      clearAuth()
-      if (typeof window !== 'undefined') {
-        setTimeout(() => {
+      const { clearAuth, accessToken } = useAuthStore.getState()
+
+      // Only redirect if user was actually logged in
+      if (accessToken) {
+        clearAuth()
+        if (typeof window !== 'undefined') {
           window.location.href = '/'
-        }, 100)
+        }
       }
+      resetRedirectFlag()
     }
     return Promise.reject(error)
   }

@@ -130,7 +130,7 @@ export default function UsersPage() {
     {
       header: 'Role',
       accessor: (user: User) => (
-        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+        <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
           {user.role}
         </span>
       ),
@@ -155,7 +155,7 @@ export default function UsersPage() {
         <div className="flex gap-2">
           <button
             onClick={() => handleEdit(user)}
-            className="text-blue-600 hover:text-blue-900"
+            className="text-primary-600 hover:text-primary-900"
             title="Edit user"
           >
             <Edit className="w-5 h-5" />
@@ -190,7 +190,7 @@ export default function UsersPage() {
             resetForm()
             setIsModalOpen(true)
           }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           Create User
@@ -322,7 +322,7 @@ export default function UsersPage() {
                 <button
                   type="submit"
                   disabled={createMutation.isPending || updateMutation.isPending}
-                  className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
                 >
                   {createMutation.isPending || updateMutation.isPending
                     ? 'Saving...'

@@ -72,6 +72,7 @@ export interface Project extends Record<string, unknown> {
   createdById?: string
   createdByName?: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface ProjectRequest {
@@ -166,4 +167,14 @@ export interface UserRoleReport {
   activeCount: number
   inactiveCount: number
   totalCount: number
+}
+
+export interface UserReport {
+  id: string
+  name: string
+  email: string
+  phone?: string
+  role: UserRole
+  isActive: boolean
+  createdAt: string
 }

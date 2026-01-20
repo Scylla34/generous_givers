@@ -3,7 +3,9 @@ package com.generalgivers.foundation.service;
 import com.generalgivers.foundation.dto.report.MonthlyFundsReport;
 import com.generalgivers.foundation.dto.report.ProjectProgressReport;
 import com.generalgivers.foundation.dto.report.UserRoleReport;
+import com.generalgivers.foundation.dto.report.UserReportDto;
 import com.generalgivers.foundation.entity.Project;
+import com.generalgivers.foundation.entity.User;
 import com.generalgivers.foundation.entity.UserRole;
 import com.generalgivers.foundation.repository.DonationRepository;
 import com.generalgivers.foundation.repository.ProjectRepository;
@@ -85,6 +87,20 @@ public class ReportService {
         }
 
         return reports;
+    }
+
+    public List<UserReportDto> getUsersReport() {
+        return userRepository.findAll().stream()
+                .map(user -> UserReportDto.builder()
+                        .id(user.getId().toString())
+                        .name(user.getName())
+                        .email(user.getEmail())
+                        .phone(user.getPhone())
+                        .role(user.getRole())
+                        .isActive(user.getIsActive())
+                        .createdAt(user.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     private Double calculatePercentFunded(BigDecimal fundsRaised, BigDecimal targetAmount) {
