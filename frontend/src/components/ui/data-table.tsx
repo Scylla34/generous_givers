@@ -90,7 +90,7 @@ export function DataTable<T extends Record<string, unknown>>({
                 {columns.map((column, index) => (
                   <th
                     key={index}
-                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                    className={`px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${column.className || ''}`}
                   >
                     {column.header}
                   </th>
@@ -145,11 +145,10 @@ export function DataTable<T extends Record<string, unknown>>({
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
-                  className={`px-3 py-1 border rounded-md text-sm font-medium ${
-                    currentPage === page
+                  className={`px-3 py-1 border rounded-md text-sm font-medium ${currentPage === page
                       ? 'bg-primary-600 text-white border-primary-600'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   {page}
                 </button>

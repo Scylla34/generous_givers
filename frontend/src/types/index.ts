@@ -72,6 +72,7 @@ export interface Project extends Record<string, unknown> {
   createdById?: string
   createdByName?: string
   createdAt: string
+  updatedAt: string
 }
 
 export interface ProjectRequest {

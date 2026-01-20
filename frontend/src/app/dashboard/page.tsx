@@ -422,11 +422,11 @@ export default function DashboardPage() {
           mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
         )} style={{ transitionDelay: '500ms' }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-cyan-300">
               <FolderOpen className="w-5 h-5 text-violet-500" />
               Projects Activity
             </CardTitle>
-            <CardDescription>Monthly project count</CardDescription>
+            <CardDescription className="text-cyan-300">Monthly project count</CardDescription>
           </CardHeader>
           <CardContent>
             <ChartContainer config={projectsChartConfig} className="h-[200px] w-full">

@@ -2,7 +2,7 @@
 
 import { useState, ReactNode } from 'react'
 import Link from 'next/link'
-// import Image from 'next/image'
+import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard,
@@ -13,7 +13,7 @@ import {
   Home,
   FileText,
   Menu,
-  // X,
+  X,
   LogOut,
   User,
   Bell,
@@ -137,7 +137,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
       >
         {/* Logo Section */}
-        {/* <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+        <div className="flex h-16 items-center justify-between px-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
           {!sidebarCollapsed && (
             <Link href="/dashboard" className="flex items-center space-x-3">
               <Image
@@ -167,7 +167,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           >
             <X className="w-5 h-5" />
           </button>
-        </div> */}
+        </div>
 
         {/* Collapse Toggle - Desktop Only */}
         <div className="hidden lg:flex justify-end p-2 border-b border-gray-100">

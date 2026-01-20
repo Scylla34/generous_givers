@@ -7,6 +7,11 @@ export const authService = {
     return response.data
   },
 
+  refreshToken: async (): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/refresh')
+    return response.data
+  },
+
   changePassword: async (data: ChangePasswordRequest): Promise<void> => {
     await api.post('/auth/change-password', data)
   },

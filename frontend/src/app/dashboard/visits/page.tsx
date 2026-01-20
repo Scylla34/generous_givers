@@ -205,8 +205,8 @@ export default function VisitsPage() {
                   Visit Date *
                 </label>
                 <DatePicker
-                  date={visitDate}
-                  onDateChange={setVisitDate}
+                  value={visitDate}
+                  onChange={setVisitDate}
                   placeholder="Select visit date"
                 />
               </div>
@@ -295,6 +295,7 @@ export default function VisitsPage() {
                   <div className="grid grid-cols-3 gap-2 mt-3">
                     {uploadedImages.map((img, index) => (
                       <div key={index} className="relative group">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={img}
                           alt={`Upload ${index + 1}`}
