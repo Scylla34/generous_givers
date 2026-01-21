@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  output: 'export',
 
   // Environment variables
   env: {
@@ -9,6 +10,7 @@ const nextConfig = {
 
   // Image optimization
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'http',
@@ -17,24 +19,12 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    // Disable image optimization in development for faster builds
-    unoptimized: process.env.NODE_ENV === 'development',
   },
 
   // Experimental features for faster development
   experimental: {
     // Enable optimized package imports - reduces bundle size
     optimizePackageImports: ['lucide-react', 'date-fns', '@tanstack/react-query', 'recharts'],
-  },
-
-  // Rewrites for API proxy
-  async rewrites() {
-    return [
-      {
-        source: '/api-docs/:path*',
-        destination: 'http://localhost:8080/swagger-ui/:path*',
-      },
-    ]
   },
 
   // Headers for better caching
