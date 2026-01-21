@@ -60,7 +60,7 @@ app:
     expiration: 900000
 
   cors:
-    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app,https://generous-givers-family.netlify.app}
+    allowed-origins: ${FRONTEND_URL:*}
 
   email:
     contact-recipient: ${CONTACT_EMAIL:info@generousgivers.org}
