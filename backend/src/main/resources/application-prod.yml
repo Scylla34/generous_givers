@@ -45,7 +45,7 @@ app:
     expiration: 900000
 
   cors:
-    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app}
+    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app,https://generous-givers-family.onrender.com}
 
 logging:
   level:
