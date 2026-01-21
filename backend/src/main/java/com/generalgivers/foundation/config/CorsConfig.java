@@ -22,15 +22,16 @@ public class CorsConfig {
         
         String origins = allowedOrigins;
         if ("*".equals(origins)) {
-            configuration.addAllowedOriginPattern("*");
+            configuration.setAllowedOriginPatterns(List.of("*"));
+            configuration.setAllowCredentials(false);
         } else {
             configuration.setAllowedOrigins(List.of(origins.split(",")));
+            configuration.setAllowCredentials(true);
         }
         
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
-        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
