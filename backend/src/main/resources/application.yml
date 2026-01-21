@@ -19,9 +19,9 @@ spring:
           writetimeout: 5000
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/general_givers}
-    username: ${SPRING_DATASOURCE_USERNAME:peter}
-    password: ${SPRING_DATASOURCE_PASSWORD:manu}
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/general_givers}
+    username: ${DATABASE_USERNAME:peter}
+    password: ${DATABASE_PASSWORD:manu}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10

@@ -3,10 +3,17 @@ spring:
     name: foundation-system
 
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/general_givers}
-    username: ${DATABASE_USERNAME:peter}
-    password: ${DATABASE_PASSWORD:manu}
+    url: ${DATABASE_URL:jdbc:postgresql://db.rxwwlbcnjujkefqclgtl.supabase.co:5432/postgres}
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   jpa:
     hibernate:
