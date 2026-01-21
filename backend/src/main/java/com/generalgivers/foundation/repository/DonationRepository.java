@@ -10,12 +10,20 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface DonationRepository extends JpaRepository<Donation, UUID> {
 
     List<Donation> findByDonorUserId(UUID donorUserId);
+
+    // M-Pesa related queries
+    Optional<Donation> findByCheckoutRequestId(String checkoutRequestId);
+
+    Optional<Donation> findByMerchantRequestId(String merchantRequestId);
+
+    List<Donation> findByPhoneNumber(String phoneNumber);
 
     List<Donation> findByProjectId(UUID projectId);
 
