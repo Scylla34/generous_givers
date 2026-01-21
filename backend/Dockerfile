@@ -21,7 +21,7 @@ ENV JAVA_OPTS=""
 
 EXPOSE 8080
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=${SPRING_PROFILES_ACTIVE:-prod} -jar /app/app.jar"]
 
 # Add a Docker HEALTHCHECK to help Render and Docker understand container health.
 # Uses the Spring Boot Actuator endpoint; adjust the path if your health endpoint is different.
