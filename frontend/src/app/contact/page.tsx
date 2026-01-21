@@ -1,8 +1,72 @@
+'use client';
+
+import { useState } from 'react';
+import { contactService, ContactRequest } from '@/services/contactService';
+import { toast } from 'sonner';
+import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
+
 export default function ContactPage() {
+  const [formData, setFormData] = useState<ContactRequest>({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      await contactService.submitContactForm(formData);
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to send message. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen">
-      <div className="bg-primary-600 text-white py-20">
-        <div className="container mx-auto px-4">
+      {/* Video Header */}
+      <div className="relative h-[300px] md:h-[400px] flex items-center justify-center text-white overflow-hidden">
+        {/* Video background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/videos/m.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-primary-700/60"></div>
+
+        {/* Text */}
+        <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl">Get in touch with our team</p>
         </div>
@@ -19,95 +83,174 @@ export default function ContactPage() {
             </p>
 
             <div className="space-y-6">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Email</h3>
-                <p className="text-gray-700">info@generalgivers.org</p>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <Mail className="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
+                  <a
+                    href="mailto:teddscylla@gmail.com"
+                    className="text-primary-600 hover:text-primary-700"
+                  >
+                    teddscylla@gmail.com
+                  </a>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Phone</h3>
-                <p className="text-gray-700">+1 (234) 567-8900</p>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <Phone className="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">Phone</h3>
+                  <a href="tel:+254700000000" className="text-gray-700 hover:text-primary-600">
+                    +254 700 000 000
+                  </a>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Address</h3>
-                <p className="text-gray-700">
-                  123 Foundation Street
-                  <br />
-                  City, State 12345
-                  <br />
-                  United States
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <MapPin className="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">Address</h3>
+                  <p className="text-gray-700">Nairobi, Kenya</p>
+                </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Office Hours</h3>
-                <p className="text-gray-700">
-                  Monday - Friday: 9:00 AM - 5:00 PM
-                  <br />
-                  Saturday - Sunday: Closed
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-primary-100 rounded-lg">
+                  <Clock className="w-5 h-5 text-primary-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-1">Office Hours</h3>
+                  <p className="text-gray-700">
+                    Monday - Friday: 9:00 AM - 5:00 PM
+                    <br />
+                    Saturday - Sunday: Closed
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
-          <div>
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
-            <form className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name
-                </label>
-                <input
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-gray-700">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
                   type="text"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  minLength={2}
+                  maxLength={100}
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                   placeholder="Your name"
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-gray-700">
+                  Email <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="email"
                   type="email"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                   placeholder="your@email.com"
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="phone" className="text-gray-700">Phone</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  maxLength={20}
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
+                  placeholder="+254 700 000 000"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="subject" className="text-gray-700">
+                  Subject <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="subject"
                   type="text"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleChange}
+                  required
+                  minLength={5}
+                  maxLength={200}
+                  className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                   placeholder="Message subject"
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="message" className="text-gray-700">
+                  Message <span className="text-red-500">*</span>
+                </Label>
                 <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
+                  minLength={10}
+                  maxLength={5000}
                   rows={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  className="flex w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Your message"
+                  disabled={isSubmitting}
                 />
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="w-full bg-primary-600 text-white px-6 py-3 rounded-lg hover:bg-primary-700 transition font-semibold"
+                disabled={isSubmitting}
+                className="w-full h-11 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700"
+                size="lg"
               >
-                Send Message
-              </button>
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <Spinner className="w-4 h-4" />
+                    Sending...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    Send Message
+                    <Send className="w-4 h-4" />
+                  </span>
+                )}
+              </Button>
             </form>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

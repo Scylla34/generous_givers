@@ -2,36 +2,75 @@ spring:
   application:
     name: foundation-system
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:teddscylla@gmail.com}
+    password: ${MAIL_PASSWORD:yuvyxkvvqyskdahv}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5433/general_givers}
     username: ${SPRING_DATASOURCE_USERNAME:peter}
     password: ${SPRING_DATASOURCE_PASSWORD:manu}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
+    open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
+        format_sql: false
         jdbc:
           time_zone: UTC
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
 
   flyway:
     enabled: false
+
+  # DevTools - disable automatic restart to prevent recompilation on file changes
+  devtools:
+    restart:
+      enabled: false
+    livereload:
+      enabled: false
 
 server:
   port: 8080
   servlet:
     context-path: /api/v1
+  # Enable response compression
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
 
 logging:
   level:
     com.generalgivers: INFO
-    org.springframework.web: INFO
+    org.springframework.web: WARN
     org.hibernate: WARN
+    org.hibernate.SQL: WARN
 
 springdoc:
   api-docs:
@@ -47,8 +86,11 @@ app:
     expiration: 900000  # 15 minutes in milliseconds
   cors:
     allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+  email:
+    contact-recipient: teddscylla@gmail.com
+    from-name: Generous Givers Family
 
-    daraja:
+  daraja:
       consumer-key: 7yZE5AcPP7dNIsyYfDAYVFCgTdyKBSWO73luWOkWFlCp27Az
       consumer-secret: aVCb7k7nFeR4mODHj779lG94RFY3ipcNI6xdS5CQHJhnGPI8E8Ub5QmWGQA4KODZ
       short-code: 174379

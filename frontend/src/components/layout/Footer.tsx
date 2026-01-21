@@ -59,11 +59,11 @@ export default function Footer() {
               </li>
               <li className="flex items-center space-x-2 text-sm">
                 <Phone className="w-4 h-4" />
-                <span>+1 (555) 123-4567</span>
+                <span>+254 (7) 123-4567</span>
               </li>
               <li className="flex items-start space-x-2 text-sm">
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
-                <span>123 Charity Lane, Hope City, HC 12345</span>
+                <span>Nairobi City, Kenya</span>
               </li>
             </ul>
           </div>
@@ -74,7 +74,7 @@ export default function Footer() {
             <p className="text-sm mb-4">
               Get updates on our latest projects and impact.
             </p>
-            <form className="space-y-2">
+            <form className="space-y-2" action="subscribe">
               <input
                 type="email"
                 placeholder="Your email"

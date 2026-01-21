@@ -37,13 +37,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - only login and docs
+                        // Public endpoints - login, docs, and M-Pesa
                         .requestMatchers(
                                 "/auth/login",
                                 "/swagger-ui/**",
                                 "/api-docs/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        // M-Pesa endpoints - public for STK Push and callback
+                        .requestMatchers("/mpesa/**").permitAll()
+                        // Contact form - public
+                        .requestMatchers("/contact/**").permitAll()
                         // Public read access to projects for public pages
                         .requestMatchers(HttpMethod.GET, "/projects/**").permitAll()
                         // Public donations (guest donations)

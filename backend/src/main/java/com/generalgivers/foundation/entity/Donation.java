@@ -44,11 +44,33 @@ public class Donation {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private DonationStatus status = DonationStatus.COMPLETED;
+    private DonationStatus status = DonationStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
+
+    // M-Pesa specific fields
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "merchant_request_id")
+    private String merchantRequestId;
+
+    @Column(name = "checkout_request_id")
+    private String checkoutRequestId;
+
+    @Column(name = "mpesa_receipt_number")
+    private String mpesaReceiptNumber;
+
+    @Column(name = "transaction_date")
+    private LocalDateTime transactionDate;
+
+    @Column(name = "result_code")
+    private Integer resultCode;
+
+    @Column(name = "result_desc")
+    private String resultDesc;
 
     @CreatedDate
     @Column(name = "created_at", updatable = false)
