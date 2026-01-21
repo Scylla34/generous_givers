@@ -1,10 +1,29 @@
 services:
   - type: web
-    name: generous-givers-backend
+    name: foundation-backend
     env: docker
-    repo: https://github.com/Scylla34/generous_givers
-    branch: main
-    autoDeploy: true
-    plan: starter
-    healthCheckPath: /api/v1/actuator/health
-    root: backend
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATABASE_URL
+        fromDatabase:
+          name: foundation-db
+          property: connectionString
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: foundation-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: foundation-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        value: https://your-frontend-url.onrender.com
+
+databases:
+  - name: foundation-db
+    databaseName: general_givers
+    user: peter
