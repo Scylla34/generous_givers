@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: generous-givers-backend
+    env: docker
+    repo: https://github.com/Scylla34/generous_givers
+    branch: main
+    autoDeploy: true
+    plan: starter
+    healthCheckPath: /api/v1/actuator/health
+    root: backend
