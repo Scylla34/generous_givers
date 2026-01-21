@@ -22,3 +22,8 @@ ENV JAVA_OPTS=""
 EXPOSE 8080
 
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -Dspring.profiles.active=prod -jar /app/app.jar"]
+
+# Add a Docker HEALTHCHECK to help Render and Docker understand container health.
+# Uses the Spring Boot Actuator endpoint; adjust the path if your health endpoint is different.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
