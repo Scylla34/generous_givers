@@ -128,6 +128,7 @@ function DonateForm() {
 
       return () => clearTimeout(timer)
     }
+    return undefined
   }, [checkoutRequestId, step, pollPaymentStatus])
 
   const handleMethodSelect = (method: PaymentMethod) => {
