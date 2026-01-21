@@ -34,6 +34,10 @@ spring:
   flyway:
     enabled: false
 
+app:
+  cors:
+    allowed-origins: https://generousgiversfamily.netlify.app,https://generous-givers-family.onrender.com
+
 server:
   port: ${PORT:8080}
   servlet:
