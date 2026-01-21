@@ -34,6 +34,21 @@ spring:
   flyway:
     enabled: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 3000
+          writetimeout: 5000
+
 server:
   port: ${PORT:8080}
   servlet:
@@ -45,7 +60,11 @@ app:
     expiration: 900000
 
   cors:
-    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app,https://generous-givers-family.onrender.com}
+    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app,https://generous-givers-family.netlify.app}
+
+  email:
+    contact-recipient: ${CONTACT_EMAIL:info@generousgivers.org}
+    from-name: ${FROM_NAME:Generous Givers Family}
 
 logging:
   level:
