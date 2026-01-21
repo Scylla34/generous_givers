@@ -1,13 +1,17 @@
+# Local development profile - optimized for fast development
 spring:
   jpa:
-    show-sql: true
+    show-sql: false
 
+  # Keep DevTools restart DISABLED for faster development
   devtools:
     restart:
-      enabled: true
+      enabled: false
+    livereload:
+      enabled: false
 
 logging:
   level:
-    com.generalgivers: DEBUG
-    org.springframework.web: DEBUG
-    org.springframework.security: DEBUG
+    com.generalgivers: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN

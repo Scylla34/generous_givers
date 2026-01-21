@@ -1,8 +1,31 @@
 export default function ContactPage() {
   return (
     <div className="min-h-screen">
-      <div className="bg-primary-600 text-white py-20">
+      {/* <div className="bg-primary-600 text-white py-20">
         <div className="container mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
+          <p className="text-xl">Get in touch with our team</p>
+        </div>
+      </div> */}
+            {/* Video Header */}
+      <div className="relative h-[300px] md:h-[400px] flex items-center justify-center text-white overflow-hidden">
+
+        {/* Video background */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+        >
+          <source src="/videos/m.mp4" type="video/mp4" />
+        </video>
+
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-primary-700/60"></div>
+
+        {/* Text */}
+        <div className="relative z-10 container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
           <p className="text-xl">Get in touch with our team</p>
         </div>
