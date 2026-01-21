@@ -5,8 +5,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME:teddscylla@gmail.com}
-    password: ${MAIL_PASSWORD:yuvyxkvvqyskdahv}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
@@ -82,18 +82,18 @@ springdoc:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:your_secure_random_secret_key_minimum_256_bits_for_HS256_algorithm}
+    secret: ${JWT_SECRET:}
     expiration: 900000  # 15 minutes in milliseconds
   cors:
     allowed-origins: ${FRONTEND_URL:http://localhost:3000}
   email:
-    contact-recipient: teddscylla@gmail.com
+    contact-recipient: ${CONTACT_RECIPIENT:teddscylla@gmail.com}
     from-name: Generous Givers Family
 
   daraja:
-      consumer-key: 7yZE5AcPP7dNIsyYfDAYVFCgTdyKBSWO73luWOkWFlCp27Az
-      consumer-secret: aVCb7k7nFeR4mODHj779lG94RFY3ipcNI6xdS5CQHJhnGPI8E8Ub5QmWGQA4KODZ
-      short-code: 174379
-      passkey: KXZphPvbhbxcJtIeCkwgUmujKcJTlVX+/KbyCnKnNgRyVltcMEzlgDo62CIh1dKIZ8Ng9yjhV8bJGUBM180zH5nCVp9WAAHpG3aqLWbyrICPwiPNu/Zf/swYsoob3vxNNk+oN2MAa8cuVRQ1YDrBsOezpcKqOVn9aPSupuyJCkPW2e0/JlM2/oMAkE9JQKZ2TTZkVsJFHWoJZzp6wPlgOz29x6V8UWFjstdahk5DzcpPAZPabH4biXEIYSKi1Y3b6HvnkJ0JtGWMW48Oig8uWrPuvk5bub7qP7BfC4y15JH6r2rIBiOt0OsAXcmqjG57Wcp5lT5vReQTGe07vtwx0A==
-      callback-url: https://yourdomain.com/api/mpesa/callback
-      base-url: https://sandbox.safaricom.co.ke
+      consumer-key: ${DAR_CONSUMER_KEY:}
+      consumer-secret: ${DAR_CONSUMER_SECRET:}
+      short-code: ${DAR_SHORT_CODE:}
+      passkey: ${DAR_PASSKEY:}
+      callback-url: ${DAR_CALLBACK_URL:https://yourdomain.com/api/mpesa/callback}
+      base-url: ${DAR_BASE_URL:https://sandbox.safaricom.co.ke}
