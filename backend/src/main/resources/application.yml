@@ -82,7 +82,7 @@ springdoc:
 
 app:
   jwt:
-    secret: ${JWT_SECRET:}
+    secret: ${JWT_SECRET:your_secure_random_secret_key_minimum_256_bits_for_HS256_algorithm}
     expiration: 900000  # 15 minutes in milliseconds
   cors:
     allowed-origins: ${FRONTEND_URL:http://localhost:3000}
