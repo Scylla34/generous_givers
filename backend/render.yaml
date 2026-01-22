@@ -21,7 +21,7 @@ services:
       - key: JWT_SECRET
         generateValue: true
       - key: FRONTEND_URL
-        value: https://your-frontend-url.onrender.com
+        value: https://generousgiversfamily.netlify.app,http://localhost:3000
 
 databases:
   - name: foundation-db
