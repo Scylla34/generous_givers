@@ -38,6 +38,14 @@ server:
   port: ${PORT:8080}
   servlet:
     context-path: /api/v1
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
 
 app:
   jwt:
@@ -45,7 +53,14 @@ app:
     expiration: 900000
 
   cors:
-    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app,http://localhost:3000}
+    allowed-origins: ${FRONTEND_URL:https://generousgiversfamily.netlify.app,https://generous-givers.vercel.app,http://localhost:3000}
+
+  security:
+    headers:
+      enabled: true
+    rate-limiting:
+      enabled: true
+      requests-per-minute: 100
 
   email:
     contact-recipient: ${CONTACT_EMAIL:info@generousgivers.org}
@@ -60,7 +75,11 @@ logging:
     com.generalgivers: INFO
     org.springframework.web: WARN
     org.hibernate: WARN
-    root: INFO
+    org.springframework.security: WARN
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 springdoc:
   api-docs:

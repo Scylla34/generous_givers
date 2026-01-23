@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, MapPin, Calendar } from 'lucide-react'
+import { ArrowRight, MapPin, Calendar, Users, Camera } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { visitService } from '@/services/visitService'
 import { formatDateSafe } from '@/lib/format'
@@ -141,7 +141,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { number: '50+', label: 'Children\'s Homes Visited' },
+              { number: '50+', label: 'Children&apos;s Homes Visited' },
               { number: '1,200+', label: 'Children Reached' },
               { number: '500+', label: 'Active Members' },
               { number: '10+', label: 'Years of Service' },
@@ -190,7 +190,7 @@ export default function Home() {
           <div className="text-center mb-12 animate-fade-in">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Our Recent Visits</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              See where we&apos;ve been making a difference in our community
+              See where we&apos;ve been making a difference in our community through meaningful visits and connections
             </p>
           </div>
 
@@ -199,69 +199,94 @@ export default function Home() {
               visits.map((visit, idx) => (
                 <div 
                   key={visit.id} 
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 animate-scale-in group"
+                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 animate-scale-in group border border-gray-100"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   {/* Image Gallery */}
                   {visit.photos && visit.photos.length > 0 ? (
-                    <div className="relative h-48 bg-gray-200 overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                    <div className="relative h-48 bg-gray-200 overflow-hidden">
+                      <Image
                         src={visit.photos[0]}
                         alt={visit.childrenHomeName || visit.location || 'Visit'}
-                        className="w-full h-full object-cover"
+                        width={400}
+                        height={192}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       {visit.photos.length > 1 && (
-                        <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white px-2 py-1 rounded text-xs">
+                        <div className="absolute bottom-3 right-3 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-xs font-medium">
                           +{visit.photos.length - 1} more
                         </div>
                       )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                     </div>
                   ) : (
                     <div className="h-48 bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center group-hover:from-primary-500 group-hover:to-primary-700 transition-all duration-300">
-                      <MapPin className="w-16 h-16 text-white opacity-50" />
+                      <MapPin className="w-16 h-16 text-white opacity-60" />
                     </div>
                   )}
 
                   {/* Content */}
                   <div className="p-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors">
                       {visit.childrenHomeName || visit.location || 'Community Visit'}
                     </h3>
 
-                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                      <Calendar className="w-4 h-4" />
-                      <span>{formatDateSafe(visit.visitDate)}</span>
+                    <div className="space-y-2 mb-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 text-primary-500" />
+                        <span>{formatDateSafe(visit.visitDate)}</span>
+                      </div>
+
+                      {visit.location && visit.childrenHomeName && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <MapPin className="w-4 h-4 text-primary-500" />
+                          <span className="line-clamp-1">{visit.location}</span>
+                        </div>
+                      )}
+
+                      {visit.createdByName && (
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <Users className="w-4 h-4 text-primary-500" />
+                          <span>Recorded by {visit.createdByName}</span>
+                        </div>
+                      )}
                     </div>
 
-                    {visit.location && visit.childrenHomeName && (
-                      <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        <MapPin className="w-4 h-4" />
-                        <span>{visit.location}</span>
-                      </div>
+                    {visit.notes && (
+                      <p className="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+                        {visit.notes}
+                      </p>
                     )}
 
-                    {visit.notes && (
-                      <p className="text-sm text-gray-600 line-clamp-3">{visit.notes}</p>
+                    {visit.photos && visit.photos.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <Camera className="w-3 h-3" />
+                          <span>{visit.photos.length} photo{visit.photos.length !== 1 ? 's' : ''} captured</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
-                <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">No visits recorded yet</p>
+              <div className="col-span-full text-center py-16">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12">
+                  <MapPin className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No visits recorded yet</h3>
+                  <p className="text-gray-500">Our team will start documenting visits to children&apos;s homes soon.</p>
+                </div>
               </div>
             )}
           </div>
 
           {visits && visits.length > 0 && (
-            <div className="text-center mt-8 animate-fade-in">
+            <div className="text-center mt-10 animate-fade-in">
               <Link
                 href="/gallery"
-                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold hover:translate-x-1 transition-transform"
+                className="inline-flex items-center gap-2 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition-all duration-300 hover:scale-105 hover:shadow-lg"
               >
-                View All Visits
+                View All Visits & Gallery
                 <ArrowRight className="w-5 h-5" />
               </Link>
             </div>

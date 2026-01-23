@@ -1,5 +1,6 @@
 package com.generalgivers.foundation.controller;
 
+import com.generalgivers.foundation.dto.common.ApiResponse;
 import com.generalgivers.foundation.dto.project.ProjectRequest;
 import com.generalgivers.foundation.dto.project.ProjectResponse;
 import com.generalgivers.foundation.entity.ProjectStatus;
@@ -28,56 +29,85 @@ public class ProjectController {
 
     @GetMapping
     @Operation(summary = "Get all projects", description = "Retrieve list of all projects")
-    public ResponseEntity<List<ProjectResponse>> getAllProjects() {
-        return ResponseEntity.ok(projectService.getAllProjects());
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAllProjects() {
+        List<ProjectResponse> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(ApiResponse.success(
+            "Projects retrieved successfully", 
+            projects
+        ));
     }
 
     @GetMapping("/active")
     @Operation(summary = "Get active projects", description = "Retrieve list of active projects")
-    public ResponseEntity<List<ProjectResponse>> getActiveProjects() {
-        return ResponseEntity.ok(projectService.getActiveProjects());
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getActiveProjects() {
+        List<ProjectResponse> projects = projectService.getActiveProjects();
+        return ResponseEntity.ok(ApiResponse.success(
+            "Active projects retrieved successfully", 
+            projects
+        ));
     }
 
     @GetMapping("/status/{status}")
     @Operation(summary = "Get projects by status", description = "Retrieve projects filtered by status")
-    public ResponseEntity<List<ProjectResponse>> getProjectsByStatus(@PathVariable ProjectStatus status) {
-        return ResponseEntity.ok(projectService.getProjectsByStatus(status));
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getProjectsByStatus(@PathVariable ProjectStatus status) {
+        List<ProjectResponse> projects = projectService.getProjectsByStatus(status);
+        return ResponseEntity.ok(ApiResponse.success(
+            "Projects with status " + status + " retrieved successfully", 
+            projects
+        ));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get project by ID", description = "Retrieve project details by ID")
-    public ResponseEntity<ProjectResponse> getProjectById(@PathVariable UUID id) {
-        return ResponseEntity.ok(projectService.getProjectById(id));
+    public ResponseEntity<ApiResponse<ProjectResponse>> getProjectById(@PathVariable UUID id) {
+        ProjectResponse project = projectService.getProjectById(id);
+        return ResponseEntity.ok(ApiResponse.success(
+            "Project retrieved successfully", 
+            project
+        ));
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Create project", description = "Create a new project (Admin only)")
-    public ResponseEntity<ProjectResponse> createProject(
+    public ResponseEntity<ApiResponse<ProjectResponse>> createProject(
             @Valid @RequestBody ProjectRequest request,
             Authentication authentication) {
         String userEmail = authentication.getName();
         ProjectResponse response = projectService.createProject(request, userEmail);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+            "Project created successfully", 
+            response
+        ));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Update project", description = "Update project details (Admin only)")
-    public ResponseEntity<ProjectResponse> updateProject(
+    public ResponseEntity<ApiResponse<ProjectResponse>> updateProject(
             @PathVariable UUID id,
-            @Valid @RequestBody ProjectRequest request) {
-        return ResponseEntity.ok(projectService.updateProject(id, request));
+            @Valid @RequestBody ProjectRequest request,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        ProjectResponse response = projectService.updateProject(id, request, userEmail);
+        return ResponseEntity.ok(ApiResponse.success(
+            "Project updated successfully", 
+            response
+        ));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Delete project", description = "Delete a project (Admin only)")
-    public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {
-        projectService.deleteProject(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<Void>> deleteProject(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName();
+        projectService.deleteProject(id, userEmail);
+        return ResponseEntity.ok(ApiResponse.success(
+            "Project deleted successfully", 
+            null
+        ));
     }
 }

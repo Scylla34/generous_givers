@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DonationResponse {
+
     private UUID id;
     private UUID donorUserId;
     private String donorName;

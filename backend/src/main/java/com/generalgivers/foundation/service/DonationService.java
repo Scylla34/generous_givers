@@ -2,10 +2,7 @@ package com.generalgivers.foundation.service;
 
 import com.generalgivers.foundation.dto.donation.DonationRequest;
 import com.generalgivers.foundation.dto.donation.DonationResponse;
-import com.generalgivers.foundation.entity.Donation;
-import com.generalgivers.foundation.entity.DonationStatus;
-import com.generalgivers.foundation.entity.Project;
-import com.generalgivers.foundation.entity.User;
+import com.generalgivers.foundation.entity.*;
 import com.generalgivers.foundation.exception.ResourceNotFoundException;
 import com.generalgivers.foundation.repository.DonationRepository;
 import com.generalgivers.foundation.repository.ProjectRepository;
@@ -27,6 +24,8 @@ public class DonationService {
     private final DonationRepository donationRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final DonationNotificationService donationNotificationService;
+    private final NotificationService notificationService;
 
     public List<DonationResponse> getAllDonations() {
         return donationRepository.findAllOrderByDateDesc().stream()
@@ -84,11 +83,33 @@ public class DonationService {
             projectRepository.save(project);
         }
 
+        // Email notifications disabled for donations
+        // donationNotificationService.notifyDonationReceived(
+        //     request.getDonorName(),
+        //     request.getAmount(),
+        //     project != null ? project.getTitle() : null
+        // );
+
+        // Send in-app notification
+        notificationService.createNotification(
+            "New Donation Received",
+            String.format("%s donated KES %,.2f%s",
+                    request.getDonorName(),
+                    request.getAmount(),
+                    project != null ? " to " + project.getTitle() : ""),
+            NotificationType.DONATION_RECEIVED,
+            "DONATION",
+            donation.getId(),
+            null,
+            null,
+            true
+        );
+
         return mapToDonationResponse(donation);
     }
 
     public BigDecimal getTotalDonations() {
-        BigDecimal total = donationRepository.getTotalDonationsAmount();
+        BigDecimal total = donationRepository.getTotalDonationAmount();
         return total != null ? total : BigDecimal.ZERO;
     }
 

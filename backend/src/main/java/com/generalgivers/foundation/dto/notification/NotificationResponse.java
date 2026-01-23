@@ -15,6 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificationResponse {
+
     private UUID id;
     private String title;
     private String message;
@@ -22,8 +23,8 @@ public class NotificationResponse {
     private String entityType;
     private UUID entityId;
     private Map<String, Object> metadata;
-    private Boolean isRead;
-    private Boolean isGlobal;
+    private boolean isRead;
+    private boolean isGlobal;
     private LocalDateTime createdAt;
     private LocalDateTime readAt;
 }

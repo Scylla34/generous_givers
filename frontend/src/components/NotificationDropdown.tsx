@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Bell, Check, CheckCheck, DollarSign, FolderOpen, MapPin, AlertCircle } from 'lucide-react';
+import { Bell, CheckCheck, DollarSign, FolderOpen, MapPin, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import {
   DropdownMenu,
@@ -29,26 +29,6 @@ const getNotificationIcon = (type: Notification['type']) => {
       return MapPin;
     default:
       return AlertCircle;
-  }
-};
-
-const getNotificationColor = (type: Notification['type']) => {
-  switch (type) {
-    case 'DONATION_COMPLETED':
-    case 'PROJECT_COMPLETED':
-    case 'VISIT_COMPLETED':
-      return 'text-green-600 bg-green-50';
-    case 'DONATION_FAILED':
-      return 'text-red-600 bg-red-50';
-    case 'DONATION_RECEIVED':
-      return 'text-blue-600 bg-blue-50';
-    case 'PROJECT_CREATED':
-    case 'PROJECT_UPDATED':
-      return 'text-purple-600 bg-purple-50';
-    case 'VISIT_SCHEDULED':
-      return 'text-amber-600 bg-amber-50';
-    default:
-      return 'text-gray-600 bg-gray-50';
   }
 };
 
@@ -89,14 +69,6 @@ export default function NotificationDropdown() {
     },
   });
 
-  const handleMarkAsRead = (id: string) => {
-    markAsReadMutation.mutate(id);
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllAsReadMutation.mutate();
-  };
-
   const handleViewAllNotifications = () => {
     setIsOpen(false);
     router.push('/dashboard/notifications');
@@ -120,7 +92,7 @@ export default function NotificationDropdown() {
           <h3 className="font-semibold text-gray-900">Notifications</h3>
           {unreadCount > 0 && (
             <button
-              onClick={handleMarkAllAsRead}
+              onClick={() => markAllAsReadMutation.mutate()}
               disabled={markAllAsReadMutation.isPending}
               className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
             >
@@ -144,9 +116,8 @@ export default function NotificationDropdown() {
             </div>
           ) : (
             <div className="divide-y divide-gray-100">
-              {notifications.map((notification) => {
+              {notifications.slice(0, 5).map((notification) => {
                 const Icon = getNotificationIcon(notification.type);
-                const colorClass = getNotificationColor(notification.type);
 
                 return (
                   <div
@@ -155,30 +126,16 @@ export default function NotificationDropdown() {
                       'px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer',
                       !notification.isRead && 'bg-blue-50/50'
                     )}
-                    onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
+                    onClick={() => !notification.isRead && markAsReadMutation.mutate(notification.id)}
                   >
                     <div className="flex gap-3">
-                      <div className={cn('p-2 rounded-full flex-shrink-0', colorClass)}>
+                      <div className="p-2 rounded-full flex-shrink-0 text-primary-600 bg-primary-50">
                         <Icon className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">
-                            {notification.title}
-                          </p>
-                          {!notification.isRead && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleMarkAsRead(notification.id);
-                              }}
-                              className="p-1 hover:bg-gray-200 rounded-full flex-shrink-0"
-                              title="Mark as read"
-                            >
-                              <Check className="w-3.5 h-3.5 text-gray-400" />
-                            </button>
-                          )}
-                        </div>
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {notification.title}
+                        </p>
                         <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">
                           {notification.message}
                         </p>

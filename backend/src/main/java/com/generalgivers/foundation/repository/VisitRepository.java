@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,6 +18,8 @@ public interface VisitRepository extends JpaRepository<Visit, UUID> {
     List<Visit> findByCreatedById(UUID createdById);
 
     List<Visit> findByVisitDateBetween(LocalDate startDate, LocalDate endDate);
+
+    long countByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT v FROM Visit v ORDER BY v.visitDate DESC")
     List<Visit> findAllOrderByVisitDateDesc();

@@ -9,6 +9,7 @@ import com.generalgivers.foundation.exception.ResourceNotFoundException;
 import com.generalgivers.foundation.repository.ProjectRepository;
 import com.generalgivers.foundation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,19 +21,23 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final ProjectNotificationService projectNotificationService;
 
     public List<ProjectResponse> getAllProjects() {
-        return projectRepository.findAllOrderByCreatedAtDesc().stream()
+        List<Project> projects = projectRepository.findAllOrderByCreatedAtDesc();
+        return projects.stream()
                 .map(this::mapToProjectResponse)
                 .collect(Collectors.toList());
     }
 
     public List<ProjectResponse> getActiveProjects() {
-        return projectRepository.findActiveProjects().stream()
+        List<Project> projects = projectRepository.findActiveProjects();
+        return projects.stream()
                 .map(this::mapToProjectResponse)
                 .collect(Collectors.toList());
     }
@@ -66,14 +71,27 @@ public class ProjectService {
                 .build();
 
         project = projectRepository.save(project);
+        
+        // Send notifications (optional - don't fail if this errors)
+        try {
+            projectNotificationService.notifyProjectCreated(project.getTitle(), creator.getName());
+        } catch (Exception e) {
+            log.warn("Failed to send project creation notifications: {}", e.getMessage());
+        }
+        
         return mapToProjectResponse(project);
     }
 
     @Transactional
-    public ProjectResponse updateProject(UUID id, ProjectRequest request) {
+    public ProjectResponse updateProject(UUID id, ProjectRequest request, String userEmail) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
 
+        User updater = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+
+        ProjectStatus oldStatus = project.getStatus();
+        
         if (request.getTitle() != null) {
             project.setTitle(request.getTitle());
         }
@@ -94,15 +112,40 @@ public class ProjectService {
         }
 
         project = projectRepository.save(project);
+        
+        // Send notifications (optional - don't fail if this errors)
+        try {
+            projectNotificationService.notifyProjectUpdated(project.getTitle(), updater.getName());
+            
+            // Special notification for project completion
+            if (oldStatus != ProjectStatus.COMPLETED && project.getStatus() == ProjectStatus.COMPLETED) {
+                projectNotificationService.notifyProjectCompleted(project.getTitle());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to send project update notifications: {}", e.getMessage());
+        }
+        
         return mapToProjectResponse(project);
     }
 
     @Transactional
-    public void deleteProject(UUID id) {
-        if (!projectRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Project", "id", id);
-        }
+    public void deleteProject(UUID id, String userEmail) {
+        Project project = projectRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Project", "id", id));
+        
+        User deleter = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+        
+        String projectTitle = project.getTitle();
+        
         projectRepository.deleteById(id);
+        
+        // Send deletion notification (optional - don't fail if this errors)
+        try {
+            projectNotificationService.notifyProjectDeleted(projectTitle, deleter.getName());
+        } catch (Exception e) {
+            log.warn("Failed to send project deletion notifications: {}", e.getMessage());
+        }
     }
 
     private ProjectResponse mapToProjectResponse(Project project) {

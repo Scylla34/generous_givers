@@ -3,12 +3,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { reportService } from '@/services/reportService'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { FileSpreadsheet, FileText } from 'lucide-react'
+import { BarChart3, Users, CheckCircle } from 'lucide-react'
 import { formatCurrency, formatDateSafe } from '@/lib/format'
+import { toast } from 'sonner'
+import { PermissionWrapper } from '@/components/ui/permission-button'
+import { ReportStats } from './components/ReportStats'
+import { ExportButton } from './components/ExportButton'
 import * as XLSX from 'xlsx'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
-import { toast } from 'sonner'
 
 export default function ReportsPage() {
   const currentYear = new Date().getFullYear()
@@ -40,6 +43,14 @@ export default function ReportsPage() {
     amount: item.totalAmount,
   })) || []
 
+  // Calculate stats for ReportStats component
+  const stats = {
+    projectCount: Array.isArray(projectProgress) ? projectProgress.length : 0,
+    userCount: Array.isArray(usersReport) ? usersReport.length : 0,
+    totalDonations: Array.isArray(monthlyFunds) ? monthlyFunds.reduce((sum, item) => sum + item.donationCount, 0) : 0,
+    activeProjects: Array.isArray(projectProgress) ? projectProgress.filter(p => p.status === 'ACTIVE').length : 0,
+  }
+
   const exportProjectsToExcel = () => {
     try {
       if (!projectProgress || projectProgress.length === 0) {
@@ -60,7 +71,6 @@ export default function ReportsPage() {
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, ws, 'Projects Report')
 
-      // Auto-size columns
       const maxWidth = data.reduce((w, r) => Math.max(w, r['Project'].length), 10)
       ws['!cols'] = [
         { wch: maxWidth },
@@ -72,7 +82,14 @@ export default function ReportsPage() {
       ]
 
       XLSX.writeFile(wb, `projects-report-${new Date().toISOString().split('T')[0]}.xlsx`)
-      toast.success('Excel file downloaded successfully!')
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Projects report exported successfully!</span>
+        </div>,
+        { duration: 4000 }
+      )
     } catch (error) {
       console.error('Excel export error:', error)
       toast.error('Failed to export to Excel')
@@ -89,25 +106,21 @@ export default function ReportsPage() {
       const doc = new jsPDF()
       const pageWidth = doc.internal.pageSize.getWidth()
 
-      // Add organization header
       doc.setFontSize(16)
-      doc.setTextColor(37, 99, 235) // primary-600
+      doc.setTextColor(37, 99, 235)
       doc.text('Generous Givers Family Foundation', pageWidth / 2, 15, { align: 'center' })
       
       doc.setFontSize(14)
       doc.setTextColor(40, 40, 40)
       doc.text('Projects Progress Report', pageWidth / 2, 23, { align: 'center' })
 
-      // Add horizontal line
       doc.setDrawColor(37, 99, 235)
       doc.line(14, 25, pageWidth - 14, 25)
 
-      // Add date
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
       doc.text(`Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 14, 32)
 
-      // Prepare table data
       const tableData = projectProgress.map(project => [
         project.title,
         project.status,
@@ -126,7 +139,14 @@ export default function ReportsPage() {
       })
 
       doc.save(`projects-report-${new Date().toISOString().split('T')[0]}.pdf`)
-      toast.success('PDF file downloaded successfully!')
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Projects report exported successfully!</span>
+        </div>,
+        { duration: 4000 }
+      )
     } catch (error) {
       console.error('PDF export error:', error)
       toast.error('Failed to export to PDF')
@@ -154,7 +174,14 @@ export default function ReportsPage() {
       ws['!cols'] = [{ wch: 12 }, { wch: 8 }, { wch: 20 }, { wch: 20 }]
 
       XLSX.writeFile(wb, `donations-report-${currentYear}.xlsx`)
-      toast.success('Excel file downloaded successfully!')
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Donations report exported successfully!</span>
+        </div>,
+        { duration: 4000 }
+      )
     } catch (error) {
       console.error('Excel export error:', error)
       toast.error('Failed to export to Excel')
@@ -171,20 +198,17 @@ export default function ReportsPage() {
       const doc = new jsPDF()
       const pageWidth = doc.internal.pageSize.getWidth()
 
-      // Add organization header
       doc.setFontSize(16)
-      doc.setTextColor(37, 99, 235) // primary-600
+      doc.setTextColor(37, 99, 235)
       doc.text('Generous Givers Family Foundation', pageWidth / 2, 15, { align: 'center' })
       
       doc.setFontSize(14)
       doc.setTextColor(40, 40, 40)
       doc.text(`Monthly Donations Report ${currentYear}`, pageWidth / 2, 23, { align: 'center' })
 
-      // Add horizontal line
       doc.setDrawColor(37, 99, 235)
       doc.line(14, 25, pageWidth - 14, 25)
 
-      // Add date
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
       doc.text(`Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 14, 32)
@@ -196,7 +220,6 @@ export default function ReportsPage() {
         item.donationCount.toString(),
       ])
 
-      // Calculate total
       const totalAmount = monthlyFunds.reduce((sum, item) => sum + item.totalAmount, 0)
       const totalCount = monthlyFunds.reduce((sum, item) => sum + item.donationCount, 0)
 
@@ -211,7 +234,14 @@ export default function ReportsPage() {
       })
 
       doc.save(`donations-report-${currentYear}.pdf`)
-      toast.success('PDF file downloaded successfully!')
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Donations report exported successfully!</span>
+        </div>,
+        { duration: 4000 }
+      )
     } catch (error) {
       console.error('PDF export error:', error)
       toast.error('Failed to export to PDF')
@@ -250,7 +280,14 @@ export default function ReportsPage() {
       ]
 
       XLSX.writeFile(wb, `users-report-${new Date().toISOString().split('T')[0]}.xlsx`)
-      toast.success('CSV file downloaded successfully!')
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Users report exported successfully!</span>
+        </div>,
+        { duration: 4000 }
+      )
     } catch (error) {
       console.error('CSV export error:', error)
       toast.error('Failed to export to CSV')
@@ -267,20 +304,17 @@ export default function ReportsPage() {
       const doc = new jsPDF()
       const pageWidth = doc.internal.pageSize.getWidth()
 
-      // Add organization header
       doc.setFontSize(16)
-      doc.setTextColor(37, 99, 235) // primary-600
+      doc.setTextColor(37, 99, 235)
       doc.text('Generous Givers Family Foundation', pageWidth / 2, 15, { align: 'center' })
       
       doc.setFontSize(14)
       doc.setTextColor(40, 40, 40)
       doc.text('Users Report', pageWidth / 2, 23, { align: 'center' })
 
-      // Add horizontal line
       doc.setDrawColor(37, 99, 235)
       doc.line(14, 25, pageWidth - 14, 25)
 
-      // Add date
       doc.setFontSize(10)
       doc.setTextColor(100, 100, 100)
       doc.text(`Generated: ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`, 14, 32)
@@ -312,7 +346,14 @@ export default function ReportsPage() {
       })
 
       doc.save(`users-report-${new Date().toISOString().split('T')[0]}.pdf`)
-      toast.success('PDF file downloaded successfully!')
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Users report exported successfully!</span>
+        </div>,
+        { duration: 4000 }
+      )
     } catch (error) {
       console.error('PDF export error:', error)
       toast.error('Failed to export to PDF')
@@ -320,154 +361,154 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-8 border border-primary-200">
-        <h1 className="text-4xl font-bold text-primary-900 mb-2">Reports & Analytics</h1>
-        <p className="text-primary-700 text-lg">Export and analyze foundation data with detailed insights</p>
-      </div>
-
-      {/* Projects Report */}
-      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Project Progress Report</h2>
-            <p className="text-gray-600 mt-1 text-sm">Track the status and progress of all projects</p>
+    <PermissionWrapper resource="reports" action="read">
+      <div className="space-y-6">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-xl p-8 border border-primary-200">
+          <div className="flex items-center gap-3 mb-2">
+            <BarChart3 className="w-8 h-8 text-primary-600" />
+            <h1 className="text-4xl font-bold text-primary-900">Reports & Analytics</h1>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={exportProjectsToExcel}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-md hover:shadow-lg"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              Excel
-            </button>
-            <button
-              onClick={exportProjectsToPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium shadow-md hover:shadow-lg"
-            >
-              <FileText className="w-4 h-4" />
-              PDF
-            </button>
-          </div>
+          <p className="text-primary-700 text-lg">Export and analyze foundation data with detailed insights</p>
         </div>
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full">
-            <thead className="bg-primary-50 border-b-2 border-primary-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Project</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Target</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Raised</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Progress</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Donations</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {projectProgress?.map((project) => (
-                <tr key={project.projectId} className="hover:bg-primary-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{project.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                      project.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
-                      project.status === 'COMPLETED' ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {project.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{formatCurrency(project.targetAmount)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">{formatCurrency(project.fundsRaised)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 bg-gray-200 rounded-full h-2 w-24">
-                        <div className="bg-primary-600 h-2 rounded-full transition-all" style={{ width: `${Math.min(project.percentFunded, 100)}%` }} />
-                      </div>
-                      <span className="text-sm font-semibold text-gray-900 w-12 text-right">{project.percentFunded.toFixed(1)}%</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{project.donationCount}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
 
-      {/* Monthly Donations Chart & Export */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Report Statistics */}
+        <ReportStats {...stats} />
+
+        {/* Projects Report */}
         <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Monthly Donations ({currentYear})</h2>
-              <p className="text-gray-600 mt-1 text-sm">Donation trends by month</p>
+              <h2 className="text-2xl font-bold text-gray-900">Project Progress Report</h2>
+              <p className="text-gray-600 mt-1 text-sm">Track the status and progress of all projects</p>
             </div>
-            <div className="flex gap-2">
-              <button
-                onClick={exportDonationsToExcel}
-                className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-md hover:shadow-lg font-medium"
-                title="Export to Excel"
-              >
-                <FileSpreadsheet className="w-4 h-4" />
-              </button>
-              <button
-                onClick={exportDonationsToPDF}
-                className="p-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition shadow-md hover:shadow-lg font-medium"
-                title="Export to PDF"
-              >
-                <FileText className="w-4 h-4" />
-              </button>
+            <ExportButton
+              onExcelExport={exportProjectsToExcel}
+              onPdfExport={exportProjectsToPDF}
+              title="Projects Report"
+              disabled={!projectProgress || projectProgress.length === 0}
+              recordCount={projectProgress?.length || 0}
+            />
+          </div>
+          
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full">
+              <thead className="bg-primary-50 border-b-2 border-primary-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Project</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Target</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Raised</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Progress</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Donations</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {projectProgress?.map((project) => (
+                  <tr key={project.projectId} className="hover:bg-primary-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{project.title}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                        project.status === 'ACTIVE' ? 'bg-green-100 text-green-800' :
+                        project.status === 'COMPLETED' ? 'bg-primary-100 text-primary-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {project.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-700">{formatCurrency(project.targetAmount)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">{formatCurrency(project.fundsRaised)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 bg-gray-200 rounded-full h-2 w-24">
+                          <div className="bg-primary-600 h-2 rounded-full transition-all" style={{ width: `${Math.min(project.percentFunded, 100)}%` }} />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900 w-12 text-right">{project.percentFunded.toFixed(1)}%</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{project.donationCount}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {(!projectProgress || projectProgress.length === 0) && (
+            <div className="text-center py-8">
+              <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No project data available</p>
             </div>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-4">
-            {!monthlyFunds ? (
-              <div className="flex items-center justify-center h-[300px]">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              </div>
-            ) : monthlyData.length === 0 ? (
-              <div className="flex items-center justify-center h-[300px]">
-                <p className="text-gray-500">No donation data available for {currentYear}</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                  <Legend />
-                  <Bar dataKey="amount" fill="#2563eb" name="Donations (KSh)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">User Roles Distribution</h2>
-            <p className="text-gray-600 text-sm mb-6">Active and inactive users by role</p>
+        {/* Monthly Donations Chart & User Roles */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Monthly Donations ({currentYear})</h2>
+                <p className="text-gray-600 mt-1 text-sm">Donation trends by month</p>
+              </div>
+              <ExportButton
+                onExcelExport={exportDonationsToExcel}
+                onPdfExport={exportDonationsToPDF}
+                title="Donations Report"
+                disabled={!monthlyFunds || monthlyFunds.length === 0}
+                recordCount={monthlyFunds?.length || 0}
+              />
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4">
+              {!monthlyFunds ? (
+                <div className="flex items-center justify-center h-[300px]">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                </div>
+              ) : monthlyData.length === 0 ? (
+                <div className="flex items-center justify-center h-[300px]">
+                  <p className="text-gray-500">No donation data available for {currentYear}</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                    <Legend />
+                    <Bar dataKey="amount" fill="#2563eb" name="Donations (KSh)" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
-          <div className="space-y-4">
-            {!userRoles ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-              </div>
-            ) : userRoles.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-500">No user role data available</p>
-              </div>
-            ) : (
-              userRoles.map((role) => (
-                <div key={role.role} className="border-l-4 border-primary-600 bg-primary-50 rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-primary-900 uppercase tracking-wider">{role.role}</span>
-                    <span className="text-lg font-bold text-primary-600">{role.totalCount}</span>
-                  </div>
-                  <div className="mt-2 flex gap-4 text-xs text-gray-600">
-                    <span className="flex items-center gap-1">✓ <span className="font-semibold text-green-600">{role.activeCount}</span> Active</span>
-                    <span className="flex items-center gap-1">✕ <span className="font-semibold text-red-600">{role.inactiveCount}</span> Inactive</span>
-                  </div>
-                  <div className="mt-3 flex gap-2">
-                    <div className="flex-1">
+
+          <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">User Roles Distribution</h2>
+              <p className="text-gray-600 text-sm mb-6">Active and inactive users by role</p>
+            </div>
+            
+            <div className="space-y-4">
+              {!userRoles ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                </div>
+              ) : userRoles.length === 0 ? (
+                <div className="text-center py-8">
+                  <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No user role data available</p>
+                </div>
+              ) : (
+                userRoles.map((role) => (
+                  <div key={role.role} className="border-l-4 border-primary-600 bg-primary-50 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold text-primary-900 uppercase tracking-wider">{role.role}</span>
+                      <span className="text-lg font-bold text-primary-600">{role.totalCount}</span>
+                    </div>
+                    <div className="mt-2 flex gap-4 text-xs text-gray-600">
+                      <span className="flex items-center gap-1">✓ <span className="font-semibold text-green-600">{role.activeCount}</span> Active</span>
+                      <span className="flex items-center gap-1">✕ <span className="font-semibold text-red-600">{role.inactiveCount}</span> Inactive</span>
+                    </div>
+                    <div className="mt-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium text-gray-600">Active: {((role.activeCount / role.totalCount) * 100).toFixed(0)}%</span>
                       </div>
@@ -476,81 +517,75 @@ export default function ReportsPage() {
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Users Report */}
-      <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Users Report</h2>
-            <p className="text-gray-600 mt-1 text-sm">Complete directory of all users in the system</p>
+        {/* Users Report */}
+        <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow p-6 border border-gray-100">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Users Report</h2>
+              <p className="text-gray-600 mt-1 text-sm">Complete directory of all users in the system</p>
+            </div>
+            <ExportButton
+              onExcelExport={exportUsersToCSV}
+              onPdfExport={exportUsersToPDF}
+              title="Users Report"
+              disabled={!usersReport || !Array.isArray(usersReport) || usersReport.length === 0}
+              recordCount={Array.isArray(usersReport) ? usersReport.length : 0}
+            />
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={exportUsersToCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium shadow-md hover:shadow-lg"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              CSV
-            </button>
-            <button
-              onClick={exportUsersToPDF}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium shadow-md hover:shadow-lg"
-            >
-              <FileText className="w-4 h-4" />
-              PDF
-            </button>
-          </div>
-        </div>
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full">
-            <thead className="bg-primary-50 border-b-2 border-primary-200">
-              <tr>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Name</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Email</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Phone</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Joined</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {usersReport?.map((user) => (
-                <tr key={user.id} className="hover:bg-primary-50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{user.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phone || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
-                      {user.role}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                      user.isActive 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDateSafe(user.createdAt)}</td>
+          
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full">
+              <thead className="bg-primary-50 border-b-2 border-primary-200">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Phone</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-900 uppercase tracking-wider">Joined</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        {(!usersReport || usersReport.length === 0) && (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No user data available</p>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {Array.isArray(usersReport) && usersReport.map((user) => (
+                  <tr key={user.id} className="hover:bg-primary-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">{user.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{user.email}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{user.phone || '-'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-3 py-1 text-xs font-bold rounded-full bg-blue-100 text-blue-800">
+                        {user.role}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-3 py-1 text-xs font-bold rounded-full ${
+                        user.isActive 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDateSafe(user.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        )}
+          
+          {(!usersReport || !Array.isArray(usersReport) || usersReport.length === 0) && (
+            <div className="text-center py-8">
+              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500">No user data available</p>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </PermissionWrapper>
   )
 }

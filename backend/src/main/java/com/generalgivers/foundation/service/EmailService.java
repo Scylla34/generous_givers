@@ -85,16 +85,16 @@ public class EmailService {
     }
 
     @Async
-    public void sendDonationReceipt(String recipientEmail, String donorName, BigDecimal amount,
-                                     String mpesaReceipt, String projectTitle) {
+    public void sendNewsletterWelcome(String recipientEmail) {
         try {
-            String subject = "Thank you for your donation - Generous Givers Family";
-            String htmlContent = buildDonationReceiptHtml(donorName, amount, mpesaReceipt, projectTitle);
+            String subject = "Welcome to Generous Givers Family Newsletter!";
+            String htmlContent = buildNewsletterWelcomeHtml(recipientEmail);
             
             mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            log.info("Donation receipt sent to: {}", recipientEmail);
+            log.info("Newsletter welcome email sent to: {}", recipientEmail);
         } catch (Exception e) {
-            log.error("Failed to send donation receipt: {}", e.getMessage());
+            log.error("Failed to send newsletter welcome email: {}", e.getMessage());
+            throw new RuntimeException("Failed to send newsletter welcome email", e);
         }
     }
 
@@ -499,4 +499,60 @@ public class EmailService {
                 PRIMARY_COLOR
             );
     }
-}
+
+    @Async
+    public void sendDonationReceipt(String recipientEmail, String donorName, BigDecimal amount,
+                                     String mpesaReceipt, String projectTitle) {
+        try {
+            String subject = "Thank you for your donation - Generous Givers Family";
+            String htmlContent = buildDonationReceiptHtml(donorName, amount, mpesaReceipt, projectTitle);
+            
+            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+            log.info("Donation receipt sent to: {}", recipientEmail);
+        } catch (Exception e) {
+            log.error("Failed to send donation receipt: {}", e.getMessage());
+        }
+    }
+
+    private String buildNewsletterWelcomeHtml(String email) {
+        return """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+                <table role="presentation" width="100%%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+                    <tr>
+                        <td align="center">
+                            <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, %s 0%%, %s 100%%); padding: 50px 30px; text-align: center;">
+                                        <div style="width: 80px; height: 80px; background-color: rgba(255,255,255,0.2); border-radius: 50%%; margin: 0 auto 20px;">
+                                            <span style="font-size: 40px; line-height: 80px;">📧</span>
+                                        </div>
+                                        <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 700;">Welcome to Our Newsletter!</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 40px 30px;">
+                                        <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 20px 0;">Thank you for subscribing to the Generous Givers Family newsletter!</p>
+                                        <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 0 0 20px 0;">You'll receive updates about our community work, upcoming events, and ways to get involved in making a difference.</p>
+                                        <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 24px 0 0 0;">Best regards,<br><strong style="color: %s;">The Generous Givers Family Team</strong></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="background-color: #f9fafb; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+                                        <p style="color: %s; margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">Generous Givers Family CBO</p>
+                                        <p style="color: #6b7280; margin: 0 0 4px 0; font-size: 13px;">Empowering Communities, Changing Lives</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+            """.formatted(PRIMARY_COLOR, PRIMARY_DARK, PRIMARY_COLOR, PRIMARY_COLOR);
+    }}

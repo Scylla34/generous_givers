@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - login, docs, password reset, and M-Pesa
+                        // Public endpoints - login, docs, password reset
                         .requestMatchers(
                                 "/auth/login",
                                 "/auth/request-password-reset",
@@ -45,14 +45,15 @@ public class SecurityConfig {
                                 "/profile/picture/**",
                                 "/swagger-ui/**",
                                 "/api-docs/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
                         ).permitAll()
                         // M-Pesa endpoints - public for STK Push and callback
                         .requestMatchers("/mpesa/**").permitAll()
                         // Contact form - public
                         .requestMatchers("/contact/**").permitAll()
                         // Public read access to projects for public pages
-                        .requestMatchers(HttpMethod.GET, "/projects/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/projects", "/projects/active").permitAll()
                         // Public donations (guest donations)
                         .requestMatchers(HttpMethod.POST, "/donations").permitAll()
                         // Change password needs authentication but no role check

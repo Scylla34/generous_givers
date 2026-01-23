@@ -16,6 +16,7 @@ interface AuthState {
   lastActivityAt: number | null
   setAuth: (user: User, accessToken: string, expiresInMs?: number) => void
   clearAuth: () => void
+  logout: () => void
   isAuthenticated: () => boolean
   refreshToken: (accessToken: string, expiresInMs?: number) => void
   updateUser: (user: User) => void
@@ -49,6 +50,20 @@ export const useAuthStore = create<AuthState>()(
           tokenExpiresAt: null,
           lastActivityAt: null,
         })
+      },
+
+      logout: () => {
+        // Clear all auth data and localStorage
+        set({
+          user: null,
+          accessToken: null,
+          tokenExpiresAt: null,
+          lastActivityAt: null,
+        })
+        // Force clear localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('auth-storage')
+        }
       },
 
       refreshToken: (accessToken, expiresInMs = 30 * 60 * 1000) => {

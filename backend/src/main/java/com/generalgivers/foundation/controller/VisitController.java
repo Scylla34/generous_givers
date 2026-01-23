@@ -1,5 +1,6 @@
 package com.generalgivers.foundation.controller;
 
+import com.generalgivers.foundation.dto.common.ApiResponse;
 import com.generalgivers.foundation.dto.visit.VisitRequest;
 import com.generalgivers.foundation.dto.visit.VisitResponse;
 import com.generalgivers.foundation.service.VisitService;
@@ -29,60 +30,69 @@ public class VisitController {
     private final VisitService visitService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
     @Operation(summary = "Get all visits", description = "Retrieve list of all visits")
-    public ResponseEntity<List<VisitResponse>> getAllVisits() {
-        return ResponseEntity.ok(visitService.getAllVisits());
+    public ResponseEntity<ApiResponse<List<VisitResponse>>> getAllVisits() {
+        List<VisitResponse> visits = visitService.getAllVisits();
+        return ResponseEntity.ok(ApiResponse.success("Visits retrieved successfully", visits));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
     @Operation(summary = "Get visit by ID", description = "Retrieve visit details by ID")
-    public ResponseEntity<VisitResponse> getVisitById(@PathVariable UUID id) {
-        return ResponseEntity.ok(visitService.getVisitById(id));
+    public ResponseEntity<ApiResponse<VisitResponse>> getVisitById(@PathVariable UUID id) {
+        VisitResponse visit = visitService.getVisitById(id);
+        return ResponseEntity.ok(ApiResponse.success("Visit retrieved successfully", visit));
     }
 
     @GetMapping("/date-range")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
     @Operation(summary = "Get visits by date range", description = "Retrieve visits within a date range")
-    public ResponseEntity<List<VisitResponse>> getVisitsByDateRange(
+    public ResponseEntity<ApiResponse<List<VisitResponse>>> getVisitsByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-        return ResponseEntity.ok(visitService.getVisitsByDateRange(from, to));
+        List<VisitResponse> visits = visitService.getVisitsByDateRange(from, to);
+        return ResponseEntity.ok(ApiResponse.success("Visits retrieved successfully", visits));
     }
 
     @GetMapping("/children-home/{childrenHomeId}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
     @Operation(summary = "Get visits by children home", description = "Retrieve visits for a specific children home")
-    public ResponseEntity<List<VisitResponse>> getVisitsByChildrenHome(@PathVariable UUID childrenHomeId) {
-        return ResponseEntity.ok(visitService.getVisitsByChildrenHome(childrenHomeId));
+    public ResponseEntity<ApiResponse<List<VisitResponse>>> getVisitsByChildrenHome(@PathVariable UUID childrenHomeId) {
+        List<VisitResponse> visits = visitService.getVisitsByChildrenHome(childrenHomeId);
+        return ResponseEntity.ok(ApiResponse.success("Visits retrieved successfully", visits));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'ORGANIZING_SECRETARY')")
     @Operation(summary = "Create visit", description = "Record a new visit")
-    public ResponseEntity<VisitResponse> createVisit(
+    public ResponseEntity<ApiResponse<VisitResponse>> createVisit(
             @Valid @RequestBody VisitRequest request,
             Authentication authentication) {
         String userEmail = authentication.getName();
         VisitResponse response = visitService.createVisit(request, userEmail);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Visit recorded successfully", response));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'ORGANIZING_SECRETARY')")
     @Operation(summary = "Update visit", description = "Update visit details")
-    public ResponseEntity<VisitResponse> updateVisit(
+    public ResponseEntity<ApiResponse<VisitResponse>> updateVisit(
             @PathVariable UUID id,
-            @Valid @RequestBody VisitRequest request) {
-        return ResponseEntity.ok(visitService.updateVisit(id, request));
+            @Valid @RequestBody VisitRequest request,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        VisitResponse response = visitService.updateVisit(id, request, userEmail);
+        return ResponseEntity.ok(ApiResponse.success("Visit updated successfully", response));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON')")
     @Operation(summary = "Delete visit", description = "Delete a visit record")
-    public ResponseEntity<Void> deleteVisit(@PathVariable UUID id) {
-        visitService.deleteVisit(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ApiResponse<Void>> deleteVisit(@PathVariable UUID id, Authentication authentication) {
+        String userEmail = authentication.getName();
+        visitService.deleteVisit(id, userEmail);
+        return ResponseEntity.ok(ApiResponse.success("Visit deleted successfully", null));
     }
 }

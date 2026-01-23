@@ -3,8 +3,10 @@ package com.generalgivers.foundation.service;
 import com.generalgivers.foundation.dto.childrenhome.ChildrenHomeRequest;
 import com.generalgivers.foundation.dto.childrenhome.ChildrenHomeResponse;
 import com.generalgivers.foundation.entity.ChildrenHome;
+import com.generalgivers.foundation.entity.User;
 import com.generalgivers.foundation.exception.ResourceNotFoundException;
 import com.generalgivers.foundation.repository.ChildrenHomeRepository;
+import com.generalgivers.foundation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 public class ChildrenHomeService {
 
     private final ChildrenHomeRepository childrenHomeRepository;
+    private final UserRepository userRepository;
+    private final ChildrenHomeNotificationService childrenHomeNotificationService;
 
     public List<ChildrenHomeResponse> getAllChildrenHomes() {
         return childrenHomeRepository.findAll().stream()
@@ -32,7 +36,10 @@ public class ChildrenHomeService {
     }
 
     @Transactional
-    public ChildrenHomeResponse createChildrenHome(ChildrenHomeRequest request) {
+    public ChildrenHomeResponse createChildrenHome(ChildrenHomeRequest request, String userEmail) {
+        User creator = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+
         ChildrenHome childrenHome = ChildrenHome.builder()
                 .name(request.getName())
                 .location(request.getLocation())
@@ -41,13 +48,20 @@ public class ChildrenHomeService {
                 .build();
 
         childrenHome = childrenHomeRepository.save(childrenHome);
+        
+        // Send notifications
+        childrenHomeNotificationService.notifyChildrenHomeCreated(childrenHome.getName(), creator.getName());
+        
         return mapToChildrenHomeResponse(childrenHome);
     }
 
     @Transactional
-    public ChildrenHomeResponse updateChildrenHome(UUID id, ChildrenHomeRequest request) {
+    public ChildrenHomeResponse updateChildrenHome(UUID id, ChildrenHomeRequest request, String userEmail) {
         ChildrenHome childrenHome = childrenHomeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("ChildrenHome", "id", id));
+
+        User updater = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
 
         if (request.getName() != null) {
             childrenHome.setName(request.getName());
@@ -63,15 +77,27 @@ public class ChildrenHomeService {
         }
 
         childrenHome = childrenHomeRepository.save(childrenHome);
+        
+        // Send notifications
+        childrenHomeNotificationService.notifyChildrenHomeUpdated(childrenHome.getName(), updater.getName());
+        
         return mapToChildrenHomeResponse(childrenHome);
     }
 
     @Transactional
-    public void deleteChildrenHome(UUID id) {
-        if (!childrenHomeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("ChildrenHome", "id", id);
-        }
+    public void deleteChildrenHome(UUID id, String userEmail) {
+        ChildrenHome childrenHome = childrenHomeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ChildrenHome", "id", id));
+        
+        User deleter = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+        
+        String homeName = childrenHome.getName();
+        
         childrenHomeRepository.deleteById(id);
+        
+        // Send deletion notification
+        childrenHomeNotificationService.notifyChildrenHomeDeleted(homeName, deleter.getName());
     }
 
     private ChildrenHomeResponse mapToChildrenHomeResponse(ChildrenHome childrenHome) {

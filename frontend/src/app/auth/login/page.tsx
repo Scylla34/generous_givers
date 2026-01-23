@@ -44,6 +44,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
   const [error, setError] = useState('')
   const [mounted, setMounted] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
@@ -71,6 +72,7 @@ export default function LoginPage() {
       setAuth(response.user, response.accessToken)
 
       toast.success('Welcome back! Login successful.')
+      setRedirecting(true)
 
       if (response.user.mustChangePassword) {
         router.push('/auth/change-password')
@@ -81,6 +83,7 @@ export default function LoginPage() {
       const errorMessage = handleApiError(err)
       setError(errorMessage)
       toast.error(errorMessage)
+      setRedirecting(false)
     } finally {
       setLoading(false)
     }
@@ -206,7 +209,7 @@ export default function LoginPage() {
                         onBlur={() => setFocusedField(null)}
                         className="pl-10 bg-white/90 border-gray-200 focus:border-primary-400 transition-all duration-200"
                         placeholder="you@example.com"
-                        disabled={loading}
+                        disabled={loading || redirecting}
                       />
                     </div>
                   </div>
@@ -243,7 +246,7 @@ export default function LoginPage() {
                         onBlur={() => setFocusedField(null)}
                         className="pl-10 pr-10 bg-white/90 border-gray-200 focus:border-primary-400 transition-all duration-200"
                         placeholder="Enter your password"
-                        disabled={loading}
+                        disabled={loading || redirecting}
                       />
                       <button
                         type="button"
@@ -259,7 +262,7 @@ export default function LoginPage() {
                 {/* Submit Button */}
                 <Button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || redirecting}
                   className="w-full h-11 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:shadow-primary-500/25"
                   size="lg"
                 >
@@ -267,6 +270,11 @@ export default function LoginPage() {
                     <span className="flex items-center gap-2">
                       <Spinner className="w-4 h-4" />
                       Signing in...
+                    </span>
+                  ) : redirecting ? (
+                    <span className="flex items-center gap-2">
+                      <Spinner className="w-4 h-4" />
+                      Redirecting...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
