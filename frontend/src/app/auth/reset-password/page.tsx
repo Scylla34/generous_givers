@@ -34,7 +34,7 @@ export default function ResetPasswordPage() {
       
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message
-      } else if (erroror.response?.status === 404) {
+      } else if (error.response?.status === 404) {
         errorMessage = 'No account found with this email address'
       } else if (error.response?.status === 403) {
         errorMessage = 'Access denied. Please try again later'
