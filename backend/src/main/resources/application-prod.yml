@@ -34,24 +34,6 @@ spring:
   flyway:
     enabled: false
 
-  mail:
-    host: smtp.gmail.com
-    port: 465
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          ssl:
-            enable: true
-          socketFactory:
-            port: 465
-            class: javax.net.ssl.SSLSocketFactory
-          connectiontimeout: 30000
-          timeout: 30000
-          writetimeout: 30000
-
 server:
   port: ${PORT:8080}
   servlet:
@@ -68,6 +50,10 @@ app:
   email:
     contact-recipient: ${CONTACT_EMAIL:info@generousgivers.org}
     from-name: ${FROM_NAME:Generous Givers Family}
+    
+  mailersend:
+    api-key: ${MAILERSEND_API_KEY}
+    from-email: ${MAILERSEND_FROM_EMAIL:noreply@yourdomain.com}
 
 logging:
   level:

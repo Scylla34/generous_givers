@@ -22,6 +22,7 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
     private final EmailConfig emailConfig;
+    private final MailerSendService mailerSendService;
 
     private static final String PRIMARY_COLOR = "#16a34a";
     private static final String PRIMARY_DARK = "#15803d";
@@ -87,22 +88,18 @@ public class EmailService {
         }
     }
 
+    @Async
     public void sendUserCredentials(String recipientEmail, String firstName, String lastName, String temporaryPassword) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(recipientEmail);
-            helper.setSubject("Welcome to Generous Givers Family - Your Account Details");
-
+            log.info("Sending email via MailerSend to: {}", recipientEmail);
+            
+            String subject = "Welcome to Generous Givers Family - Your Account Details";
             String htmlContent = buildUserCredentialsEmailHtml(firstName, lastName, recipientEmail, temporaryPassword);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
-            log.info("User credentials email sent to: {}", recipientEmail);
-        } catch (MessagingException e) {
-            log.error("Failed to send user credentials email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send user credentials email", e);
+            
+            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+            log.info("User credentials email sent successfully to: {}", recipientEmail);
+        } catch (Exception e) {
+            log.error("Failed to send user credentials email to {}: {}", recipientEmail, e.getMessage(), e);
         }
     }
 

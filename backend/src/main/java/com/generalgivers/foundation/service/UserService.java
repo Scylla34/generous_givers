@@ -71,7 +71,8 @@ public class UserService {
 
         user = userRepository.save(user);
         
-        // Send credentials via email - if this fails, rollback user creation
+        // Send credentials via email
+        boolean emailSent = false;
         try {
             emailService.sendUserCredentials(
                 user.getEmail(), 
@@ -79,16 +80,19 @@ public class UserService {
                 user.getLastName(), 
                 temporaryPassword
             );
+            emailSent = true;
             log.info("User credentials sent to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send user credentials email: {}", e.getMessage());
-            throw new RuntimeException("User creation failed: Unable to send credentials email. Please check email configuration.", e);
         }
         
-        // Create notification for admin users
+        // Create notification for admin users only
         try {
-            String notificationMessage = String.format("New user %s %s has been created and notified via email.", 
-                user.getFirstName(), user.getLastName());
+            String notificationMessage = emailSent 
+                ? String.format("New user %s %s has been created and notified via email.", 
+                    user.getFirstName(), user.getLastName())
+                : String.format("New user %s %s has been created. Warning: Email notification failed.", 
+                    user.getFirstName(), user.getLastName());
             
             // Send notification to all admin users (SUPER_USER, CHAIRPERSON, SECRETARY_GENERAL)
             List<User> adminUsers = userRepository.findByRoleIn(
@@ -109,7 +113,7 @@ public class UserService {
         
         UserResponse response = mapToUserResponse(user);
         response.setTemporaryPassword(temporaryPassword); // Include in response for admin reference
-        response.setEmailSent(true); // Email was sent successfully
+        response.setEmailSent(emailSent); // Include email status
         
         return response;
     }
