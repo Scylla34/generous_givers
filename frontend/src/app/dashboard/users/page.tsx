@@ -14,7 +14,7 @@ export default function UsersPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [error, setError] = useState('')
+  const [formError, setFormError] = useState('')
   const [formData, setFormData] = useState<CreateUserRequest>({
     firstName: '',
     lastName: '',
@@ -24,7 +24,7 @@ export default function UsersPage() {
     memberJoiningDate: '',
   })
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, error } = useQuery({
     queryKey: ['users'],
     queryFn: userService.getAll,
   })
@@ -66,9 +66,9 @@ export default function UsersPage() {
       )
     },
     onError: (err: unknown) => {
-      const error = err as { response?: { data?: { message?: string } } }
-      const errorMessage = error?.response?.data?.message || 'Failed to create user'
-      setError(errorMessage)
+      const errorResponse = err as { response?: { data?: { message?: string } } }
+      const errorMessage = errorResponse?.response?.data?.message || 'Failed to create user'
+      setFormError(errorMessage)
       toast.error(errorMessage)
     },
   })
@@ -83,9 +83,9 @@ export default function UsersPage() {
       toast.success('User updated successfully!')
     },
     onError: (err: unknown) => {
-      const error = err as { response?: { data?: { message?: string } } }
-      const errorMessage = error?.response?.data?.message || 'Failed to update user'
-      setError(errorMessage)
+      const errorResponse = err as { response?: { data?: { message?: string } } }
+      const errorMessage = errorResponse?.response?.data?.message || 'Failed to update user'
+      setFormError(errorMessage)
       toast.error(errorMessage)
     },
   })
@@ -111,12 +111,12 @@ export default function UsersPage() {
       memberJoiningDate: '',
     })
     setEditingUser(null)
-    setError('')
+    setFormError('')
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
+    setFormError('')
     
     if (editingUser) {
       updateMutation.mutate({
@@ -197,29 +197,32 @@ export default function UsersPage() {
     },
     {
       header: 'Actions',
-      accessor: (user: User) => (
-        <div className="flex gap-2">
-          <PermissionButton
-            resource="users"
-            action="update"
-            onClick={() => handleEdit(user)}
-            className="text-primary-600 hover:text-primary-900 transition-colors"
-            title="Edit user"
-          >
-            <Edit className="w-4 h-4" />
-          </PermissionButton>
-          <PermissionButton
-            resource="users"
-            action="delete"
-            onClick={() => handleDelete(user.id)}
-            disabled={!user.isActive}
-            className="text-red-600 hover:text-red-900 transition-colors disabled:opacity-50"
-            title="Deactivate user"
-          >
-            <Trash2 className="w-4 h-4" />
-          </PermissionButton>
-        </div>
-      ),
+      accessor: (user: User) => {
+        console.log('Rendering actions for user:', user.name); // Debug log
+        return (
+          <div className="flex gap-2">
+            <PermissionButton
+              resource="users"
+              action="update"
+              onClick={() => handleEdit(user)}
+              className="text-primary-600 hover:text-primary-900 transition-colors"
+              title="Edit user"
+            >
+              <Edit className="w-4 h-4" />
+            </PermissionButton>
+            <PermissionButton
+              resource="users"
+              action="delete"
+              onClick={() => handleDelete(user.id)}
+              disabled={!user.isActive}
+              className="text-red-600 hover:text-red-900 transition-colors disabled:opacity-50"
+              title="Deactivate user"
+            >
+              <Trash2 className="w-4 h-4" />
+            </PermissionButton>
+          </div>
+        );
+      },
     },
   ]
 
@@ -227,6 +230,14 @@ export default function UsersPage() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-gray-500">Loading users...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500">Failed to load users. Please try again.</div>
       </div>
     )
   }
@@ -278,9 +289,9 @@ export default function UsersPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
+              {formError && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-                  {error}
+                  {formError}
                 </div>
               )}
               

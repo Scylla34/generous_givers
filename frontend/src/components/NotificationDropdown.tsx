@@ -61,11 +61,18 @@ export default function NotificationDropdown() {
   });
 
   const markAllAsReadMutation = useMutation({
-    mutationFn: () => notificationService.markAllAsRead(),
+    mutationFn: () => {
+      console.log('Calling markAllAsRead API...');
+      return notificationService.markAllAsRead();
+    },
     onSuccess: () => {
+      console.log('markAllAsRead successful, invalidating queries...');
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
       queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
       queryClient.invalidateQueries({ queryKey: ['notifications', 'unread'] });
+    },
+    onError: (error) => {
+      console.error('markAllAsRead failed:', error);
     },
   });
 
@@ -92,12 +99,15 @@ export default function NotificationDropdown() {
           <h3 className="font-semibold text-gray-900">Notifications</h3>
           {unreadCount > 0 && (
             <button
-              onClick={() => markAllAsReadMutation.mutate()}
+              onClick={() => {
+                console.log('Mark all read button clicked');
+                markAllAsReadMutation.mutate();
+              }}
               disabled={markAllAsReadMutation.isPending}
-              className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
+              className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 disabled:opacity-50"
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              Mark all read
+              {markAllAsReadMutation.isPending ? 'Marking...' : 'Mark all read'}
             </button>
           )}
         </div>

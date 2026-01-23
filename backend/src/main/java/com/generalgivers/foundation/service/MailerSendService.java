@@ -18,7 +18,7 @@ public class MailerSendService {
     private final MailerSendConfig mailerSendConfig;
     private final WebClient webClient = WebClient.builder().build();
 
-    public void sendEmail(String to, String subject, String htmlContent) {
+    public boolean sendEmail(String to, String subject, String htmlContent) {
         try {
             // Debug logging
             log.info("Attempting to send email via MailerSend");
@@ -53,10 +53,11 @@ public class MailerSendService {
                     .block();
 
             log.info("Email sent successfully via MailerSend to: {}", to);
+            return true;
         } catch (Exception e) {
             log.error("Failed to send email via MailerSend to {}: {}", to, e.getMessage());
             log.error("Full error: ", e);
-            throw new RuntimeException("Failed to send email", e);
+            return false;
         }
     }
 

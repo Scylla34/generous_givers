@@ -34,8 +34,14 @@ public class EmailService {
             String subject = "[Contact Form] " + request.getSubject();
             String htmlContent = buildContactEmailHtml(request);
             
-            mailerSendService.sendEmail(emailConfig.getContactRecipient(), subject, htmlContent);
-            log.info("Contact email sent successfully from: {}", request.getEmail());
+            boolean emailSent = mailerSendService.sendEmail(emailConfig.getContactRecipient(), subject, htmlContent);
+            
+            if (emailSent) {
+                log.info("Contact email sent successfully from: {}", request.getEmail());
+            } else {
+                log.error("Failed to send contact email from: {}", request.getEmail());
+                throw new RuntimeException("Contact email delivery failed");
+            }
         } catch (Exception e) {
             log.error("Failed to send contact email: {}", e.getMessage());
             throw new RuntimeException("Failed to send email", e);
@@ -48,8 +54,13 @@ public class EmailService {
             String subject = "Thank you for contacting Generous Givers Family";
             String htmlContent = buildConfirmationEmailHtml(request);
             
-            mailerSendService.sendEmail(request.getEmail(), subject, htmlContent);
-            log.info("Confirmation email sent to: {}", request.getEmail());
+            boolean emailSent = mailerSendService.sendEmail(request.getEmail(), subject, htmlContent);
+            
+            if (emailSent) {
+                log.info("Confirmation email sent to: {}", request.getEmail());
+            } else {
+                log.error("Failed to send confirmation email to: {}", request.getEmail());
+            }
         } catch (Exception e) {
             log.error("Failed to send confirmation email: {}", e.getMessage());
         }
@@ -61,8 +72,14 @@ public class EmailService {
             String subject = "Password Reset - Generous Givers Family";
             String htmlContent = buildPasswordResetEmailHtml(firstName, lastName, resetToken);
             
-            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            log.info("Password reset email sent to: {}", recipientEmail);
+            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+            
+            if (emailSent) {
+                log.info("Password reset email sent to: {}", recipientEmail);
+            } else {
+                log.error("Failed to send password reset email to: {}", recipientEmail);
+                throw new RuntimeException("Password reset email delivery failed");
+            }
         } catch (Exception e) {
             log.error("Failed to send password reset email: {}", e.getMessage());
             throw new RuntimeException("Failed to send reset email", e);
@@ -77,10 +94,17 @@ public class EmailService {
             String subject = "Welcome to Generous Givers Family - Your Account Details";
             String htmlContent = buildUserCredentialsEmailHtml(firstName, lastName, recipientEmail, temporaryPassword);
             
-            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            log.info("User credentials email sent successfully to: {}", recipientEmail);
+            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+            
+            if (emailSent) {
+                log.info("User credentials email sent successfully to: {}", recipientEmail);
+            } else {
+                log.error("Failed to send user credentials email to: {}", recipientEmail);
+                throw new RuntimeException("Email delivery failed");
+            }
         } catch (Exception e) {
             log.error("Failed to send user credentials email to {}: {}", recipientEmail, e.getMessage(), e);
+            throw new RuntimeException("Failed to send user credentials email", e);
         }
     }
 
@@ -90,8 +114,14 @@ public class EmailService {
             String subject = "Welcome to Generous Givers Family Newsletter!";
             String htmlContent = buildNewsletterWelcomeHtml(recipientEmail);
             
-            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            log.info("Newsletter welcome email sent to: {}", recipientEmail);
+            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+            
+            if (emailSent) {
+                log.info("Newsletter welcome email sent to: {}", recipientEmail);
+            } else {
+                log.error("Failed to send newsletter welcome email to: {}", recipientEmail);
+                throw new RuntimeException("Newsletter welcome email delivery failed");
+            }
         } catch (Exception e) {
             log.error("Failed to send newsletter welcome email: {}", e.getMessage());
             throw new RuntimeException("Failed to send newsletter welcome email", e);
@@ -507,8 +537,13 @@ public class EmailService {
             String subject = "Thank you for your donation - Generous Givers Family";
             String htmlContent = buildDonationReceiptHtml(donorName, amount, mpesaReceipt, projectTitle);
             
-            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            log.info("Donation receipt sent to: {}", recipientEmail);
+            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+            
+            if (emailSent) {
+                log.info("Donation receipt sent to: {}", recipientEmail);
+            } else {
+                log.error("Failed to send donation receipt to: {}", recipientEmail);
+            }
         } catch (Exception e) {
             log.error("Failed to send donation receipt: {}", e.getMessage());
         }

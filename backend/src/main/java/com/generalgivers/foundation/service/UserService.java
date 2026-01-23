@@ -31,9 +31,12 @@ public class UserService {
     private final NotificationService notificationService;
 
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
+        log.info("Fetching all users...");
+        List<UserResponse> users = userRepository.findAll().stream()
                 .map(this::mapToUserResponse)
                 .collect(Collectors.toList());
+        log.info("Found {} users", users.size());
+        return users;
     }
 
     public UserResponse getUserById(UUID id) {
@@ -72,6 +75,7 @@ public class UserService {
         user = userRepository.save(user);
         
         // Send credentials via email - REQUIRED for user creation
+        boolean emailSent = false;
         try {
             emailService.sendUserCredentials(
                 user.getEmail(), 
@@ -79,6 +83,7 @@ public class UserService {
                 user.getLastName(), 
                 temporaryPassword
             );
+            emailSent = true;
             log.info("User credentials sent to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send user credentials email: {}", e.getMessage());
@@ -111,6 +116,7 @@ public class UserService {
         
         UserResponse response = mapToUserResponse(user);
         response.setTemporaryPassword(temporaryPassword);
+        response.setEmailSent(emailSent);
         
         return response;
     }
