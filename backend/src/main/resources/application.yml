@@ -85,7 +85,7 @@ app:
     secret: ${JWT_SECRET:your_secure_random_secret_key_minimum_256_bits_for_HS256_algorithm}
     expiration: 900000  # 15 minutes in milliseconds
   cors:
-    allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+    allowed-origins: ${FRONTEND_URL:http://localhost:3000,https://generousgiversfamily.netlify.app,https://generous-givers.vercel.app}
   email:
     contact-recipient: ${CONTACT_RECIPIENT:teddscylla@gmail.com}
     from-name: Generous Givers Family
@@ -97,3 +97,7 @@ app:
       passkey: ${DAR_PASSKEY:}
       callback-url: ${DAR_CALLBACK_URL:https://yourdomain.com/api/mpesa/callback}
       base-url: ${DAR_BASE_URL:https://sandbox.safaricom.co.ke}
+
+  mailersend:
+    api-key: ${MAILERSEND_API_KEY:mlsn.370f25b51906b17d4c5f3308fd3b3efdc65586a5dec63a499474cf9c1b26e172}
+    from-email: ${MAILERSEND_FROM_EMAIL:MS_OG3r3S@test-65qngkdkxd8lwr12.mlsender.net}

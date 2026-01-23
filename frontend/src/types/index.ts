@@ -11,7 +11,7 @@ export type UserRole =
   | 'ORGANIZING_SECRETARY' // Organizing Secretary - coordinates events
   | 'COMMITTEE_MEMBER'     // Committee Members - general support
 
-export type ProjectStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED'
+export type ProjectStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED'
 
 export type DonationStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
@@ -205,4 +205,11 @@ export interface UserReport {
   role: UserRole
   isActive: boolean
   createdAt: string
+}
+
+export interface ApiResponse<T> {
+  success: boolean
+  message: string
+  data: T
+  timestamp: string
 }

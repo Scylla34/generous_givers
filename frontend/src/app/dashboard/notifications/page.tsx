@@ -1,192 +1,174 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { notificationService } from '@/services/notificationService'
-import { Bell, Check, CheckCheck, Calendar } from 'lucide-react'
-import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Bell, CheckCheck, DollarSign, FolderOpen, MapPin, AlertCircle, Filter } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+import { notificationService, Notification } from '@/services/notificationService';
+
+const getNotificationIcon = (type: Notification['type']) => {
+  switch (type) {
+    case 'DONATION_RECEIVED':
+    case 'DONATION_COMPLETED':
+    case 'DONATION_FAILED':
+      return DollarSign;
+    case 'PROJECT_CREATED':
+    case 'PROJECT_UPDATED':
+    case 'PROJECT_COMPLETED':
+      return FolderOpen;
+    case 'VISIT_SCHEDULED':
+    case 'VISIT_COMPLETED':
+      return MapPin;
+    default:
+      return AlertCircle;
+  }
+};
 
 export default function NotificationsPage() {
-  const queryClient = useQueryClient()
-  const [page, setPage] = useState(0)
-  const [filter, setFilter] = useState<'all' | 'unread'>('all')
+  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [page, setPage] = useState(0);
+  const queryClient = useQueryClient();
 
-  const { data: notifications, isLoading } = useQuery({
-    queryKey: ['notifications', page],
+  const { data: notificationsData, isLoading } = useQuery({
+    queryKey: ['notifications', 'paginated', page, filter],
     queryFn: () => notificationService.getNotifications(page, 20),
-  })
+  });
 
   const markAsReadMutation = useMutation({
-    mutationFn: notificationService.markAsRead,
+    mutationFn: (id: string) => notificationService.markAsRead(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] })
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread'] })
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-  })
+  });
 
   const markAllAsReadMutation = useMutation({
-    mutationFn: notificationService.markAllAsRead,
+    mutationFn: () => notificationService.markAllAsRead(),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notifications'] })
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] })
-      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread'] })
-      toast.success('All notifications marked as read')
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
-  })
+  });
 
-  const handleMarkAsRead = (id: string) => {
-    markAsReadMutation.mutate(id)
-  }
-
-  const handleMarkAllAsRead = () => {
-    markAllAsReadMutation.mutate()
-  }
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'USER_REGISTERED':
-        return '👤'
-      case 'DONATION_RECEIVED':
-        return '💰'
-      case 'PROJECT_CREATED':
-        return '📋'
-      case 'VISIT_SCHEDULED':
-        return '📅'
-      default:
-        return '🔔'
-    }
-  }
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const filteredNotifications = notifications?.notifications?.filter(notification => 
-    filter === 'all' || (filter === 'unread' && !notification.isRead)
-  ) || []
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading notifications...</div>
-      </div>
-    )
-  }
+  const filteredNotifications = notificationsData?.notifications.filter(n => 
+    filter === 'all' || !n.isRead
+  ) || [];
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-          <p className="text-gray-600 mt-1">Stay updated with system activities</p>
+          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
+          <p className="text-gray-600">Stay updated with your organization&apos;s activities</p>
         </div>
-        <div className="flex gap-3">
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as 'all' | 'unread')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
-          >
-            <option value="all">All Notifications</option>
-            <option value="unread">Unread Only</option>
-          </select>
-          <button
-            onClick={handleMarkAllAsRead}
+        <div className="flex items-center gap-3">
+          <Select value={filter} onValueChange={(value: 'all' | 'unread') => setFilter(value)}>
+            <SelectTrigger className="w-32">
+              <Filter className="w-4 h-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="unread">Unread</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => markAllAsReadMutation.mutate()}
             disabled={markAllAsReadMutation.isPending}
-            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2"
+            variant="outline"
+            size="sm"
           >
-            <CheckCheck className="w-4 h-4" />
-            Mark All Read
-          </button>
+            <CheckCheck className="w-4 h-4 mr-2" />
+            Mark all read
+          </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border">
-        {filteredNotifications.length === 0 ? (
-          <div className="text-center py-12">
-            <Bell className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+      <div className="bg-white rounded-lg border border-gray-200">
+        {isLoading ? (
+          <div className="p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+            <p className="text-gray-500 mt-2">Loading notifications...</p>
+          </div>
+        ) : filteredNotifications.length === 0 ? (
+          <div className="p-12 text-center">
+            <Bell className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No notifications</h3>
-            <p className="text-gray-500">You&apos;re all caught up!</p>
+            <p className="text-gray-500">
+              {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
+            </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
-            {filteredNotifications.map((notification) => (
-              <div
-                key={notification.id}
-                className={cn(
-                  "p-4 hover:bg-gray-50 transition-colors",
-                  !notification.isRead && "bg-blue-50"
-                )}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="text-2xl">
-                    {getNotificationIcon(notification.type)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className={cn(
-                          "text-sm font-medium",
-                          !notification.isRead ? "text-gray-900" : "text-gray-700"
-                        )}>
-                          {notification.title}
-                        </h4>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {notification.message}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(notification.createdAt)}
+          <div className="divide-y divide-gray-100">
+            {filteredNotifications.map((notification) => {
+              const Icon = getNotificationIcon(notification.type);
+
+              return (
+                <div
+                  key={notification.id}
+                  className={cn(
+                    'p-6 hover:bg-gray-50 transition-colors cursor-pointer',
+                    !notification.isRead && 'bg-blue-50/30 border-l-4 border-l-primary-500'
+                  )}
+                  onClick={() => !notification.isRead && markAsReadMutation.mutate(notification.id)}
+                >
+                  <div className="flex gap-4">
+                    <div className="p-3 rounded-full bg-primary-50 text-primary-600 flex-shrink-0">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-gray-900 mb-1">
+                            {notification.title}
+                          </h3>
+                          <p className="text-gray-600 mb-2">
+                            {notification.message}
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm text-gray-500">
+                              {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                            </span>
+                            <Badge variant={notification.isRead ? 'secondary' : 'default'}>
+                              {notification.isRead ? 'Read' : 'Unread'}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
-                      {!notification.isRead && (
-                        <button
-                          onClick={() => handleMarkAsRead(notification.id)}
-                          className="text-primary-600 hover:text-primary-700 p-1"
-                          title="Mark as read"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
 
-        {notifications && notifications.totalPages > 1 && (
-          <div className="px-4 py-3 border-t border-gray-200 flex justify-between items-center">
-            <div className="text-sm text-gray-700">
-              Page {page + 1} of {notifications.totalPages}
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage(Math.max(0, page - 1))}
-                disabled={page === 0}
-                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage(Math.min(notifications.totalPages - 1, page + 1))}
-                disabled={page >= notifications.totalPages - 1}
-                className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
+        {notificationsData && notificationsData.totalPages > 1 && (
+          <div className="p-4 border-t border-gray-100 flex justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+            >
+              Previous
+            </Button>
+            <span className="px-3 py-1 text-sm text-gray-600">
+              Page {page + 1} of {notificationsData.totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage(p => p + 1)}
+              disabled={page >= notificationsData.totalPages - 1}
+            >
+              Next
+            </Button>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

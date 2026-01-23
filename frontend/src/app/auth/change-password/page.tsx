@@ -125,10 +125,13 @@ export default function ChangePasswordPage() {
         newPassword,
       })
 
-      toast.success('Password changed successfully! Redirecting to dashboard...')
+      // Clear auth state after successful password change
+      useAuthStore.getState().logout()
+      
+      toast.success('Password changed successfully! Please login with your new password.')
       setTimeout(() => {
-        router.push('/dashboard')
-      }, 1500)
+        router.push('/auth/login')
+      }, 2000)
     } catch (err) {
       const errorMessage = handleApiError(err)
       setError(errorMessage)

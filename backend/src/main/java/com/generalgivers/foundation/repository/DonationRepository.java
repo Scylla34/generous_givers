@@ -32,7 +32,10 @@ public interface DonationRepository extends JpaRepository<Donation, UUID> {
     List<Donation> findByDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT SUM(d.amount) FROM Donation d WHERE d.status = 'COMPLETED'")
-    BigDecimal getTotalDonationsAmount();
+    BigDecimal getTotalDonationAmount();
+
+    @Query("SELECT SUM(d.amount) FROM Donation d WHERE d.date BETWEEN :startDate AND :endDate AND d.status = 'COMPLETED'")
+    BigDecimal getTotalDonationAmountBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
     @Query("SELECT SUM(d.amount) FROM Donation d WHERE d.project.id = :projectId AND d.status = 'COMPLETED'")
     BigDecimal getTotalDonationsByProject(@Param("projectId") UUID projectId);

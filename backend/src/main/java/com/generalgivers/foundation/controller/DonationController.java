@@ -1,5 +1,6 @@
 package com.generalgivers.foundation.controller;
 
+import com.generalgivers.foundation.dto.common.ApiResponse;
 import com.generalgivers.foundation.dto.donation.DonationRequest;
 import com.generalgivers.foundation.dto.donation.DonationResponse;
 import com.generalgivers.foundation.service.DonationService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -27,55 +29,48 @@ public class DonationController {
     private final DonationService donationService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'TREASURER')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Get all donations", description = "Retrieve list of all donations (Admin only)")
-    public ResponseEntity<List<DonationResponse>> getAllDonations() {
-        return ResponseEntity.ok(donationService.getAllDonations());
+    @Operation(summary = "Get all donations", description = "Retrieve list of all donations")
+    public ResponseEntity<ApiResponse<List<DonationResponse>>> getAllDonations() {
+        List<DonationResponse> donations = donationService.getAllDonations();
+        return ResponseEntity.ok(ApiResponse.success("Donations retrieved successfully", donations));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'TREASURER')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Get donation by ID", description = "Retrieve donation details by ID")
-    public ResponseEntity<DonationResponse> getDonationById(@PathVariable UUID id) {
-        return ResponseEntity.ok(donationService.getDonationById(id));
-    }
-
-    @GetMapping("/user/{userId}")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Get user donations", description = "Retrieve donations by user")
-    public ResponseEntity<List<DonationResponse>> getDonationsByUser(@PathVariable UUID userId) {
-        return ResponseEntity.ok(donationService.getDonationsByUser(userId));
+    public ResponseEntity<ApiResponse<DonationResponse>> getDonationById(@PathVariable UUID id) {
+        DonationResponse donation = donationService.getDonationById(id);
+        return ResponseEntity.ok(ApiResponse.success("Donation retrieved successfully", donation));
     }
 
     @GetMapping("/project/{projectId}")
-    @Operation(summary = "Get project donations", description = "Retrieve donations for a specific project")
-    public ResponseEntity<List<DonationResponse>> getDonationsByProject(@PathVariable UUID projectId) {
-        return ResponseEntity.ok(donationService.getDonationsByProject(projectId));
-    }
-
-    @PostMapping
-    @Operation(summary = "Create donation", description = "Create a new donation (Public/Guest allowed)")
-    public ResponseEntity<DonationResponse> createDonation(
-            @Valid @RequestBody DonationRequest request,
-            Authentication authentication) {
-        String userEmail = authentication != null ? authentication.getName() : null;
-        DonationResponse response = donationService.createDonation(request, userEmail);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'TREASURER', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "Get donations by project", description = "Retrieve donations for a specific project")
+    public ResponseEntity<ApiResponse<List<DonationResponse>>> getDonationsByProject(@PathVariable UUID projectId) {
+        List<DonationResponse> donations = donationService.getDonationsByProject(projectId);
+        return ResponseEntity.ok(ApiResponse.success("Project donations retrieved successfully", donations));
     }
 
     @GetMapping("/total")
-    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'TREASURER')")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'TREASURER')")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "Get total donations", description = "Get total amount of all donations")
-    public ResponseEntity<BigDecimal> getTotalDonations() {
-        return ResponseEntity.ok(donationService.getTotalDonations());
+    @Operation(summary = "Get total donations", description = "Get total donation amount")
+    public ResponseEntity<ApiResponse<Map<String, BigDecimal>>> getTotalDonations() {
+        BigDecimal total = donationService.getTotalDonations();
+        Map<String, BigDecimal> result = Map.of("total", total);
+        return ResponseEntity.ok(ApiResponse.success("Total donations retrieved successfully", result));
     }
 
-    @GetMapping("/total/project/{projectId}")
-    @Operation(summary = "Get total donations by project", description = "Get total donations for a specific project")
-    public ResponseEntity<BigDecimal> getTotalDonationsByProject(@PathVariable UUID projectId) {
-        return ResponseEntity.ok(donationService.getTotalDonationsByProject(projectId));
+    @PostMapping
+    @Operation(summary = "Create donation", description = "Record a new donation")
+    public ResponseEntity<ApiResponse<DonationResponse>> createDonation(
+            @Valid @RequestBody DonationRequest request) {
+        DonationResponse response = donationService.createDonation(request, null);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Thank you for your donation! Your contribution makes a difference.", response));
     }
 }

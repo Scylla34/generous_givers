@@ -2,7 +2,9 @@ import { api } from './api'
 
 export interface DashboardStats {
   totalProjects: number
-  totalDonations: string
+  activeProjects: number
+  completedProjects: number
+  totalDonations: number
   activeUsers: number
   monthlyGrowth: string
   projectsChange: string
@@ -12,11 +14,17 @@ export interface DashboardStats {
 
 export interface RecentActivity {
   id: string
-  type: 'donation' | 'project' | 'visit'
+  type: string
   title: string
   description: string
   timestamp: string
   color: string
+}
+
+export interface MonthlyChartData {
+  month: string
+  amount?: number
+  projects?: number
 }
 
 export const dashboardService = {
@@ -27,6 +35,16 @@ export const dashboardService = {
 
   getRecentActivities: async (): Promise<RecentActivity[]> => {
     const response = await api.get('/dashboard/activities')
+    return response.data
+  },
+
+  getMonthlyDonations: async (): Promise<MonthlyChartData[]> => {
+    const response = await api.get('/dashboard/donations-chart')
+    return response.data
+  },
+
+  getMonthlyProjects: async (): Promise<MonthlyChartData[]> => {
+    const response = await api.get('/dashboard/projects-chart')
     return response.data
   },
 }

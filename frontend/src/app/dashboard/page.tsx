@@ -15,8 +15,9 @@ import {
   ArrowDownRight,
   Calendar,
   HandHeart,
+  CheckCircle,
 } from 'lucide-react'
-import { dashboardService } from '@/services/dashboardService'
+import { dashboardService, DashboardStats, RecentActivity, MonthlyChartData } from '@/services/dashboardService'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
@@ -30,25 +31,7 @@ import { Bar, BarChart, XAxis, YAxis, Area, AreaChart, CartesianGrid } from 'rec
 import { toast } from 'sonner'
 import { formatDistanceToNow } from 'date-fns'
 import { cn } from '@/lib/utils'
-
-interface DashboardStats {
-  totalProjects: number
-  totalDonations: string
-  activeUsers: number
-  monthlyGrowth: string
-  projectsChange: string
-  donationsChange: string
-  usersChange: string
-}
-
-interface RecentActivity {
-  id: string
-  type: string
-  title: string
-  description: string
-  timestamp: string
-  color: string
-}
+import { formatCurrency } from '@/lib/format'
 
 const donationsChartConfig = {
   amount: {
@@ -69,6 +52,8 @@ export default function DashboardPage() {
   const { user } = useAuthStore()
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [activities, setActivities] = useState<RecentActivity[]>([])
+  const [donationsChartData, setDonationsChartData] = useState<MonthlyChartData[]>([])
+  const [projectsChartData, setProjectsChartData] = useState<MonthlyChartData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
@@ -83,14 +68,28 @@ export default function DashboardPage() {
       setLoading(true)
       setError(null)
 
-      const [statsData, activitiesData] = await Promise.all([
+      const [statsData, activitiesData, donationsData, projectsData] = await Promise.all([
         dashboardService.getStats(),
         dashboardService.getRecentActivities(),
+        dashboardService.getMonthlyDonations(),
+        dashboardService.getMonthlyProjects(),
       ])
 
       setStats(statsData)
       setActivities(activitiesData)
-    } catch {
+      setDonationsChartData(donationsData)
+      setProjectsChartData(projectsData)
+
+      // Success notification
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Dashboard data loaded successfully!</span>
+        </div>,
+        { duration: 3000 }
+      )
+    } catch (error) {
+      console.error('Dashboard error:', error)
       const errorMessage = 'Failed to load dashboard data'
       setError(errorMessage)
       toast.error(errorMessage)
@@ -124,41 +123,12 @@ export default function DashboardPage() {
     }
   }
 
-  const formatCurrency = (amount: string) => {
-    const num = parseFloat(amount)
-    return new Intl.NumberFormat('en-KE', {
-      style: 'currency',
-      currency: 'KES',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(num)
-  }
-
   const parseChange = (change: string): { value: number; isPositive: boolean } => {
-    const match = change.match(/([+-]?\d+(?:\.\d+)?)/);
-    const value = match ? parseFloat(match[1]) : 0;
-    const isPositive = !change.includes('-') && value > 0;
-    return { value: Math.abs(value), isPositive };
+    const match = change.match(/([+-]?\d+(?:\.\d+)?)/)
+    const value = match ? parseFloat(match[1]) : 0
+    const isPositive = !change.includes('-') && value > 0
+    return { value: Math.abs(value), isPositive }
   }
-
-  // Sample chart data - in production this would come from API
-  const donationsChartData = [
-    { month: 'Jan', amount: 12000 },
-    { month: 'Feb', amount: 18000 },
-    { month: 'Mar', amount: 15000 },
-    { month: 'Apr', amount: 22000 },
-    { month: 'May', amount: 28000 },
-    { month: 'Jun', amount: 25000 },
-  ]
-
-  const projectsChartData = [
-    { month: 'Jan', projects: 2 },
-    { month: 'Feb', projects: 3 },
-    { month: 'Mar', projects: 2 },
-    { month: 'Apr', projects: 4 },
-    { month: 'May', projects: 3 },
-    { month: 'Jun', projects: 5 },
-  ]
 
   const statsConfig = [
     {
@@ -229,7 +199,7 @@ export default function DashboardPage() {
       })
     }
 
-    if (['SUPER_USER', 'CHAIRPERSON', 'TREASURER'].includes(user?.role || '')) {
+    if (['SUPER_USER', 'CHAIRPERSON', 'TREASURER', 'SECRETARY_GENERAL'].includes(user?.role || '')) {
       actions.push({
         key: 'donations',
         label: 'Donations',
@@ -379,40 +349,49 @@ export default function DashboardPage() {
               <DollarSign className="w-5 h-5 text-emerald-500" />
               Donations Overview
             </CardTitle>
-            <CardDescription>Monthly donation trends</CardDescription>
+            <CardDescription>Monthly donation trends (Last 6 months)</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={donationsChartConfig} className="h-[200px] w-full">
-              <AreaChart data={donationsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="donationsGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
-                  tickFormatter={(value) => `${value / 1000}k`}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#0ea5e9"
-                  strokeWidth={2}
-                  fill="url(#donationsGradient)"
-                />
-              </AreaChart>
-            </ChartContainer>
+            {donationsChartData.length === 0 ? (
+              <div className="flex items-center justify-center h-[200px]">
+                <p className="text-gray-500">No donation data available</p>
+              </div>
+            ) : (
+              <ChartContainer config={donationsChartConfig} className="h-[200px] w-full">
+                <AreaChart data={donationsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="donationsGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                    tickFormatter={(value) => `${value / 1000}k`}
+                  />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent />}
+                    formatter={(value) => [formatCurrency(Number(value)), 'Donations']}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#0ea5e9"
+                    strokeWidth={2}
+                    fill="url(#donationsGradient)"
+                  />
+                </AreaChart>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
 
@@ -426,31 +405,37 @@ export default function DashboardPage() {
               <FolderOpen className="w-5 h-5 text-violet-500" />
               Projects Activity
             </CardTitle>
-            <CardDescription>Monthly project count</CardDescription>
+            <CardDescription>Monthly project creation (Last 6 months)</CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={projectsChartConfig} className="h-[200px] w-full">
-              <BarChart data={projectsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis
-                  dataKey="month"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: '#6b7280', fontSize: 12 }}
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar
-                  dataKey="projects"
-                  fill="#8b5cf6"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ChartContainer>
+            {projectsChartData.length === 0 ? (
+              <div className="flex items-center justify-center h-[200px]">
+                <p className="text-gray-500">No project data available</p>
+              </div>
+            ) : (
+              <ChartContainer config={projectsChartConfig} className="h-[200px] w-full">
+                <BarChart data={projectsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: '#6b7280', fontSize: 12 }}
+                  />
+                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Bar
+                    dataKey="projects"
+                    fill="#8b5cf6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ChartContainer>
+            )}
           </CardContent>
         </Card>
       </div>

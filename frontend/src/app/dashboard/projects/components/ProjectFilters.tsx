@@ -9,11 +9,12 @@ interface ProjectFiltersProps {
   projectCount: number
 }
 
-const statusOptions: { value: ProjectStatus | 'ALL'; label: string }[] = [
-  { value: 'ALL', label: 'All' },
-  { value: 'DRAFT', label: 'Draft' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'COMPLETED', label: 'Completed' },
+const statusOptions: { value: ProjectStatus | 'ALL'; label: string; color: string }[] = [
+  { value: 'ALL', label: 'All', color: 'bg-gray-600' },
+  { value: 'PLANNING', label: 'Planning', color: 'bg-purple-600' },
+  { value: 'ACTIVE', label: 'Active', color: 'bg-green-600' },
+  { value: 'ON_HOLD', label: 'On Hold', color: 'bg-yellow-600' },
+  { value: 'COMPLETED', label: 'Completed', color: 'bg-blue-600' },
 ]
 
 export function ProjectFilters({ statusFilter, onStatusFilterChange, projectCount }: ProjectFiltersProps) {
@@ -31,10 +32,11 @@ export function ProjectFilters({ statusFilter, onStatusFilterChange, projectCoun
               <button
                 key={option.value}
                 onClick={() => onStatusFilterChange(option.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${statusFilter === option.value
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  statusFilter === option.value
+                    ? `${option.color} text-white shadow-md transform scale-105`
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+                }`}
               >
                 {option.label}
               </button>

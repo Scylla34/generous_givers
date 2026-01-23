@@ -14,7 +14,7 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${app.cors.allowed-origins:https://generousgiversfamily.netlify.app,http://localhost:3000}")
+    @Value("${app.cors.allowed-origins:http://localhost:3000,https://generousgiversfamily.netlify.app}")
     private String allowedOrigins;
 
     @Bean
@@ -45,7 +45,8 @@ public class CorsConfig {
             configuration.setAllowedOrigins(Arrays.asList(
                     "http://localhost:3000",
                     "http://localhost:3001",
-                    "https://generousgiversfamily.netlify.app"
+                    "https://generousgiversfamily.netlify.app",
+                    "https://generous-givers.vercel.app"
             ));
             configuration.setAllowCredentials(true);
         }

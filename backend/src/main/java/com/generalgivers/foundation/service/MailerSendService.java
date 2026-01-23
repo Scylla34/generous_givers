@@ -44,4 +44,26 @@ public class MailerSendService {
             throw new RuntimeException("Failed to send email", e);
         }
     }
+
+    public void sendNotificationEmail(String to, String name, String subject, String content) {
+        String htmlContent = String.format(
+            "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>" +
+            "<div style='background: linear-gradient(135deg, #2563eb 0%%, #1d4ed8 100%%); padding: 30px; text-align: center;'>" +
+            "<h1 style='color: white; margin: 0; font-size: 28px;'>General Givers Foundation</h1>" +
+            "</div>" +
+            "<div style='padding: 30px; background-color: #f8fafc;'>" +
+            "<h2 style='color: #1e293b; margin-bottom: 20px;'>Hello %s,</h2>" +
+            "<p style='color: #475569; line-height: 1.6; margin-bottom: 20px;'>%s</p>" +
+            "<div style='text-align: center; margin: 30px 0;'>" +
+            "<a href='https://generalgivers.org/dashboard' style='background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;'>View Dashboard</a>" +
+            "</div>" +
+            "<p style='color: #64748b; font-size: 14px; margin-top: 30px;'>" +
+            "Best regards,<br>General Givers Foundation Team" +
+            "</p>" +
+            "</div>" +
+            "</div>",
+            name, content
+        );
+        sendEmail(to, subject, htmlContent);
+    }
 }

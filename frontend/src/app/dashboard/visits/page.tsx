@@ -1,30 +1,24 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { visitService } from '@/services/visitService'
 import { childrenHomeService } from '@/services/childrenHomeService'
 import { Visit, VisitRequest } from '@/types'
-import { Plus, X, Calendar, Image as ImageIcon } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { DatePicker } from '@/components/ui/date-picker'
+import { Plus, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatDateSafe, toDateInputValue } from '@/lib/format'
-import { useDropzone } from 'react-dropzone'
+import { PermissionWrapper } from '@/components/ui/permission-button'
+import { VisitStats } from './components/VisitStats'
+import { VisitModal } from './components/VisitModal'
+import { VisitViewModal } from './components/VisitViewModal'
+import { VisitsTable } from './components/VisitsTable'
 
 export default function VisitsPage() {
   const queryClient = useQueryClient()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [visitDate, setVisitDate] = useState<Date>()
-  const [uploadedImages, setUploadedImages] = useState<string[]>([])
-  const [formData, setFormData] = useState<VisitRequest>({
-    visitDate: '',
-    location: '',
-    childrenHomeId: '',
-    notes: '',
-    participants: [],
-    photos: [],
-  })
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [editingVisit, setEditingVisit] = useState<Visit | null>(null)
+  const [viewingVisit, setViewingVisit] = useState<Visit | null>(null)
 
   const { data: visits, isLoading } = useQuery({
     queryKey: ['visits'],
@@ -36,308 +30,190 @@ export default function VisitsPage() {
     queryFn: childrenHomeService.getAll,
   })
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    acceptedFiles.forEach((file) => {
-      const reader = new FileReader()
-      reader.onload = () => {
-        const base64 = reader.result as string
-        setUploadedImages((prev) => [...prev, base64])
-        setFormData((prev) => ({
-          ...prev,
-          photos: [...(prev.photos || []), base64],
-        }))
-      }
-      reader.readAsDataURL(file)
-    })
-  }, [])
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] },
-    maxFiles: 5,
-  })
-
   const createMutation = useMutation({
     mutationFn: visitService.create,
-    onSuccess: () => {
+    onSuccess: (newVisit) => {
       queryClient.invalidateQueries({ queryKey: ['visits'] })
+      queryClient.invalidateQueries({ queryKey: ['recent-visits'] })
       setIsModalOpen(false)
-      resetForm()
-      toast.success('Visit recorded successfully!')
+      setEditingVisit(null)
+      
+      // Enhanced success notification
+      toast.success(
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="font-medium">Visit recorded successfully!</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            Visit to {newVisit.childrenHomeName || newVisit.location || 'location'} has been saved.
+          </div>
+        </div>,
+        { duration: 5000 }
+      )
+      
+      // Organizing team notification
+      toast.info(
+        `New visit recorded at ${newVisit.childrenHomeName || newVisit.location || 'location'}.`,
+        { duration: 4000 }
+      )
     },
-    onError: () => {
-      toast.error('Failed to record visit')
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to record visit'
+      toast.error(
+        <div className="space-y-1">
+          <div className="font-medium">Failed to record visit</div>
+          <div className="text-sm text-gray-600">{errorMessage}</div>
+        </div>,
+        { duration: 6000 }
+      )
     },
   })
 
-  const resetForm = () => {
-    setFormData({
-      visitDate: '',
-      location: '',
-      childrenHomeId: '',
-      notes: '',
-      participants: [],
-      photos: [],
-    })
-    setVisitDate(undefined)
-    setUploadedImages([])
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    const submitData = {
-      ...formData,
-      visitDate: visitDate ? toDateInputValue(visitDate) : '',
-    }
-    createMutation.mutate(submitData)
-  }
-
-  const removeImage = (index: number) => {
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index))
-    setFormData((prev) => ({
-      ...prev,
-      photos: prev.photos?.filter((_, i) => i !== index),
-    }))
-  }
-
-  const columns = [
-    {
-      header: 'Date',
-      accessor: (visit: Visit) => (
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-gray-500" />
-          <span className="text-sm text-gray-900">{formatDateSafe(visit.visitDate)}</span>
-        </div>
-      ),
-    },
-    {
-      header: 'Location / Home',
-      accessor: (visit: Visit) => (
-        <div>
-          <div className="font-medium text-gray-900">
-            {visit.childrenHomeName || visit.location || '-'}
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: VisitRequest }) =>
+      visitService.update(id, data),
+    onSuccess: (updatedVisit) => {
+      queryClient.invalidateQueries({ queryKey: ['visits'] })
+      queryClient.invalidateQueries({ queryKey: ['recent-visits'] })
+      setIsModalOpen(false)
+      setEditingVisit(null)
+      
+      toast.success(
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="font-medium">Visit updated successfully!</span>
           </div>
-          {visit.childrenHomeName && visit.location && (
-            <div className="text-sm text-gray-500">{visit.location}</div>
-          )}
-        </div>
-      ),
+          <div className="text-sm text-gray-600">
+            Changes to visit at {updatedVisit.childrenHomeName || updatedVisit.location || 'location'} have been saved.
+          </div>
+        </div>,
+        { duration: 4000 }
+      )
     },
-    {
-      header: 'Participants',
-      accessor: (visit: Visit) => (
-        <span className="text-sm text-gray-600">
-          {visit.participants && visit.participants.length > 0
-            ? `${visit.participants.length} participant${visit.participants.length > 1 ? 's' : ''}`
-            : '-'}
-        </span>
-      ),
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update visit'
+      toast.error(
+        <div className="space-y-1">
+          <div className="font-medium">Failed to update visit</div>
+          <div className="text-sm text-gray-600">{errorMessage}</div>
+        </div>,
+        { duration: 6000 }
+      )
     },
-    {
-      header: 'Photos',
-      accessor: (visit: Visit) => (
-        <div className="flex items-center gap-2">
-          <ImageIcon className="w-4 h-4 text-gray-500" />
-          <span className="text-sm text-gray-600">
-            {visit.photos && visit.photos.length > 0 ? visit.photos.length : '0'}
-          </span>
-        </div>
-      ),
-    },
-    {
-      header: 'Notes',
-      accessor: (visit: Visit) => (
-        <span className="text-sm text-gray-600 line-clamp-2">{visit.notes || '-'}</span>
-      ),
-    },
-  ]
+  })
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading visits...</div>
-      </div>
-    )
+  const deleteMutation = useMutation({
+    mutationFn: visitService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['visits'] })
+      queryClient.invalidateQueries({ queryKey: ['recent-visits'] })
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Visit deleted successfully!</span>
+        </div>,
+        { duration: 3000 }
+      )
+    },
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete visit'
+      toast.error(
+        <div className="space-y-1">
+          <div className="font-medium">Failed to delete visit</div>
+          <div className="text-sm text-gray-600">{errorMessage}</div>
+        </div>,
+        { duration: 6000 }
+      )
+    },
+  })
+
+  const handleSubmit = (data: VisitRequest) => {
+    if (editingVisit) {
+      updateMutation.mutate({ id: editingVisit.id, data })
+    } else {
+      createMutation.mutate(data)
+    }
+  }
+
+  const handleEdit = (visit: Visit) => {
+    setEditingVisit(visit)
+    setIsModalOpen(true)
+  }
+
+  const handleView = (visit: Visit) => {
+    setViewingVisit(visit)
+    setIsViewModalOpen(true)
+  }
+
+  const handleDelete = (id: string) => {
+    if (confirm('Are you sure you want to delete this visit? This action cannot be undone.')) {
+      deleteMutation.mutate(id)
+    }
+  }
+
+  const handleCreateNew = () => {
+    setEditingVisit(null)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setEditingVisit(null)
+  }
+
+  const handleCloseViewModal = () => {
+    setIsViewModalOpen(false)
+    setViewingVisit(null)
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Visits</h1>
-        <button
-          onClick={() => {
-            resetForm()
-            setIsModalOpen(true)
-          }}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2"
-        >
-          <Plus className="w-5 h-5" />
-          Record Visit
-        </button>
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Visits</h1>
+          <p className="text-gray-600 mt-1">Record and manage visits to children&apos;s homes</p>
+        </div>
+        <PermissionWrapper resource="visits" action="create">
+          <button
+            onClick={handleCreateNew}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5 text-white" />
+            <span className="text-white font-medium">Record Visit</span>
+          </button>
+        </PermissionWrapper>
       </div>
 
-      <DataTable
-        data={visits || []}
-        columns={columns}
-        searchPlaceholder="Search visits by location or notes..."
-        itemsPerPage={10}
+      {/* Visit Statistics */}
+      <VisitStats visits={visits || []} />
+
+      {/* Visits Table */}
+      <VisitsTable
+        visits={visits || []}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onView={handleView}
+        isLoading={isLoading}
       />
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Record Visit</h2>
-              <button
-                onClick={() => {
-                  setIsModalOpen(false)
-                  resetForm()
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
+      {/* Modals */}
+      <VisitModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleSubmit}
+        visit={editingVisit}
+        childrenHomes={childrenHomes || []}
+        isLoading={createMutation.isPending || updateMutation.isPending}
+      />
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Visit Date *
-                </label>
-                <DatePicker
-                  value={visitDate}
-                  onChange={setVisitDate}
-                  placeholder="Select visit date"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Children&apos;s Home
-                </label>
-                <select
-                  value={formData.childrenHomeId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, childrenHomeId: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
-                >
-                  <option value="">Select a home (optional)</option>
-                  {childrenHomes?.map((home) => (
-                    <option key={home.id} value={home.id}>
-                      {home.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) =>
-                    setFormData({ ...formData, location: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
-                  placeholder="Specific location or address"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 bg-white"
-                  placeholder="Visit notes and observations..."
-                />
-              </div>
-
-              {/* Image Upload with Drag & Drop */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Photos
-                </label>
-                <div
-                  {...getRootProps()}
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition ${
-                    isDragActive
-                      ? 'border-primary-500 bg-primary-50'
-                      : 'border-gray-300 hover:border-primary-400'
-                  }`}
-                >
-                  <input {...getInputProps()} />
-                  <ImageIcon className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                  {isDragActive ? (
-                    <p className="text-sm text-primary-600">Drop the images here...</p>
-                  ) : (
-                    <div>
-                      <p className="text-sm text-gray-600">
-                        Drag &amp; drop images here, or click to select
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        PNG, JPG, GIF, WebP up to 5 files
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Preview uploaded images */}
-                {uploadedImages.length > 0 && (
-                  <div className="grid grid-cols-3 gap-2 mt-3">
-                    {uploadedImages.map((img, index) => (
-                      <div key={index} className="relative group">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img}
-                          alt={`Upload ${index + 1}`}
-                          className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                          title="Remove image"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-2 pt-4">
-                <button
-                  type="submit"
-                  disabled={createMutation.isPending}
-                  className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition disabled:opacity-50"
-                >
-                  {createMutation.isPending ? 'Saving...' : 'Save Visit'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsModalOpen(false)
-                    resetForm()
-                  }}
-                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <VisitViewModal
+        isOpen={isViewModalOpen}
+        onClose={handleCloseViewModal}
+        visit={viewingVisit}
+      />
     </div>
   )
 }

@@ -3,6 +3,7 @@ package com.generalgivers.foundation.service;
 import com.generalgivers.foundation.dto.visit.VisitRequest;
 import com.generalgivers.foundation.dto.visit.VisitResponse;
 import com.generalgivers.foundation.entity.ChildrenHome;
+import com.generalgivers.foundation.entity.NotificationType;
 import com.generalgivers.foundation.entity.User;
 import com.generalgivers.foundation.entity.Visit;
 import com.generalgivers.foundation.exception.ResourceNotFoundException;
@@ -25,9 +26,10 @@ public class VisitService {
     private final VisitRepository visitRepository;
     private final UserRepository userRepository;
     private final ChildrenHomeRepository childrenHomeRepository;
+    private final NotificationService notificationService;
 
     public List<VisitResponse> getAllVisits() {
-        return visitRepository.findAllOrderByVisitDateDesc().stream()
+        return visitRepository.findAll().stream()
                 .map(this::mapToVisitResponse)
                 .collect(Collectors.toList());
     }
@@ -72,13 +74,34 @@ public class VisitService {
                 .build();
 
         visit = visitRepository.save(visit);
+        
+        // Email notifications disabled for visits
+        // visitNotificationService.notifyVisitRecorded(location, creator.getName());
+        
+        // Send in-app notification
+        String location = childrenHome != null ? childrenHome.getName() : 
+                         (visit.getLocation() != null ? visit.getLocation() : "Unknown Location");
+        notificationService.createNotification(
+            "Visit Recorded",
+            "New visit recorded at " + location + " by " + creator.getName(),
+            NotificationType.VISIT_COMPLETED,
+            "VISIT",
+            visit.getId(),
+            null,
+            null,
+            true
+        );
+        
         return mapToVisitResponse(visit);
     }
 
     @Transactional
-    public VisitResponse updateVisit(UUID id, VisitRequest request) {
+    public VisitResponse updateVisit(UUID id, VisitRequest request, String userEmail) {
         Visit visit = visitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", id));
+
+        User updater = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
 
         if (request.getVisitDate() != null) {
             visit.setVisitDate(request.getVisitDate());
@@ -102,15 +125,42 @@ public class VisitService {
         }
 
         visit = visitRepository.save(visit);
+        
+        // Email notifications disabled for visits
+        // visitNotificationService.notifyVisitUpdated(location, updater.getName());
+        
+        // Send in-app notification
+        String location = visit.getChildrenHome() != null ? visit.getChildrenHome().getName() : 
+                         (visit.getLocation() != null ? visit.getLocation() : "Unknown Location");
+        notificationService.createNotification(
+            "Visit Updated",
+            "Visit at " + location + " updated by " + updater.getName(),
+            NotificationType.VISIT_COMPLETED,
+            "VISIT",
+            visit.getId(),
+            null,
+            null,
+            true
+        );
+        
         return mapToVisitResponse(visit);
     }
 
     @Transactional
-    public void deleteVisit(UUID id) {
-        if (!visitRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Visit", "id", id);
-        }
+    public void deleteVisit(UUID id, String userEmail) {
+        Visit visit = visitRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", id));
+        
+        User deleter = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", userEmail));
+        
+        String location = visit.getChildrenHome() != null ? visit.getChildrenHome().getName() : 
+                         (visit.getLocation() != null ? visit.getLocation() : "Unknown Location");
+        
         visitRepository.deleteById(id);
+        
+        // Email notifications disabled for visits
+        // visitNotificationService.notifyVisitDeleted(location, deleter.getName());
     }
 
     private VisitResponse mapToVisitResponse(Visit visit) {

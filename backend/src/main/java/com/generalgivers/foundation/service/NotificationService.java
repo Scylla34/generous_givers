@@ -1,5 +1,7 @@
 package com.generalgivers.foundation.service;
 
+import com.generalgivers.foundation.dto.notification.NotificationResponse;
+import com.generalgivers.foundation.dto.notification.NotificationsPageResponse;
 import com.generalgivers.foundation.entity.Notification;
 import com.generalgivers.foundation.entity.NotificationType;
 import com.generalgivers.foundation.entity.User;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +30,64 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
+    public NotificationsPageResponse getUserNotifications(String userEmail, int page, int size) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        Page<Notification> notificationPage = getNotificationsForUser(user.getId(), page, size);
+        
+        List<NotificationResponse> notifications = notificationPage.getContent().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+        
+        return NotificationsPageResponse.builder()
+                .notifications(notifications)
+                .currentPage(page)
+                .totalPages(notificationPage.getTotalPages())
+                .totalElements(notificationPage.getTotalElements())
+                .hasMore(notificationPage.hasNext())
+                .build();
+    }
+
+    public List<NotificationResponse> getUnreadNotifications(String userEmail) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        return getUnreadNotificationsForUser(user.getId()).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public long getUnreadCount(String userEmail) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        return getUnreadCountForUser(user.getId());
+    }
+
+    public void markAsRead(UUID notificationId, String userEmail) {
+        markAsRead(notificationId);
+    }
+
+    public void markAllAsRead(String userEmail) {
+        User user = userRepository.findByEmail(userEmail).orElseThrow();
+        markAllAsReadForUser(user.getId());
+    }
+
+    private NotificationResponse mapToResponse(Notification notification) {
+        return NotificationResponse.builder()
+                .id(notification.getId())
+                .title(notification.getTitle())
+                .message(notification.getMessage())
+                .type(notification.getType())
+                .entityType(notification.getEntityType())
+                .entityId(notification.getEntityId())
+                .metadata(notification.getMetadata())
+                .isRead(notification.getIsRead())
+                .isGlobal(notification.getIsGlobal())
+                .createdAt(notification.getCreatedAt())
+                .readAt(notification.getReadAt())
+                .build();
+    }
+
     public Page<Notification> getNotificationsForUser(UUID userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return notificationRepository.findByUserIdOrGlobal(userId, pageable);
     }
-
     public List<Notification> getUnreadNotificationsForUser(UUID userId) {
         return notificationRepository.findUnreadByUserIdOrGlobal(userId);
     }

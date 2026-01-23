@@ -8,6 +8,7 @@ import { Plus, Edit, Trash2, X, Mail, CheckCircle } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { DatePicker } from '@/components/ui/date-picker'
 import { toast } from 'sonner'
+import { PermissionButton, PermissionWrapper } from '@/components/ui/permission-button'
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
@@ -198,21 +199,25 @@ export default function UsersPage() {
       header: 'Actions',
       accessor: (user: User) => (
         <div className="flex gap-2">
-          <button
+          <PermissionButton
+            resource="users"
+            action="update"
             onClick={() => handleEdit(user)}
             className="text-primary-600 hover:text-primary-900 transition-colors"
             title="Edit user"
           >
             <Edit className="w-4 h-4" />
-          </button>
-          <button
+          </PermissionButton>
+          <PermissionButton
+            resource="users"
+            action="delete"
             onClick={() => handleDelete(user.id)}
-            className="text-red-600 hover:text-red-900 transition-colors"
             disabled={!user.isActive}
+            className="text-red-600 hover:text-red-900 transition-colors disabled:opacity-50"
             title="Deactivate user"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </PermissionButton>
         </div>
       ),
     },
@@ -233,16 +238,18 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600 mt-1">Manage organization members and their roles</p>
         </div>
-        <button
-          onClick={() => {
-            resetForm()
-            setIsModalOpen(true)
-          }}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 shadow-sm"
-        >
-          <Plus className="w-4 h-4" />
-          Create User
-        </button>
+        <PermissionWrapper resource="users" action="create">
+          <button
+            onClick={() => {
+              resetForm()
+              setIsModalOpen(true)
+            }}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            Create User
+          </button>
+        </PermissionWrapper>
       </div>
 
       <DataTable

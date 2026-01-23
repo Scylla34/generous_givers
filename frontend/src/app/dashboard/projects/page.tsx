@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { projectService } from '@/services/projectService'
 import { ProjectRequest, Project, ProjectStatus } from '@/types'
-import { Plus } from 'lucide-react'
+import { Plus, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
+import { PermissionWrapper } from '@/components/ui/permission-button'
 import { ProjectsTable } from './components/ProjectsTable'
 import { ProjectModal } from './components/ProjectModal'
 import { ProjectViewModal } from './components/ProjectViewModal'
 import { ProjectFilters } from './components/ProjectFilters'
+import { ProjectStats } from './components/ProjectStats'
 
 export default function ProjectsPage() {
   const queryClient = useQueryClient()
@@ -26,28 +28,73 @@ export default function ProjectsPage() {
 
   const createMutation = useMutation({
     mutationFn: projectService.create,
-    onSuccess: () => {
+    onSuccess: (newProject) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       setIsModalOpen(false)
       setEditingProject(null)
-      toast.success('Project created successfully!')
+      
+      // Enhanced success notification
+      toast.success(
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="font-medium">Project created successfully!</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            Project &quot;{newProject.title}&quot; has been added to the system.
+          </div>
+        </div>,
+        { duration: 5000 }
+      )
+      
+      // Admin notification
+      toast.info(
+        `New project &quot;${newProject.title}&quot; created with ${newProject.status} status.`,
+        { duration: 4000 }
+      )
     },
-    onError: () => {
-      toast.error('Failed to create project')
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create project'
+      toast.error(
+        <div className="space-y-1">
+          <div className="font-medium">Failed to create project</div>
+          <div className="text-sm text-gray-600">{errorMessage}</div>
+        </div>,
+        { duration: 6000 }
+      )
     },
   })
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: ProjectRequest }) =>
       projectService.update(id, data),
-    onSuccess: () => {
+    onSuccess: (updatedProject) => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
       setIsModalOpen(false)
       setEditingProject(null)
-      toast.success('Project updated successfully!')
+      
+      toast.success(
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="font-medium">Project updated successfully!</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            Changes to &quot;{updatedProject.title}&quot; have been saved.
+          </div>
+        </div>,
+        { duration: 4000 }
+      )
     },
-    onError: () => {
-      toast.error('Failed to update project')
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update project'
+      toast.error(
+        <div className="space-y-1">
+          <div className="font-medium">Failed to update project</div>
+          <div className="text-sm text-gray-600">{errorMessage}</div>
+        </div>,
+        { duration: 6000 }
+      )
     },
   })
 
@@ -55,10 +102,23 @@ export default function ProjectsPage() {
     mutationFn: projectService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
-      toast.success('Project deleted successfully!')
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle className="w-4 h-4 text-green-600" />
+          <span className="font-medium">Project deleted successfully!</span>
+        </div>,
+        { duration: 3000 }
+      )
     },
-    onError: () => {
-      toast.error('Failed to delete project')
+    onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete project'
+      toast.error(
+        <div className="space-y-1">
+          <div className="font-medium">Failed to delete project</div>
+          <div className="text-sm text-gray-600">{errorMessage}</div>
+        </div>,
+        { duration: 6000 }
+      )
     },
   })
 
@@ -101,30 +161,42 @@ export default function ProjectsPage() {
     setViewingProject(null)
   }
 
-  // Filter projects by status
-  const filteredProjects = projects?.filter(project =>
+  // Filter projects by status - ensure projects is always an array
+  const projectsArray = Array.isArray(projects) ? projects : []
+  const filteredProjects = projectsArray.filter(project =>
     statusFilter === 'ALL' || project.status === statusFilter
-  ) || []
+  )
 
   return (
     <div className="space-y-6">
+      {/* Header Section */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
-        <button
-          onClick={handleCreateNew}
-          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition flex items-center gap-2 whitespace-nowrap"
-        >
-          <Plus className="w-5 h-5" />
-          Create Project
-        </button>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
+          <p className="text-gray-600 mt-1">Manage and track organization projects</p>
+        </div>
+        <PermissionWrapper resource="projects" action="create">
+          <button
+            onClick={handleCreateNew}
+            className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors flex items-center gap-2 shadow-sm hover:shadow-md whitespace-nowrap"
+          >
+            <Plus className="w-5 h-5" />
+            Create Project
+          </button>
+        </PermissionWrapper>
       </div>
 
+      {/* Project Statistics */}
+      <ProjectStats projects={projectsArray} />
+
+      {/* Filters */}
       <ProjectFilters
         statusFilter={statusFilter}
         onStatusFilterChange={setStatusFilter}
         projectCount={filteredProjects.length}
       />
 
+      {/* Projects Table */}
       <ProjectsTable
         projects={filteredProjects}
         onEdit={handleEdit}
@@ -133,6 +205,7 @@ export default function ProjectsPage() {
         isLoading={isLoading}
       />
 
+      {/* Modals */}
       <ProjectModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}

@@ -26,7 +26,7 @@ public class MpesaController {
 
     private final MpesaService mpesaService;
 
-    @PostMapping("/stkpush")
+    @PostMapping("/stk-push")
     @Operation(summary = "Initiate STK Push", description = "Sends STK Push prompt to customer's phone for payment")
     public ResponseEntity<Map<String, Object>> initiateStkPush(@Valid @RequestBody MpesaPaymentRequest request) {
         log.info("Initiating STK Push for phone: {}, amount: {}",

@@ -1,5 +1,6 @@
 package com.generalgivers.foundation.controller;
 
+import com.generalgivers.foundation.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +12,15 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class NewsletterController {
 
+    private final EmailService emailService;
+
     @PostMapping("/subscribe")
     public ResponseEntity<String> subscribe(@RequestParam String email) {
         try {
-            // For now, just log the subscription
             log.info("Newsletter subscription request from: {}", email);
+            
+            // Send welcome email to subscriber
+            emailService.sendNewsletterWelcome(email);
             
             // TODO: Add to newsletter database/service
             

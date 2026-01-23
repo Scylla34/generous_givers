@@ -26,15 +26,23 @@ public class ContactController {
     public ResponseEntity<Map<String, String>> submitContactForm(@Valid @RequestBody ContactRequest request) {
         log.info("Received contact form submission from: {}", request.getEmail());
 
-        // Send email to admin
-        emailService.sendContactEmail(request);
+        try {
+            // Send email to admin
+            emailService.sendContactEmail(request);
 
-        // Send confirmation to the sender
-        emailService.sendContactConfirmation(request);
+            // Send confirmation to the sender
+            emailService.sendContactConfirmation(request);
 
-        return ResponseEntity.ok(Map.of(
-            "status", "success",
-            "message", "Thank you for your message. We will get back to you soon!"
-        ));
+            return ResponseEntity.ok(Map.of(
+                "status", "success",
+                "message", "Thank you for your message. We will get back to you soon!"
+            ));
+        } catch (Exception e) {
+            log.error("Failed to send contact form emails: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of(
+                "status", "error",
+                "message", "Failed to send your message. Please try again or contact us directly."
+            ));
+        }
     }
 }

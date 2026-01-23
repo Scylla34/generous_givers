@@ -1,7 +1,8 @@
 package com.generalgivers.foundation.controller;
 
-import com.generalgivers.foundation.dto.DashboardStatsDTO;
-import com.generalgivers.foundation.dto.RecentActivityDTO;
+import com.generalgivers.foundation.dto.dashboard.DashboardStatsResponse;
+import com.generalgivers.foundation.dto.dashboard.MonthlyChartData;
+import com.generalgivers.foundation.dto.dashboard.RecentActivityResponse;
 import com.generalgivers.foundation.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -18,23 +19,37 @@ import java.util.List;
 @RestController
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
-@Tag(name = "Dashboard", description = "Dashboard statistics and activities")
 @SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Dashboard", description = "Dashboard data endpoints")
 public class DashboardController {
 
     private final DashboardService dashboardService;
 
     @GetMapping("/stats")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get dashboard statistics", description = "Returns overall statistics for the dashboard")
-    public ResponseEntity<DashboardStatsDTO> getStats() {
-        return ResponseEntity.ok(dashboardService.getStats());
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
+    @Operation(summary = "Get dashboard statistics", description = "Get overview statistics for the dashboard")
+    public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
+        return ResponseEntity.ok(dashboardService.getDashboardStats());
     }
 
     @GetMapping("/activities")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "Get recent activities", description = "Returns recent activities (donations, projects, visits)")
-    public ResponseEntity<List<RecentActivityDTO>> getRecentActivities() {
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
+    @Operation(summary = "Get recent activities", description = "Get recent activities for the dashboard")
+    public ResponseEntity<List<RecentActivityResponse>> getRecentActivities() {
         return ResponseEntity.ok(dashboardService.getRecentActivities());
+    }
+
+    @GetMapping("/donations-chart")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
+    @Operation(summary = "Get monthly donations chart data", description = "Get monthly donations data for charts")
+    public ResponseEntity<List<MonthlyChartData>> getMonthlyDonations() {
+        return ResponseEntity.ok(dashboardService.getMonthlyDonations());
+    }
+
+    @GetMapping("/projects-chart")
+    @PreAuthorize("hasAnyRole('SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'VICE_CHAIRPERSON', 'TREASURER', 'VICE_SECRETARY', 'ORGANIZING_SECRETARY', 'COMMITTEE_MEMBER')")
+    @Operation(summary = "Get monthly projects chart data", description = "Get monthly projects data for charts")
+    public ResponseEntity<List<MonthlyChartData>> getMonthlyProjects() {
+        return ResponseEntity.ok(dashboardService.getMonthlyProjects());
     }
 }

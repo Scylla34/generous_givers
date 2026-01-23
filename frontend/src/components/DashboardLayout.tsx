@@ -64,43 +64,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       name: 'Users',
       href: '/dashboard/users',
       icon: Users,
-      roles: ['SUPER_USER'],
     },
     {
       name: 'Projects',
       href: '/dashboard/projects',
       icon: FolderOpen,
-      roles: ['SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL', 'ORGANIZING_SECRETARY'],
     },
     {
       name: 'Donations',
       href: '/dashboard/donations',
       icon: DollarSign,
-      roles: ['SUPER_USER', 'CHAIRPERSON', 'TREASURER'],
     },
     {
       name: 'Children Homes',
       href: '/dashboard/children-homes',
       icon: Home,
-      roles: ['SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL'],
     },
     {
       name: 'Visits',
       href: '/dashboard/visits',
       icon: MapPin,
-      roles: ['SUPER_USER', 'CHAIRPERSON', 'SECRETARY_GENERAL'],
     },
     {
       name: 'Reports',
       href: '/dashboard/reports',
       icon: FileText,
-      roles: ['SUPER_USER', 'CHAIRPERSON', 'TREASURER'],
     },
   ]
 
-  const filteredNavigation = navigation.filter(
-    (item) => !item.roles || item.roles.includes(user?.role || '')
-  )
+  // Remove unused variable
 
   const handleLogout = () => {
     clearAuth()
@@ -186,7 +178,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-3 space-y-1">
-          {filteredNavigation.map((item) => {
+          {navigation.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
             return (
@@ -264,7 +256,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <Menu className="w-5 h-5" />
               </button>
               <h1 className="text-xl font-semibold text-gray-900">
-                {filteredNavigation.find((item) => item.href === pathname)?.name || 'Dashboard'}
+                {navigation.find((item) => item.href === pathname)?.name || 'Dashboard'}
               </h1>
             </div>
             

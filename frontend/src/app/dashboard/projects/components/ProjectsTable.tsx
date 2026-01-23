@@ -4,6 +4,7 @@ import { Edit, Trash2, Eye } from 'lucide-react'
 import { Project } from '@/types'
 import { formatCurrency } from '@/lib/format'
 import { DataTable } from '@/components/ui/data-table'
+import { PermissionButton } from '@/components/ui/permission-button'
 
 interface ProjectsTableProps {
   projects: Project[]
@@ -89,20 +90,24 @@ export function ProjectsTable({ projects, onEdit, onDelete, onView, isLoading }:
           >
             <Eye className="w-4 h-4" />
           </button>
-          <button
+          <PermissionButton
+            resource="projects"
+            action="update"
             onClick={() => onEdit(project)}
             className="p-1.5 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-colors"
             title="Edit project"
           >
             <Edit className="w-4 h-4" />
-          </button>
-          <button
+          </PermissionButton>
+          <PermissionButton
+            resource="projects"
+            action="delete"
             onClick={() => onDelete(project.id)}
             className="p-1.5 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-colors"
             title="Delete project"
           >
             <Trash2 className="w-4 h-4" />
-          </button>
+          </PermissionButton>
         </div>
       ),
     },

@@ -18,6 +18,10 @@ spring:
           timeout: 5000
           writetimeout: 5000
 
+  mailersend:
+    api-key: ${MAILERSEND_API_KEY:mlsn.370f25b51906b17d4c5f3308fd3b3efdc65586a5dec63a499474cf9c1b26e172}
+    from-email: ${MAILERSEND_FROM_EMAIL:MS_OG3r3S@test-65qngkdkxd8lwr12.mlsender.net}
+
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/general_givers}
     username: ${DATABASE_USERNAME:peter}

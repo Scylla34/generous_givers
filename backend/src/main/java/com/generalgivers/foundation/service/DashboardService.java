@@ -1,18 +1,24 @@
 package com.generalgivers.foundation.service;
 
-import com.generalgivers.foundation.dto.DashboardStatsDTO;
-import com.generalgivers.foundation.dto.RecentActivityDTO;
-import com.generalgivers.foundation.entity.DonationStatus;
+import com.generalgivers.foundation.dto.dashboard.DashboardStatsResponse;
+import com.generalgivers.foundation.dto.dashboard.RecentActivityResponse;
+import com.generalgivers.foundation.dto.dashboard.MonthlyChartData;
+import com.generalgivers.foundation.entity.Project;
 import com.generalgivers.foundation.entity.ProjectStatus;
-import com.generalgivers.foundation.repository.*;
+import com.generalgivers.foundation.entity.User;
+import com.generalgivers.foundation.repository.DonationRepository;
+import com.generalgivers.foundation.repository.ProjectRepository;
+import com.generalgivers.foundation.repository.UserRepository;
+import com.generalgivers.foundation.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,110 +29,163 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final VisitRepository visitRepository;
 
-    public DashboardStatsDTO getStats() {
-        // Get total projects
+    public DashboardStatsResponse getDashboardStats() {
+        // Get current counts
         long totalProjects = projectRepository.count();
-
-        // Get total donations (completed only)
-        BigDecimal totalDonations = donationRepository.getTotalDonationsAmount();
+        long activeProjects = projectRepository.countByStatus(ProjectStatus.ACTIVE);
+        long completedProjects = projectRepository.countByStatus(ProjectStatus.COMPLETED);
+        
+        // Calculate total donations
+        BigDecimal totalDonations = donationRepository.getTotalDonationAmount();
         if (totalDonations == null) {
             totalDonations = BigDecimal.ZERO;
         }
-
-        // Get active users (is_active = true)
-        long activeUsers = userRepository.countByIsActive(true);
-
-        // Calculate monthly growth (simple calculation for now)
-        LocalDateTime lastMonth = LocalDateTime.now().minusMonths(1);
-        long lastMonthDonationsCount = donationRepository
-                .findByDateBetween(lastMonth, LocalDateTime.now())
-                .size();
-
-        String monthlyGrowth = calculateGrowthPercentage(lastMonthDonationsCount, totalDonations.intValue());
-
-        // Calculate changes (mock data for now - can be improved)
-        String projectsChange = "+2 this month";
-        String donationsChange = "+12% from last month";
-        String usersChange = "+3 new this week";
-
-        return DashboardStatsDTO.builder()
-                .totalProjects(totalProjects)
+        
+        // Get active users count
+        long activeUsers = userRepository.countByIsActiveTrue();
+        
+        // Calculate monthly growth (simplified - comparing current month to previous)
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastMonth = now.minusMonths(1);
+        
+        long currentMonthProjects = projectRepository.countByCreatedAtBetween(
+            now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0),
+            now
+        );
+        long lastMonthProjects = projectRepository.countByCreatedAtBetween(
+            lastMonth.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0),
+            lastMonth.withDayOfMonth(lastMonth.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59)
+        );
+        
+        // Calculate percentage changes
+        double projectsChange = calculatePercentageChange(lastMonthProjects, currentMonthProjects);
+        double monthlyGrowth = calculateMonthlyGrowth();
+        
+        return DashboardStatsResponse.builder()
+                .totalProjects((int) totalProjects)
+                .activeProjects((int) activeProjects)
+                .completedProjects((int) completedProjects)
                 .totalDonations(totalDonations)
-                .activeUsers(activeUsers)
-                .monthlyGrowth(monthlyGrowth)
-                .projectsChange(projectsChange)
-                .donationsChange(donationsChange)
-                .usersChange(usersChange)
+                .activeUsers((int) activeUsers)
+                .monthlyGrowth(String.format("%.1f%%", monthlyGrowth))
+                .projectsChange(String.format("%+.1f", projectsChange))
+                .donationsChange("+12.5") // Simplified for now
+                .usersChange("+8.3") // Simplified for now
                 .build();
     }
 
-    public List<RecentActivityDTO> getRecentActivities() {
-        List<RecentActivityDTO> activities = new ArrayList<>();
-
-        // Get recent donations (last 3)
-        var recentDonations = donationRepository.findAllOrderByDateDesc()
-                .stream()
-                .limit(3)
-                .toList();
-
-        for (var donation : recentDonations) {
-            activities.add(RecentActivityDTO.builder()
-                    .id(donation.getId().toString())
-                    .type("donation")
-                    .title("New donation received")
-                    .description(String.format("$%.2f from %s",
-                            donation.getAmount(),
-                            donation.getDonorName() != null ? donation.getDonorName() : "Anonymous"))
-                    .timestamp(donation.getDate())
+    public List<RecentActivityResponse> getRecentActivities() {
+        List<RecentActivityResponse> activities = new ArrayList<>();
+        
+        // Get recent projects
+        List<Project> recentProjects = projectRepository.findTop3ByOrderByCreatedAtDesc();
+        for (Project project : recentProjects) {
+            activities.add(RecentActivityResponse.builder()
+                    .id(project.getId().toString())
+                    .type("project")
+                    .title("New Project Created")
+                    .description("Project '" + project.getTitle() + "' was added to the system")
+                    .timestamp(project.getCreatedAt().toString())
+                    .color("primary")
+                    .build());
+        }
+        
+        // Get recent users
+        List<User> recentUsers = userRepository.findTop2ByOrderByCreatedAtDesc();
+        for (User user : recentUsers) {
+            activities.add(RecentActivityResponse.builder()
+                    .id(user.getId().toString())
+                    .type("user")
+                    .title("New Member Joined")
+                    .description(user.getName() + " joined as " + user.getRole().name())
+                    .timestamp(user.getCreatedAt().toString())
                     .color("green")
                     .build());
         }
-
-        // Get recent projects (last 2)
-        var recentProjects = projectRepository.findAllOrderByCreatedAtDesc()
-                .stream()
-                .limit(2)
-                .toList();
-
-        for (var project : recentProjects) {
-            String statusText = project.getStatus() == ProjectStatus.COMPLETED ? "completed" : "started";
-            activities.add(RecentActivityDTO.builder()
-                    .id(project.getId().toString())
-                    .type("project")
-                    .title("Project " + statusText)
-                    .description(project.getTitle())
-                    .timestamp(project.getCreatedAt())
-                    .color("blue")
-                    .build());
-        }
-
-        // Get recent visits (last 2)
-        var recentVisits = visitRepository.findAllOrderByVisitDateDesc()
-                .stream()
-                .limit(2)
-                .toList();
-
-        for (var visit : recentVisits) {
-            activities.add(RecentActivityDTO.builder()
-                    .id(visit.getId().toString())
-                    .type("visit")
-                    .title("Visit recorded")
-                    .description(visit.getChildrenHome().getName())
-                    .timestamp(visit.getVisitDate().atStartOfDay())
-                    .color("purple")
-                    .build());
-        }
-
-        // Sort by timestamp descending
-        activities.sort((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()));
-
-        // Return top 5
-        return activities.stream().limit(5).toList();
+        
+        // Sort by timestamp descending and limit to 5
+        return activities.stream()
+                .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
+                .limit(5)
+                .collect(Collectors.toList());
     }
 
-    private String calculateGrowthPercentage(long current, long total) {
-        if (total == 0) return "0%";
-        double percentage = ((double) current / total) * 100;
-        return String.format("%.1f%%", percentage);
+    public List<MonthlyChartData> getMonthlyDonations() {
+        // Get donations for the last 6 months
+        List<MonthlyChartData> chartData = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        
+        for (int i = 5; i >= 0; i--) {
+            LocalDateTime monthStart = now.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime monthEnd = monthStart.withDayOfMonth(monthStart.toLocalDate().lengthOfMonth())
+                    .withHour(23).withMinute(59).withSecond(59);
+            
+            BigDecimal monthlyTotal = donationRepository.getTotalDonationAmountBetween(monthStart, monthEnd);
+            if (monthlyTotal == null) {
+                monthlyTotal = BigDecimal.ZERO;
+            }
+            
+            String monthName = monthStart.format(DateTimeFormatter.ofPattern("MMM"));
+            
+            chartData.add(MonthlyChartData.builder()
+                    .month(monthName)
+                    .amount(monthlyTotal.doubleValue())
+                    .build());
+        }
+        
+        return chartData;
+    }
+
+    public List<MonthlyChartData> getMonthlyProjects() {
+        // Get project creation data for the last 6 months
+        List<MonthlyChartData> chartData = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
+        
+        for (int i = 5; i >= 0; i--) {
+            LocalDateTime monthStart = now.minusMonths(i).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+            LocalDateTime monthEnd = monthStart.withDayOfMonth(monthStart.toLocalDate().lengthOfMonth())
+                    .withHour(23).withMinute(59).withSecond(59);
+            
+            long monthlyProjects = projectRepository.countByCreatedAtBetween(monthStart, monthEnd);
+            String monthName = monthStart.format(DateTimeFormatter.ofPattern("MMM"));
+            
+            chartData.add(MonthlyChartData.builder()
+                    .month(monthName)
+                    .projects((int) monthlyProjects)
+                    .build());
+        }
+        
+        return chartData;
+    }
+
+    private double calculatePercentageChange(long oldValue, long newValue) {
+        if (oldValue == 0) {
+            return newValue > 0 ? 100.0 : 0.0;
+        }
+        return ((double) (newValue - oldValue) / oldValue) * 100.0;
+    }
+
+    private double calculateMonthlyGrowth() {
+        // Simplified calculation - in production this would be more sophisticated
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime lastMonth = now.minusMonths(1);
+        
+        long currentMonthActivities = projectRepository.countByCreatedAtBetween(
+            now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0),
+            now
+        ) + visitRepository.countByCreatedAtBetween(
+            now.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0),
+            now
+        );
+        
+        long lastMonthActivities = projectRepository.countByCreatedAtBetween(
+            lastMonth.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0),
+            lastMonth.withDayOfMonth(lastMonth.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59)
+        ) + visitRepository.countByCreatedAtBetween(
+            lastMonth.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0),
+            lastMonth.withDayOfMonth(lastMonth.toLocalDate().lengthOfMonth()).withHour(23).withMinute(59).withSecond(59)
+        );
+        
+        return calculatePercentageChange(lastMonthActivities, currentMonthActivities);
     }
 }

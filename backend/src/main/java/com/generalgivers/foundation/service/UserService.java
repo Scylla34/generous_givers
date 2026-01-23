@@ -71,8 +71,7 @@ public class UserService {
 
         user = userRepository.save(user);
         
-        // Send credentials via email
-        boolean emailSent = false;
+        // Send credentials via email - REQUIRED for user creation
         try {
             emailService.sendUserCredentials(
                 user.getEmail(), 
@@ -80,22 +79,20 @@ public class UserService {
                 user.getLastName(), 
                 temporaryPassword
             );
-            emailSent = true;
             log.info("User credentials sent to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send user credentials email: {}", e.getMessage());
-            // TODO: Could add email retry logic here or queue for later
+            // Delete the created user since email failed
+            userRepository.delete(user);
+            throw new RuntimeException("User creation failed: Unable to send credentials email to " + user.getEmail() + ". Error: " + e.getMessage());
         }
         
-        // Create notification for admin users only
+        // Create notification for admin users
         try {
-            String notificationMessage = emailSent 
-                ? String.format("New user %s %s has been created and notified via email.", 
-                    user.getFirstName(), user.getLastName())
-                : String.format("New user %s %s has been created. Warning: Email notification failed.", 
-                    user.getFirstName(), user.getLastName());
+            String notificationMessage = String.format("New user %s %s has been created and notified via email.", 
+                user.getFirstName(), user.getLastName());
             
-            // Send notification to all admin users (SUPER_USER, CHAIRPERSON, SECRETARY_GENERAL)
+            // Send notification to all admin users
             List<User> adminUsers = userRepository.findByRoleIn(
                 List.of(UserRole.SUPER_USER, UserRole.CHAIRPERSON, UserRole.SECRETARY_GENERAL)
             );
@@ -113,8 +110,7 @@ public class UserService {
         }
         
         UserResponse response = mapToUserResponse(user);
-        response.setTemporaryPassword(temporaryPassword); // Include in response for admin reference
-        response.setEmailSent(emailSent); // Include email status
+        response.setTemporaryPassword(temporaryPassword);
         
         return response;
     }
