@@ -20,16 +20,30 @@ public class MailerSendService {
 
     public void sendEmail(String to, String subject, String htmlContent) {
         try {
+            // Debug logging
+            log.info("Attempting to send email via MailerSend");
+            log.info("API Key configured: {}", mailerSendConfig.getApiKey() != null && !mailerSendConfig.getApiKey().isEmpty());
+            log.info("From Email: {}", mailerSendConfig.getFromEmail());
+            log.info("To Email: {}", to);
+            
             String url = "https://api.mailersend.com/v1/email";
             
             Map<String, Object> emailData = Map.of(
-                "from", Map.of("email", mailerSendConfig.getFromEmail()),
-                "to", new Object[]{Map.of("email", to)},
+                "from", Map.of(
+                    "email", mailerSendConfig.getFromEmail(),
+                    "name", "General Givers Foundation"
+                ),
+                "to", new Object[]{Map.of(
+                    "email", to,
+                    "name", "User"
+                )},
                 "subject", subject,
                 "html", htmlContent
             );
 
-            webClient.post()
+            log.info("Sending request to MailerSend API: {}", url);
+            
+            String response = webClient.post()
                     .uri(url)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + mailerSendConfig.getApiKey())
                     .contentType(MediaType.APPLICATION_JSON)
@@ -41,6 +55,7 @@ public class MailerSendService {
             log.info("Email sent successfully via MailerSend to: {}", to);
         } catch (Exception e) {
             log.error("Failed to send email via MailerSend to {}: {}", to, e.getMessage());
+            log.error("Full error: ", e);
             throw new RuntimeException("Failed to send email", e);
         }
     }
