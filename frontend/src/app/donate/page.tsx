@@ -71,6 +71,70 @@ function CopyButton({ text }: { text: string }) {
   )
 }
 
+function DonateHeroSlider() {
+  const childrenImages = [1, 2, 3, 4, 5, 6, 7, 8]
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % childrenImages.length)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [childrenImages.length])
+
+  return (
+    <section className="relative h-[300px] md:h-[400px] flex items-center justify-center text-white overflow-hidden">
+      {/* Image slider background */}
+      <div className="absolute inset-0">
+        {childrenImages.map((num, idx) => (
+          <div
+            key={num}
+            className="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+            style={{
+              opacity: idx === currentIndex ? 1 : 0,
+            }}
+          >
+            <Image
+              src={`/children/${num}.jpg`}
+              alt={`Hero image ${num}`}
+              fill
+              className="object-cover"
+              priority={idx === 0}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-black/60" />
+
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-4 text-center">
+        <Heart className="w-16 h-16 mx-auto mb-4 animate-pulse" />
+        <h1 className="text-4xl md:text-5xl font-bold mb-4 animate-fade-in">Make a Donation</h1>
+        <p className="text-xl animate-slide-up" style={{ animationDelay: '100ms' }}>Your generosity transforms lives</p>
+      </div>
+
+      {/* Image indicators */}
+      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
+        {childrenImages.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentIndex(idx)}
+            className={`w-2 h-2 rounded-full transition-all ${
+              idx === currentIndex
+                ? 'bg-white w-8'
+                : 'bg-white/50 hover:bg-white/75'
+            }`}
+            aria-label={`Go to image ${idx + 1}`}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function DonateForm() {
   const searchParams = useSearchParams()
   const projectId = searchParams.get('project')
@@ -199,12 +263,59 @@ function DonateForm() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-50 to-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 text-white py-16">
-        <div className="container mx-auto px-4 text-center">
-          <Heart className="w-16 h-16 mx-auto mb-4 animate-pulse" />
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Make a Donation</h1>
-          <p className="text-xl text-primary-100">Your generosity transforms lives</p>
+      {/* Hero Image Slider Header */}
+      <DonateHeroSlider />
+
+      {/* Impact Information Section */}
+      <div className="bg-primary-50 border-b border-primary-100 py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-600 mb-2">100%</div>
+                <p className="text-gray-700 text-sm">
+                  Transparent use of funds. No hidden fees.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-600 mb-2">1,200+</div>
+                <p className="text-gray-700 text-sm">
+                  Children helped across 50+ homes
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary-600 mb-2">10+</div>
+                <p className="text-gray-700 text-sm">
+                  Years of proven community impact
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-12 bg-white rounded-lg p-8 border border-primary-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">How Your Donation Helps</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                {[
+                  { label: 'Education', image: '/How Your Donation Helps/Education.jpg', desc: 'School supplies, books, and tuition support' },
+                  { label: 'Nutrition', image: '/How Your Donation Helps/Nutrition.jpg', desc: 'Food, meals, and nutritional support' },
+                  { label: 'Clothing', image: '/How Your Donation Helps/Clothing.jpg', desc: 'Essential clothing and uniforms' },
+                  { label: 'Healthcare', image: '/How Your Donation Helps/Healthcare.jpg', desc: 'Medical care and health programs' },
+                ].map((item) => (
+                  <div key={item.label} className="relative h-48 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all group">
+                    <Image
+                      src={item.image}
+                      alt={item.label}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end p-4">
+                      <h3 className="font-bold text-white text-lg">{item.label}</h3>
+                      <p className="text-gray-200 text-sm">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

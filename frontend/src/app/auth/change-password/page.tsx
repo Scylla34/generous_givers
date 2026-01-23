@@ -175,10 +175,24 @@ export default function ChangePasswordPage() {
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-xl text-center">Set New Password</CardTitle>
               <CardDescription className="text-center">
-                Your temporary password needs to be changed
+                Your temporary password needs to be changed before proceeding
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* First-Login Security Notice */}
+              <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex gap-3">
+                  <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-900">
+                    <p className="font-semibold mb-1">First-Time Login Security</p>
+                    <p>
+                      As a new member, you received a temporary password for security reasons. 
+                      Please create a strong, unique password that only you know.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Error Message */}
                 {error && (

@@ -14,8 +14,10 @@ export default function Navbar() {
 
   const navigation = [
     { name: 'Home', href: '/' },
-    { name: 'About', href: '/about' },
+    { name: 'About Us', href: '/about' },
     { name: 'Projects', href: '/projects' },
+    { name: 'Gallery', href: '/gallery' },
+    { name: 'Get Involved', href: '/get-involved' },
     { name: 'Donate', href: '/donate' },
     { name: 'Contact', href: '/contact' },
   ]
@@ -44,15 +46,15 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1 flex-1 justify-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`text-sm font-medium transition ${
+                className={`px-3 py-2 text-sm font-medium rounded-md transition ${
                   pathname === item.href
-                    ? 'text-primary-600'
-                    : 'text-gray-700 hover:text-primary-600'
+                    ? 'text-primary-600 bg-primary-50'
+                    : 'text-gray-700 hover:text-primary-600 hover:bg-gray-100'
                 }`}
               >
                 {item.name}
@@ -80,17 +82,18 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/auth/login"
-                className="bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-700 transition"
+                className="text-sm font-medium text-gray-700 hover:text-primary-600 transition border border-gray-300 px-3 py-2 rounded-md hover:border-primary-600"
               >
-                Login
+                Member Login
               </Link>
             )}
           </div>
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden p-2"
+            className="md:hidden p-2 text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md transition"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -103,28 +106,28 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t">
-          <div className="container mx-auto px-4 py-4 space-y-3">
+        <div className="md:hidden border-t bg-white">
+          <div className="container mx-auto px-4 py-4 space-y-2">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`block text-sm font-medium ${
+                className={`block px-3 py-2 rounded-md text-sm font-medium transition ${
                   pathname === item.href
-                    ? 'text-primary-600'
-                    : 'text-gray-700'
+                    ? 'text-primary-600 bg-primary-50'
+                    : 'text-gray-700 hover:text-primary-600 hover:bg-gray-100'
                 }`}
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.name}
               </Link>
             ))}
-            <div className="pt-3 border-t">
+            <div className="pt-4 border-t mt-4">
               {user ? (
                 <>
                   <Link
                     href="/dashboard"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className="block px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md transition mb-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
@@ -134,7 +137,7 @@ export default function Navbar() {
                       handleLogout()
                       setMobileMenuOpen(false)
                     }}
-                    className="block text-sm font-medium text-gray-700"
+                    className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-gray-100 rounded-md transition"
                   >
                     Logout
                   </button>
@@ -142,10 +145,10 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="block bg-primary-600 text-white px-4 py-2 rounded-lg text-sm font-medium text-center"
+                  className="block px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-md text-center hover:text-primary-600 hover:border-primary-600 transition"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Login
+                  Member Login
                 </Link>
               )}
             </div>
