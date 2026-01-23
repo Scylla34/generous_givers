@@ -36,27 +36,19 @@ export default function UsersPage() {
       resetForm()
       
       // Show success message with email status
-      if (response.emailSent) {
-        toast.success(
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <span className="font-medium">User created successfully!</span>
-            </div>
-            <div className="text-sm text-gray-600">
-              <Mail className="w-3 h-3 inline mr-1" />
-              Login credentials sent to {response.email}
-            </div>
-          </div>,
-          { duration: 5000 }
-        )
-      } else {
-        toast.success('User created successfully!', { duration: 3000 })
-        toast.warning(
-          `Email notification failed. Please manually send credentials to ${response.email}`,
-          { duration: 8000 }
-        )
-      }
+      toast.success(
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="font-medium">User created successfully!</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            <Mail className="w-3 h-3 inline mr-1" />
+            Login credentials sent to {response.email}
+          </div>
+        </div>,
+        { duration: 5000 }
+      )
       
       // Show admin notification
       toast.info(
@@ -68,7 +60,22 @@ export default function UsersPage() {
       const error = err as { response?: { data?: { message?: string } } }
       const errorMessage = error?.response?.data?.message || 'Failed to create user'
       setError(errorMessage)
-      toast.error(errorMessage)
+      
+      // Show specific error for email failures
+      if (errorMessage.includes('email')) {
+        toast.error(
+          <div className="space-y-2">
+            <div className="font-medium">User creation failed</div>
+            <div className="text-sm">{errorMessage}</div>
+            <div className="text-xs text-gray-600 mt-1">
+              Please check your email configuration and try again.
+            </div>
+          </div>,
+          { duration: 8000 }
+        )
+      } else {
+        toast.error(errorMessage, { duration: 5000 })
+      }
     },
   })
 
@@ -391,6 +398,7 @@ export default function UsersPage() {
                       <div className="text-sm text-blue-800">
                         <p className="font-medium">Auto-Generated Password</p>
                         <p>A temporary password will be automatically generated and sent to the user&apos;s email address.</p>
+                        <p className="text-xs mt-1 font-medium text-blue-900">Note: User creation will fail if email cannot be sent.</p>
                       </div>
                     </div>
                   </div>
