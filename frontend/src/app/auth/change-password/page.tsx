@@ -39,7 +39,7 @@ function FloatingElement({ icon: Icon, className, style }: {
 
 export default function ChangePasswordPage() {
   const router = useRouter()
-  const { user, clearAuth } = useAuthStore()
+  const { user } = useAuthStore()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -126,7 +126,6 @@ export default function ChangePasswordPage() {
       })
 
       toast.success('Password changed successfully! Redirecting to dashboard...')
-      clearAuth()
       setTimeout(() => {
         router.push('/dashboard')
       }, 1500)

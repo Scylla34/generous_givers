@@ -24,26 +24,19 @@ public class EmailService {
     private final EmailConfig emailConfig;
     private final MailerSendService mailerSendService;
 
-    private static final String PRIMARY_COLOR = "#16a34a";
-    private static final String PRIMARY_DARK = "#15803d";
-    private static final String LOGO_URL = "https://i.imgur.com/placeholder.png"; // Replace with actual logo URL
+    private static final String PRIMARY_COLOR = "#2563eb";
+    private static final String PRIMARY_DARK = "#1d4ed8";
+    private static final String LOGO_URL = "https://generousgiversfamily.netlify.app/logo/logo.jpg";
 
     @Async
     public void sendContactEmail(ContactRequest request) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(emailConfig.getContactRecipient());
-            helper.setSubject("[Contact Form] " + request.getSubject());
-            helper.setReplyTo(request.getEmail());
-
+            String subject = "[Contact Form] " + request.getSubject();
             String htmlContent = buildContactEmailHtml(request);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
+            
+            mailerSendService.sendEmail(emailConfig.getContactRecipient(), subject, htmlContent);
             log.info("Contact email sent successfully from: {}", request.getEmail());
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send contact email: {}", e.getMessage());
             throw new RuntimeException("Failed to send email", e);
         }
@@ -52,18 +45,12 @@ public class EmailService {
     @Async
     public void sendContactConfirmation(ContactRequest request) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(request.getEmail());
-            helper.setSubject("Thank you for contacting Generous Givers Family");
-
+            String subject = "Thank you for contacting Generous Givers Family";
             String htmlContent = buildConfirmationEmailHtml(request);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
+            
+            mailerSendService.sendEmail(request.getEmail(), subject, htmlContent);
             log.info("Confirmation email sent to: {}", request.getEmail());
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send confirmation email: {}", e.getMessage());
         }
     }
@@ -71,18 +58,12 @@ public class EmailService {
     @Async
     public void sendPasswordResetEmail(String recipientEmail, String firstName, String lastName, String resetToken) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(recipientEmail);
-            helper.setSubject("Password Reset - Generous Givers Family");
-
+            String subject = "Password Reset - Generous Givers Family";
             String htmlContent = buildPasswordResetEmailHtml(firstName, lastName, resetToken);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
+            
+            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
             log.info("Password reset email sent to: {}", recipientEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send password reset email: {}", e.getMessage());
             throw new RuntimeException("Failed to send reset email", e);
         }
@@ -107,18 +88,12 @@ public class EmailService {
     public void sendDonationReceipt(String recipientEmail, String donorName, BigDecimal amount,
                                      String mpesaReceipt, String projectTitle) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(recipientEmail);
-            helper.setSubject("Thank you for your donation - Generous Givers Family");
-
+            String subject = "Thank you for your donation - Generous Givers Family";
             String htmlContent = buildDonationReceiptHtml(donorName, amount, mpesaReceipt, projectTitle);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(message);
+            
+            mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
             log.info("Donation receipt sent to: {}", recipientEmail);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             log.error("Failed to send donation receipt: {}", e.getMessage());
         }
     }
@@ -238,7 +213,7 @@ public class EmailService {
 
                                         <!-- Login Button -->
                                         <div style="text-align: center; margin: 32px 0;">
-                                            <a href="#" style="display: inline-block; background: linear-gradient(135deg, %s 0%%, %s 100%%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600;">Access Member Portal</a>
+                                            <a href="https://generousgiversfamily.netlify.app/auth/login" style="display: inline-block; background: linear-gradient(135deg, %s 0%%, %s 100%%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-size: 14px; font-weight: 600;">Access Member Portal</a>
                                         </div>
 
                                         <p style="color: #374151; font-size: 16px; line-height: 1.7; margin: 24px 0 0 0;">

@@ -84,6 +84,7 @@ public class UserService {
             log.info("User credentials sent to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send user credentials email: {}", e.getMessage());
+            // TODO: Could add email retry logic here or queue for later
         }
         
         // Create notification for admin users only

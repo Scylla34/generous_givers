@@ -1,9 +1,35 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Heart, Mail, Phone, MapPin } from 'lucide-react'
+import { toast } from 'sonner'
+import { api } from '@/lib/api'
 
 export default function Footer() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email) {
+      toast.error('Please enter your email address')
+      return
+    }
+
+    setLoading(true)
+    try {
+      await api.post('/newsletter/subscribe', null, {
+        params: { email }
+      })
+      toast.success('Successfully subscribed to newsletter!')
+      setEmail('')
+    } catch {
+      toast.error('Failed to subscribe. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-8">
@@ -74,17 +100,21 @@ export default function Footer() {
             <p className="text-sm mb-4">
               Get updates on our latest projects and impact.
             </p>
-            <form className="space-y-2" action="subscribe">
+            <form className="space-y-2" onSubmit={handleSubscribe}>
               <input
                 type="email"
                 placeholder="Your email"
-                className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:outline-none focus:border-primary-500"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-3 py-2 rounded bg-gray-800 border border-gray-700 text-sm focus:outline-none focus:border-primary-500 text-white"
+                disabled={loading}
               />
               <button
                 type="submit"
-                className="w-full bg-primary-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-primary-700 transition"
+                disabled={loading}
+                className="w-full bg-primary-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-primary-700 transition disabled:opacity-50"
               >
-                Subscribe
+                {loading ? 'Subscribing...' : 'Subscribe'}
               </button>
             </form>
           </div>
