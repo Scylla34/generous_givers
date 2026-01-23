@@ -17,12 +17,16 @@ export type DonationStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
 export interface User extends Record<string, unknown> {
   id: string
-  name: string
+  firstName: string
+  lastName: string
+  name: string // Computed full name for backward compatibility
   email: string
   phone?: string
   role: UserRole
   isActive: boolean
   mustChangePassword: boolean
+  profilePicture?: string
+  memberJoiningDate?: string
   createdAt: string
   updatedAt: string
 }
@@ -35,11 +39,29 @@ export interface AuthResponse {
 }
 
 export interface CreateUserRequest {
-  name: string
+  firstName: string
+  lastName: string
   email: string
-  temporaryPassword: string
   phone?: string
   role: UserRole
+  memberJoiningDate?: string
+}
+
+export interface UserResponse {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  role: UserRole
+  isActive: boolean
+  mustChangePassword: boolean
+  profilePicture?: string
+  memberJoiningDate?: string
+  createdAt: string
+  updatedAt: string
+  temporaryPassword?: string
+  emailSent?: boolean
 }
 
 export interface UpdateUserRequest {
@@ -47,6 +69,12 @@ export interface UpdateUserRequest {
   email?: string
   phone?: string
   password?: string
+}
+
+export interface UpdateProfileRequest {
+  firstName: string
+  lastName: string
+  phone?: string
 }
 
 export interface ChangePasswordRequest {

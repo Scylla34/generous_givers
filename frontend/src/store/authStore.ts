@@ -18,6 +18,7 @@ interface AuthState {
   clearAuth: () => void
   isAuthenticated: () => boolean
   refreshToken: (accessToken: string, expiresInMs?: number) => void
+  updateUser: (user: User) => void
   updateLastActivity: () => void
   getTimeUntilExpiry: () => number
   isTokenExpired: () => boolean
@@ -57,6 +58,10 @@ export const useAuthStore = create<AuthState>()(
           tokenExpiresAt: now + expiresInMs,
           lastActivityAt: now,
         })
+      },
+
+      updateUser: (user) => {
+        set({ user })
       },
 
       updateLastActivity: () => {

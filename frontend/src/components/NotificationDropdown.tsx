@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, Check, CheckCheck, DollarSign, FolderOpen, MapPin, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
@@ -53,6 +54,7 @@ const getNotificationColor = (type: Notification['type']) => {
 
 export default function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const queryClient = useQueryClient();
   const { isAuthenticated } = useAuthStore();
 
@@ -73,6 +75,8 @@ export default function NotificationDropdown() {
     mutationFn: (id: string) => notificationService.markAsRead(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread'] });
     },
   });
 
@@ -80,6 +84,8 @@ export default function NotificationDropdown() {
     mutationFn: () => notificationService.markAllAsRead(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread-count'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications', 'unread'] });
     },
   });
 
@@ -89,6 +95,11 @@ export default function NotificationDropdown() {
 
   const handleMarkAllAsRead = () => {
     markAllAsReadMutation.mutate();
+  };
+
+  const handleViewAllNotifications = () => {
+    setIsOpen(false);
+    router.push('/dashboard/notifications');
   };
 
   return (
@@ -187,7 +198,7 @@ export default function NotificationDropdown() {
         {notifications.length > 0 && (
           <div className="border-t border-gray-100 p-2">
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={handleViewAllNotifications}
               className="w-full py-2 text-sm text-center text-primary-600 hover:text-primary-700 font-medium hover:bg-primary-50 rounded-md transition-colors"
             >
               View all notifications

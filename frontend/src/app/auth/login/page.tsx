@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { authService } from '@/services/authService'
 import { useAuthStore } from '@/store/authStore'
 import { handleApiError } from '@/lib/api'
-import { Lock, Mail, Heart, Users, HandHeart } from 'lucide-react'
+import { Lock, Mail, Heart, Users, HandHeart, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -42,6 +42,7 @@ export default function LoginPage() {
   const { setAuth } = useAuthStore()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [mounted, setMounted] = useState(false)
@@ -234,16 +235,23 @@ export default function LoginPage() {
                       )} />
                       <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         onFocus={() => setFocusedField('password')}
                         onBlur={() => setFocusedField(null)}
-                        className="pl-10 bg-white/90 border-gray-200 focus:border-primary-400 transition-all duration-200"
+                        className="pl-10 pr-10 bg-white/90 border-gray-200 focus:border-primary-400 transition-all duration-200"
                         placeholder="Enter your password"
                         disabled={loading}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 z-10 text-gray-400 hover:text-gray-600 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -269,14 +277,20 @@ export default function LoginPage() {
                 </Button>
               </form>
 
-              {/* Back Link */}
               <div className="mt-6 text-center">
                 <Link
-                  href="/"
+                  href="/contact"
                   className="text-sm text-gray-500 hover:text-primary-600 transition-colors duration-200 inline-flex items-center gap-1"
                 >
                   <span className="transform group-hover:-translate-x-1 transition-transform">←</span>
                   Back to Home
+                </Link>
+                <span className="mx-2 text-gray-300">|</span>
+                <Link
+                  href="/auth/reset-password"
+                  className="text-sm text-primary-600 hover:text-primary-700 transition-colors duration-200"
+                >
+                  Forgot Password?
                 </Link>
               </div>
             </CardContent>

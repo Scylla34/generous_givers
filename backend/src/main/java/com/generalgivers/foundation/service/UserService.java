@@ -3,12 +3,15 @@ package com.generalgivers.foundation.service;
 import com.generalgivers.foundation.dto.user.CreateUserRequest;
 import com.generalgivers.foundation.dto.user.UpdateUserRequest;
 import com.generalgivers.foundation.dto.user.UserResponse;
+import com.generalgivers.foundation.entity.NotificationType;
 import com.generalgivers.foundation.entity.User;
 import com.generalgivers.foundation.entity.UserRole;
 import com.generalgivers.foundation.exception.DuplicateResourceException;
 import com.generalgivers.foundation.exception.ResourceNotFoundException;
 import com.generalgivers.foundation.repository.UserRepository;
+import com.generalgivers.foundation.util.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +22,13 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final NotificationService notificationService;
 
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
@@ -48,18 +54,68 @@ public class UserService {
             throw new DuplicateResourceException("User", "email", request.getEmail());
         }
 
+        // Generate temporary password
+        String temporaryPassword = PasswordGenerator.generateTemporaryPassword();
+        
         User user = User.builder()
-                .name(request.getName())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .email(request.getEmail())
-                .passwordHash(passwordEncoder.encode(request.getTemporaryPassword()))
+                .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .phone(request.getPhone())
                 .role(request.getRole())
+                .memberJoiningDate(request.getMemberJoiningDate())
                 .isActive(true)
                 .mustChangePassword(true) // Force password change on first login
                 .build();
 
         user = userRepository.save(user);
-        return mapToUserResponse(user);
+        
+        // Send credentials via email
+        boolean emailSent = false;
+        try {
+            emailService.sendUserCredentials(
+                user.getEmail(), 
+                user.getFirstName(), 
+                user.getLastName(), 
+                temporaryPassword
+            );
+            emailSent = true;
+            log.info("User credentials sent to: {}", user.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send user credentials email: {}", e.getMessage());
+        }
+        
+        // Create notification for admin users only
+        try {
+            String notificationMessage = emailSent 
+                ? String.format("New user %s %s has been created and notified via email.", 
+                    user.getFirstName(), user.getLastName())
+                : String.format("New user %s %s has been created. Warning: Email notification failed.", 
+                    user.getFirstName(), user.getLastName());
+            
+            // Send notification to all admin users (SUPER_USER, CHAIRPERSON, SECRETARY_GENERAL)
+            List<User> adminUsers = userRepository.findByRoleIn(
+                List.of(UserRole.SUPER_USER, UserRole.CHAIRPERSON, UserRole.SECRETARY_GENERAL)
+            );
+            
+            for (User adminUser : adminUsers) {
+                notificationService.createUserNotification(
+                    "New User Created",
+                    notificationMessage,
+                    NotificationType.USER_REGISTERED,
+                    adminUser.getId()
+                );
+            }
+        } catch (Exception e) {
+            log.error("Failed to create user creation notification: {}", e.getMessage());
+        }
+        
+        UserResponse response = mapToUserResponse(user);
+        response.setTemporaryPassword(temporaryPassword); // Include in response for admin reference
+        response.setEmailSent(emailSent); // Include email status
+        
+        return response;
     }
 
     @Transactional
@@ -68,7 +124,10 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", id));
 
         if (request.getName() != null) {
-            user.setName(request.getName());
+            // Split name into first and last name if provided
+            String[] nameParts = request.getName().trim().split("\\s+", 2);
+            user.setFirstName(nameParts[0]);
+            user.setLastName(nameParts.length > 1 ? nameParts[1] : "");
         }
 
         if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
@@ -116,7 +175,9 @@ public class UserService {
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
-                .name(user.getName())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .name(user.getName()) // Computed full name
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .role(user.getRole())

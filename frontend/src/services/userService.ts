@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import { CreateUserRequest, UpdateUserRequest, User, UserRole } from '@/types'
+import { CreateUserRequest, UpdateUserRequest, User, UserRole, UserResponse } from '@/types'
 
 export const userService = {
   getAll: async (): Promise<User[]> => {
@@ -12,8 +12,8 @@ export const userService = {
     return response.data
   },
 
-  create: async (data: CreateUserRequest): Promise<User> => {
-    const response = await api.post<User>('/users', data)
+  create: async (data: CreateUserRequest): Promise<UserResponse> => {
+    const response = await api.post<UserResponse>('/users', data)
     return response.data
   },
 
