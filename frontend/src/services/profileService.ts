@@ -46,8 +46,8 @@ export const profileService = {
     return response.data
   },
 
-  getProfilePictureUrl(fileName?: string): string | null {
-    if (!fileName) return null
+  getProfilePictureUrl(fileName?: string): string | undefined {
+    if (!fileName) return undefined
     return `${process.env.NEXT_PUBLIC_API_URL}/profile/picture/${fileName}`
   },
 }
