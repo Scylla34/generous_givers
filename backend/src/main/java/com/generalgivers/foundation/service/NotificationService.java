@@ -76,6 +76,14 @@ public class NotificationService {
     }
 
     @Transactional
+    public Notification createGlobalNotification(String title, String message, NotificationType type,
+                                                 String entityType, String entityId) {
+        Map<String, Object> metadata = entityId != null ? Map.of("entityId", entityId) : null;
+        return createNotification(title, message, type, entityType, 
+                entityId != null ? UUID.fromString(entityId) : null, metadata, null, true);
+    }
+
+    @Transactional
     public Notification createGlobalNotification(String title, String message, NotificationType type) {
         return createNotification(title, message, type, null, null, null, null, true);
     }

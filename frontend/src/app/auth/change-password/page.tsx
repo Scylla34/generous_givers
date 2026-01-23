@@ -43,6 +43,7 @@ export default function ChangePasswordPage() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, feedback: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [mounted, setMounted] = useState(false)
@@ -69,9 +70,40 @@ export default function ChangePasswordPage() {
     { id: 6, Icon: HandHeart, initialX: 90, initialY: 45, delay: 2.5, duration: 7 },
   ]
 
+  const checkPasswordStrength = (password: string) => {
+    let score = 0
+    let feedback = ''
+    
+    if (password.length >= 8) score += 1
+    if (/[a-z]/.test(password)) score += 1
+    if (/[A-Z]/.test(password)) score += 1
+    if (/[0-9]/.test(password)) score += 1
+    if (/[^A-Za-z0-9]/.test(password)) score += 1
+    
+    if (score < 3) {
+      feedback = 'Weak - Add uppercase, lowercase, numbers, and symbols'
+    } else if (score < 4) {
+      feedback = 'Fair - Consider adding more character types'
+    } else if (score < 5) {
+      feedback = 'Good - Strong password'
+    } else {
+      feedback = 'Excellent - Very strong password'
+    }
+    
+    return { score, feedback }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const strength = checkPasswordStrength(newPassword)
+    
+    if (strength.score < 3) {
+      setError('Password is too weak. Please create a stronger password.')
+      toast.error('Password is too weak. Please create a stronger password.')
+      return
+    }
 
     if (newPassword.length < 8) {
       setError('New password must be at least 8 characters long')
@@ -93,9 +125,11 @@ export default function ChangePasswordPage() {
         newPassword,
       })
 
-      toast.success('Password changed successfully! Please login with your new password.')
+      toast.success('Password changed successfully! Redirecting to dashboard...')
       clearAuth()
-      router.push('/auth/login')
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 1500)
     } catch (err) {
       const errorMessage = handleApiError(err)
       setError(errorMessage)
@@ -264,7 +298,10 @@ export default function ChangePasswordPage() {
                         type="password"
                         required
                         value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
+                        onChange={(e) => {
+                          setNewPassword(e.target.value)
+                          setPasswordStrength(checkPasswordStrength(e.target.value))
+                        }}
                         onFocus={() => setFocusedField('new')}
                         onBlur={() => setFocusedField(null)}
                         className="pl-10 bg-white/90 border-gray-200 focus:border-primary-400 transition-all duration-200 text-gray-900"
@@ -274,6 +311,34 @@ export default function ChangePasswordPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Password Strength Indicator */}
+                {newPassword && (
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">Password Strength</span>
+                      <span className={cn(
+                        "text-xs font-medium",
+                        passwordStrength.score < 3 ? "text-red-600" :
+                        passwordStrength.score < 4 ? "text-yellow-600" :
+                        passwordStrength.score < 5 ? "text-blue-600" : "text-green-600"
+                      )}>
+                        {passwordStrength.feedback}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div
+                        className={cn(
+                          "h-2 rounded-full transition-all duration-300",
+                          passwordStrength.score < 3 ? "bg-red-500" :
+                          passwordStrength.score < 4 ? "bg-yellow-500" :
+                          passwordStrength.score < 5 ? "bg-blue-500" : "bg-green-500"
+                        )}
+                        style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
 
                 {/* Confirm Password Field */}
                 <div className="space-y-2">

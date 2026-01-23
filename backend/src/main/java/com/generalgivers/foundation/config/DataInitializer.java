@@ -31,7 +31,8 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         User admin = User.builder()
-                .name("System Administrator")
+                .firstName("System")
+                .lastName("Administrator")
                 .email(adminEmail)
                 .passwordHash(passwordEncoder.encode("Admin@123"))
                 .phone("+1234567890")

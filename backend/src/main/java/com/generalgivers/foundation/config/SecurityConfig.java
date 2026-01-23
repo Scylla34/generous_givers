@@ -37,9 +37,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints - login, docs, and M-Pesa
+                        // Public endpoints - login, docs, password reset, and M-Pesa
                         .requestMatchers(
                                 "/auth/login",
+                                "/auth/request-password-reset",
+                                "/auth/reset-password",
+                                "/profile/picture/**",
                                 "/swagger-ui/**",
                                 "/api-docs/**",
                                 "/swagger-ui.html"

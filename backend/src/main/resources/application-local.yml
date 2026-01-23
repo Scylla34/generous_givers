@@ -1,17 +1,99 @@
-# Local development profile - optimized for fast development
 spring:
-  jpa:
-    show-sql: false
+  application:
+    name: foundation-system
 
-  # Keep DevTools restart DISABLED for faster development
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:teddscylla@gmail.com}
+    password: ${MAIL_PASSWORD:yuvyxkvvqyskdahv}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5433/general_givers}
+    username: ${DATABASE_USERNAME:peter}
+    password: ${DATABASE_PASSWORD:manu}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc:
+          time_zone: UTC
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+
+  flyway:
+    enabled: false
+
+  # DevTools - disable automatic restart to prevent recompilation on file changes
   devtools:
     restart:
       enabled: false
     livereload:
       enabled: false
 
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api/v1
+  # Enable response compression
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain
+    min-response-size: 1024
+
 logging:
   level:
     com.generalgivers: INFO
     org.springframework.web: WARN
-    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: WARN
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:your_secure_random_secret_key_minimum_256_bits_for_HS256_algorithm}
+    expiration: 900000  # 15 minutes in milliseconds
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:3000}
+  email:
+    contact-recipient: ${CONTACT_RECIPIENT:teddscylla@gmail.com}
+    from-name: Generous Givers Family
+
+  daraja:
+    consumer-key: ${DAR_CONSUMER_KEY:}
+    consumer-secret: ${DAR_CONSUMER_SECRET:}
+    short-code: ${DAR_SHORT_CODE:}
+    passkey: ${DAR_PASSKEY:}
+    callback-url: ${DAR_CALLBACK_URL:https://yourdomain.com/api/mpesa/callback}
+    base-url: ${DAR_BASE_URL:https://sandbox.safaricom.co.ke}

@@ -20,6 +20,7 @@ import {
   ChevronRight,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { profileService } from '@/services/profileService'
 import NotificationDropdown from './NotificationDropdown'
 import {
   DropdownMenu,
@@ -29,7 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import { Avatar, AvatarFallback } from './ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { cn } from '@/lib/utils'
 import { useSessionTimeout } from '@/hooks/useSessionTimeout'
 
@@ -217,6 +218,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-3">
               <Avatar className="w-10 h-10">
+                <AvatarImage 
+                  src={user?.profilePicture ? profileService.getProfilePictureUrl(user.profilePicture) : undefined}
+                  alt="Profile picture"
+                />
                 <AvatarFallback className="bg-primary-100 text-primary-700 font-semibold">
                   {user ? getInitials(user.name) : 'U'}
                 </AvatarFallback>
@@ -270,6 +275,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-primary-50 transition-colors">
                     <Avatar className="w-8 h-8">
+                      <AvatarImage 
+                        src={user?.profilePicture ? profileService.getProfilePictureUrl(user.profilePicture) : undefined}
+                        alt="Profile picture"
+                      />
                       <AvatarFallback className="bg-primary-100 text-primary-700 text-xs font-semibold">
                         {user ? getInitials(user.name) : 'U'}
                       </AvatarFallback>
