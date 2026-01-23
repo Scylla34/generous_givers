@@ -17,7 +17,11 @@ export function PermissionButton({
   resource,
   action,
   children,
-  className
+  className,
+  onClick,
+  disabled = false,
+  title,
+  type = 'button'
 }: PermissionButtonProps) {
   const { hasPermission } = usePermissions()
   
@@ -28,9 +32,15 @@ export function PermissionButton({
   }
 
   return (
-    <div className={cn('inline-block', className)}>
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={cn('inline-block', className)}
+    >
       {children}
-    </div>
+    </button>
   )
 }
 

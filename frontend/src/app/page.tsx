@@ -122,12 +122,12 @@ export default function Home() {
       {/* Impact Stats */}
       <section className="py-16 relative overflow-hidden">
         <Image
-          src="/children/2.jpg"
+          src="/children/7.jpg"
           alt="Impact background"
           fill
           className="object-cover -z-10"
         />
-        <div className="absolute inset-0 bg-black/60 -z-10" />
+        <div className="absolute inset-0 bg-black/70 -z-10" />
         
         <div className="container mx-auto px-4">
           <div className="text-center mb-12 animate-fade-in">
