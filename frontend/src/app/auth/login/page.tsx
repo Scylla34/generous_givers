@@ -149,11 +149,22 @@ export default function LoginPage() {
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           )}>
             <CardHeader className="space-y-1 pb-4">
-              <CardTitle className="text-xl text-center">Sign In</CardTitle>
+              <CardTitle className="text-xl text-center">Member Login</CardTitle>
               <CardDescription className="text-center">
-                Access your Generous Givers Family dashboard
+                Dashboard access for registered members only
               </CardDescription>
             </CardHeader>
+
+            {/* Admin-Only Notice */}
+            <div className="px-6 pt-2 pb-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-sm text-blue-900">
+                  <span className="font-semibold">Member Portal Notice:</span> This portal is
+                  for registered members only. Accounts are created and managed by administrators.
+                </p>
+              </div>
+            </div>
+
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Error Message */}

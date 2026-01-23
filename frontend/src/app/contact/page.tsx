@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
+import { HeroImageSlider } from '@/components/HeroImageSlider';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState<ContactRequest>({
@@ -49,41 +50,24 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Video Header */}
-      <div className="relative h-[300px] md:h-[400px] flex items-center justify-center text-white overflow-hidden">
-        {/* Video background */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/videos/m.mp4" type="video/mp4" />
-        </video>
-
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-primary-700/60"></div>
-
-        {/* Text */}
-        <div className="relative z-10 container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Us</h1>
-          <p className="text-xl">Get in touch with our team</p>
-        </div>
-      </div>
+      {/* Image Slider Header */}
+      <HeroImageSlider 
+        title="Contact Us"
+        subtitle="Get in touch with our team"
+      />
 
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Get In Touch</h2>
-            <p className="text-gray-700 mb-8">
+          <div className="animate-fade-in">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 animate-slide-up">Get In Touch</h2>
+            <p className="text-gray-700 mb-8 animate-slide-up" style={{ animationDelay: '100ms' }}>
               We would love to hear from you! Whether you have questions, want to get
               involved, or need more information about our work, please don&apos;t hesitate to
               reach out.
             </p>
 
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 animate-slide-up" style={{ animationDelay: '200ms' }}>
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <Mail className="w-5 h-5 text-primary-600" />
                 </div>
@@ -98,7 +82,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 animate-slide-up" style={{ animationDelay: '300ms' }}>
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <Phone className="w-5 h-5 text-primary-600" />
                 </div>
@@ -110,7 +94,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 animate-slide-up" style={{ animationDelay: '400ms' }}>
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <MapPin className="w-5 h-5 text-primary-600" />
                 </div>
@@ -120,7 +104,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-4 animate-slide-up" style={{ animationDelay: '500ms' }}>
                 <div className="p-3 bg-primary-100 rounded-lg">
                   <Clock className="w-5 h-5 text-primary-600" />
                 </div>
@@ -136,8 +120,8 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
+          <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 animate-scale-in" style={{ animationDelay: '200ms' }}>
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 animate-slide-up">Send Us a Message</h2>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
