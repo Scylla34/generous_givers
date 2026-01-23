@@ -87,7 +87,6 @@ public class EmailService {
         }
     }
 
-    @Async
     public void sendUserCredentials(String recipientEmail, String firstName, String lastName, String temporaryPassword) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -103,6 +102,7 @@ public class EmailService {
             log.info("User credentials email sent to: {}", recipientEmail);
         } catch (MessagingException e) {
             log.error("Failed to send user credentials email: {}", e.getMessage());
+            throw new RuntimeException("Failed to send user credentials email", e);
         }
     }
 
