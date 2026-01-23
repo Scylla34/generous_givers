@@ -1,4 +1,5 @@
 import { BarChart3, TrendingUp, CheckCircle, Pause } from 'lucide-react'
+import { Project } from '@/types'
 
 interface ProjectStatsProps {
   projects: Project[]
