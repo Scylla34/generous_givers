@@ -68,7 +68,7 @@ app:
     
   mailersend:
     api-key: ${MAILERSEND_API_KEY}
-    from-email: ${MAILERSEND_FROM_EMAIL:noreply@yourdomain.com}
+    from-email: ${MAILERSEND_FROM_EMAIL}
 
 logging:
   level:
