@@ -27,7 +27,7 @@ public class NewsletterController {
             return ResponseEntity.ok("Successfully subscribed to newsletter!");
         } catch (Exception e) {
             log.error("Failed to subscribe email: {}", e.getMessage());
-            return ResponseEntity.badRequest().body("Failed to subscribe. Please try again.");
+            return ResponseEntity.badRequest().body("Failed to subscribe. Please check your email address and try again.");
         }
     }
 }
