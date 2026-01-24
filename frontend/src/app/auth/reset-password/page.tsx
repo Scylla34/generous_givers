@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { authService } from '@/services/authService'
-import { Mail, ArrowLeft, CheckCircle } from 'lucide-react'
+import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
+import { isEmailDeliveryError, getUserFriendlyErrorMessage } from '@/lib/utils'
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -29,8 +30,8 @@ export default function ResetPasswordPage() {
       setSent(true)
       toast.success('Password reset instructions sent successfully!')
     } catch (err: unknown) {
-      let errorMessage = 'Failed to send reset email'
       const error = err as { response?: { data?: { message?: string }; status?: number } }
+      let errorMessage = 'Failed to send reset email'
       
       if (error.response?.data?.message) {
         errorMessage = error.response.data.message
@@ -42,8 +43,24 @@ export default function ResetPasswordPage() {
         errorMessage = 'Server error. Please try again later'
       }
       
-      setError(errorMessage)
-      toast.error(errorMessage)
+      const friendlyMessage = getUserFriendlyErrorMessage(errorMessage)
+      
+      if (isEmailDeliveryError(errorMessage)) {
+        setError('Failed to send password reset email. Please check your email address and try again.')
+        toast.error(
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-600" />
+              <span className="font-medium">Email delivery failed</span>
+            </div>
+            <div className="text-sm">Please verify your email address is correct and try again.</div>
+          </div>,
+          { duration: 8000 }
+        )
+      } else {
+        setError(friendlyMessage)
+        toast.error(friendlyMessage)
+      }
     } finally {
       setLoading(false)
     }

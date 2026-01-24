@@ -75,7 +75,6 @@ public class UserService {
         user = userRepository.save(user);
         
         // Send credentials via email - REQUIRED for user creation
-        boolean emailSent = false;
         try {
             emailService.sendUserCredentials(
                 user.getEmail(), 
@@ -83,13 +82,12 @@ public class UserService {
                 user.getLastName(), 
                 temporaryPassword
             );
-            emailSent = true;
             log.info("User credentials sent to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send user credentials email: {}", e.getMessage());
             // Delete the created user since email failed
             userRepository.delete(user);
-            throw new RuntimeException("User creation failed: Unable to send credentials email to " + user.getEmail() + ". Error: " + e.getMessage());
+            throw new RuntimeException("User creation failed: Unable to send credentials email to " + user.getEmail() + ". Please check the email address and try again.");
         }
         
         // Create notification for admin users
@@ -116,7 +114,7 @@ public class UserService {
         
         UserResponse response = mapToUserResponse(user);
         response.setTemporaryPassword(temporaryPassword);
-        response.setEmailSent(emailSent);
+        response.setEmailSent(true);
         
         return response;
     }

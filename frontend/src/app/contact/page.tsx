@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import { contactService, ContactRequest } from '@/services/contactService';
 import { toast } from 'sonner';
-import { Mail, Phone, MapPin, Clock, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Send, AlertCircle } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { HeroImageSlider } from '@/components/HeroImageSlider';
+import { isEmailDeliveryError, getUserFriendlyErrorMessage } from '@/lib/utils';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState<ContactRequest>({
@@ -40,9 +41,24 @@ export default function ContactPage() {
         message: '',
       });
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : 'Failed to send message. Please try again.'
-      );
+      const errorResponse = error as { response?: { data?: { message?: string } } }
+      const errorMessage = errorResponse?.response?.data?.message || 'Failed to send message. Please try again.'
+      const friendlyMessage = getUserFriendlyErrorMessage(errorMessage)
+      
+      if (isEmailDeliveryError(errorMessage)) {
+        toast.error(
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-600" />
+              <span className="font-medium">Message delivery failed</span>
+            </div>
+            <div className="text-sm">Please check your email address and try again, or contact us directly.</div>
+          </div>,
+          { duration: 8000 }
+        )
+      } else {
+        toast.error(friendlyMessage)
+      }
     } finally {
       setIsSubmitting(false);
     }

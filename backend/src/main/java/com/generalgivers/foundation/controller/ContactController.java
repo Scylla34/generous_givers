@@ -41,7 +41,7 @@ public class ContactController {
             log.error("Failed to send contact form emails: {}", e.getMessage());
             return ResponseEntity.badRequest().body(Map.of(
                 "status", "error",
-                "message", "Failed to send your message. Please try again or contact us directly."
+                "message", "Failed to send your message. Please check your email address and try again."
             ));
         }
     }

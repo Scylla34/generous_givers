@@ -59,7 +59,9 @@ public class PasswordResetService {
             log.info("Password reset email sent to: {}", user.getEmail());
         } catch (Exception e) {
             log.error("Failed to send password reset email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send reset email");
+            // Delete the token since email failed
+            tokenRepository.delete(resetToken);
+            throw new RuntimeException("Failed to send password reset email. Please check your email address and try again.");
         }
     }
 

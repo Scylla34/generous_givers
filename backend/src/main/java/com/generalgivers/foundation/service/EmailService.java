@@ -44,7 +44,7 @@ public class EmailService {
             }
         } catch (Exception e) {
             log.error("Failed to send contact email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send email", e);
+            throw new RuntimeException("Failed to send contact email: " + e.getMessage(), e);
         }
     }
 
@@ -82,7 +82,7 @@ public class EmailService {
             }
         } catch (Exception e) {
             log.error("Failed to send password reset email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send reset email", e);
+            throw new RuntimeException("Failed to send password reset email: " + e.getMessage(), e);
         }
     }
 
@@ -100,11 +100,11 @@ public class EmailService {
                 log.info("User credentials email sent successfully to: {}", recipientEmail);
             } else {
                 log.error("Failed to send user credentials email to: {}", recipientEmail);
-                throw new RuntimeException("Email delivery failed");
+                throw new RuntimeException("Email delivery failed - MailerSend service returned false");
             }
         } catch (Exception e) {
-            log.error("Failed to send user credentials email to {}: {}", recipientEmail, e.getMessage(), e);
-            throw new RuntimeException("Failed to send user credentials email", e);
+            log.error("Failed to send user credentials email to {}: {}", recipientEmail, e.getMessage());
+            throw new RuntimeException("Failed to send user credentials email: " + e.getMessage(), e);
         }
     }
 
@@ -124,7 +124,7 @@ public class EmailService {
             }
         } catch (Exception e) {
             log.error("Failed to send newsletter welcome email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send newsletter welcome email", e);
+            throw new RuntimeException("Failed to send newsletter welcome email: " + e.getMessage(), e);
         }
     }
 

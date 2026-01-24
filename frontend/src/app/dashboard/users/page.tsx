@@ -9,6 +9,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { DatePicker } from '@/components/ui/date-picker'
 import { toast } from 'sonner'
 import { PermissionButton, PermissionWrapper } from '@/components/ui/permission-button'
+import { isEmailDeliveryError, getUserFriendlyErrorMessage } from '@/lib/utils'
 
 export default function UsersPage() {
   const queryClient = useQueryClient()
@@ -68,8 +69,23 @@ export default function UsersPage() {
     onError: (err: unknown) => {
       const errorResponse = err as { response?: { data?: { message?: string } } }
       const errorMessage = errorResponse?.response?.data?.message || 'Failed to create user'
-      setFormError(errorMessage)
-      toast.error(errorMessage)
+      
+      // Use utility function for better error handling
+      const friendlyMessage = getUserFriendlyErrorMessage(errorMessage)
+      
+      if (isEmailDeliveryError(errorMessage)) {
+        setFormError(friendlyMessage)
+        toast.error(
+          <div className="space-y-2">
+            <div className="font-medium">User creation failed</div>
+            <div className="text-sm">Unable to send login credentials to the provided email address. Please verify the email is correct and try again.</div>
+          </div>,
+          { duration: 8000 }
+        )
+      } else {
+        setFormError(friendlyMessage)
+        toast.error(friendlyMessage)
+      }
     },
   })
 
@@ -408,7 +424,7 @@ export default function UsersPage() {
                       <Mail className="w-4 h-4 text-blue-600 mt-0.5" />
                       <div className="text-sm text-blue-800">
                         <p className="font-medium">Auto-Generated Password</p>
-                        <p>A temporary password will be automatically generated and sent to the user&apos;s email address.</p>
+                        <p>A temporary password will be automatically generated and sent to the user&apos;s email address. <strong>User creation will fail if the email cannot be delivered.</strong></p>
                       </div>
                     </div>
                   </div>

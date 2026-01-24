@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Heart, Mail, Phone, MapPin } from 'lucide-react'
+import { Heart, Mail, Phone, MapPin, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { api } from '@/lib/api'
+import { isEmailDeliveryError, getUserFriendlyErrorMessage } from '@/lib/utils'
 
 export default function Footer() {
   const [email, setEmail] = useState('')
@@ -24,8 +25,25 @@ export default function Footer() {
       })
       toast.success('Successfully subscribed to newsletter!')
       setEmail('')
-    } catch {
-      toast.error('Failed to subscribe. Please try again.')
+    } catch (error) {
+      const errorResponse = error as { response?: { data?: string } }
+      const errorMessage = errorResponse?.response?.data || 'Failed to subscribe. Please try again.'
+      const friendlyMessage = getUserFriendlyErrorMessage(errorMessage)
+      
+      if (isEmailDeliveryError(errorMessage)) {
+        toast.error(
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-600" />
+              <span className="font-medium">Subscription failed</span>
+            </div>
+            <div className="text-sm">Please check your email address and try again.</div>
+          </div>,
+          { duration: 8000 }
+        )
+      } else {
+        toast.error(friendlyMessage)
+      }
     } finally {
       setLoading(false)
     }

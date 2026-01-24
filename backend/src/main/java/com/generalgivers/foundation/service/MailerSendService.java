@@ -50,6 +50,7 @@ public class MailerSendService {
                     .bodyValue(emailData)
                     .retrieve()
                     .bodyToMono(String.class)
+                    .timeout(java.time.Duration.ofSeconds(30))
                     .block();
 
             log.info("Email sent successfully via MailerSend to: {}", to);
