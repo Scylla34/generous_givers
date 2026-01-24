@@ -74,12 +74,12 @@ public class UserService {
 
         user = userRepository.save(user);
         
-        // Send credentials via email - REQUIRED for user creation
+        // Send credentials via email - REQUIRED for user creation (synchronous call)
         try {
-            emailService.sendUserCredentials(
-                user.getEmail(), 
-                user.getFirstName(), 
-                user.getLastName(), 
+            emailService.sendUserCredentialsSync(
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
                 temporaryPassword
             );
             log.info("User credentials sent to: {}", user.getEmail());
@@ -87,7 +87,7 @@ public class UserService {
             log.error("Failed to send user credentials email: {}", e.getMessage());
             // Delete the created user since email failed
             userRepository.delete(user);
-            throw new RuntimeException("User creation failed: Unable to send credentials email to " + user.getEmail() + ". Please check the email address and try again.");
+            throw new RuntimeException("User creation failed: Unable to send credentials email to " + user.getEmail() + ". Please check email configuration and try again.");
         }
         
         // Create notification for admin users

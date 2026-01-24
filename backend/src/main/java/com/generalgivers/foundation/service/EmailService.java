@@ -66,46 +66,54 @@ public class EmailService {
         }
     }
 
+    /**
+     * Synchronous version - blocks until email is sent.
+     * Use this for critical operations where email must succeed before continuing.
+     */
+    public void sendPasswordResetEmailSync(String recipientEmail, String firstName, String lastName, String resetToken) {
+        log.info("Sending password reset email via MailerSend to: {}", recipientEmail);
+
+        String subject = "Password Reset - Generous Givers Family";
+        String htmlContent = buildPasswordResetEmailHtml(firstName, lastName, resetToken);
+
+        boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+
+        if (!emailSent) {
+            log.error("Failed to send password reset email to: {}", recipientEmail);
+            throw new RuntimeException("Email delivery failed - Unable to send password reset to " + recipientEmail);
+        }
+
+        log.info("Password reset email sent successfully to: {}", recipientEmail);
+    }
+
     @Async
     public void sendPasswordResetEmail(String recipientEmail, String firstName, String lastName, String resetToken) {
-        try {
-            String subject = "Password Reset - Generous Givers Family";
-            String htmlContent = buildPasswordResetEmailHtml(firstName, lastName, resetToken);
-            
-            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            
-            if (emailSent) {
-                log.info("Password reset email sent to: {}", recipientEmail);
-            } else {
-                log.error("Failed to send password reset email to: {}", recipientEmail);
-                throw new RuntimeException("Password reset email delivery failed");
-            }
-        } catch (Exception e) {
-            log.error("Failed to send password reset email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send password reset email: " + e.getMessage(), e);
+        sendPasswordResetEmailSync(recipientEmail, firstName, lastName, resetToken);
+    }
+
+    /**
+     * Synchronous version - blocks until email is sent.
+     * Use this for critical operations where email must succeed before continuing.
+     */
+    public void sendUserCredentialsSync(String recipientEmail, String firstName, String lastName, String temporaryPassword) {
+        log.info("Sending credentials email via MailerSend to: {}", recipientEmail);
+
+        String subject = "Welcome to Generous Givers Family - Your Account Details";
+        String htmlContent = buildUserCredentialsEmailHtml(firstName, lastName, recipientEmail, temporaryPassword);
+
+        boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+
+        if (!emailSent) {
+            log.error("Failed to send user credentials email to: {}", recipientEmail);
+            throw new RuntimeException("Email delivery failed - Unable to send credentials to " + recipientEmail);
         }
+
+        log.info("User credentials email sent successfully to: {}", recipientEmail);
     }
 
     @Async
     public void sendUserCredentials(String recipientEmail, String firstName, String lastName, String temporaryPassword) {
-        try {
-            log.info("Sending email via MailerSend to: {}", recipientEmail);
-            
-            String subject = "Welcome to Generous Givers Family - Your Account Details";
-            String htmlContent = buildUserCredentialsEmailHtml(firstName, lastName, recipientEmail, temporaryPassword);
-            
-            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            
-            if (emailSent) {
-                log.info("User credentials email sent successfully to: {}", recipientEmail);
-            } else {
-                log.error("Failed to send user credentials email to: {}", recipientEmail);
-                throw new RuntimeException("Email delivery failed - MailerSend service returned false");
-            }
-        } catch (Exception e) {
-            log.error("Failed to send user credentials email to {}: {}", recipientEmail, e.getMessage());
-            throw new RuntimeException("Failed to send user credentials email: " + e.getMessage(), e);
-        }
+        sendUserCredentialsSync(recipientEmail, firstName, lastName, temporaryPassword);
     }
 
     @Async

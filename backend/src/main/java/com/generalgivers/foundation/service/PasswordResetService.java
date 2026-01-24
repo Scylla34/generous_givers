@@ -48,9 +48,9 @@ public class PasswordResetService {
 
         tokenRepository.save(resetToken);
 
-        // Send reset email
+        // Send reset email (synchronous - must succeed before completing)
         try {
-            emailService.sendPasswordResetEmail(
+            emailService.sendPasswordResetEmailSync(
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
@@ -61,7 +61,7 @@ public class PasswordResetService {
             log.error("Failed to send password reset email: {}", e.getMessage());
             // Delete the token since email failed
             tokenRepository.delete(resetToken);
-            throw new RuntimeException("Failed to send password reset email. Please check your email address and try again.");
+            throw new RuntimeException("Failed to send password reset email. Please check email configuration and try again.");
         }
     }
 
