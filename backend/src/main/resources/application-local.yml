@@ -19,8 +19,8 @@ spring:
           writetimeout: 5000
 
   mailersend:
-    api-key: ${MAILERSEND_API_KEY:mlsn.7717952bc45e8fefb287f7a43dbdab0faaac05e8e104b548c1fd1613daeb621d}
-    from-email: ${MAILERSEND_FROM_EMAIL:MS_0AyAvC@test-68zxl2712554j905.mlsender.net}
+    api-key: ${MAILERSEND_API_KEY}
+    from-email: ${MAILERSEND_FROM_EMAIL}
 
 
   datasource:
