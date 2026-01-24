@@ -8,7 +8,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 @Service
 @RequiredArgsConstructor
@@ -20,29 +24,27 @@ public class MailerSendService {
 
     public boolean sendEmail(String to, String subject, String htmlContent) {
         try {
-            // Debug logging
             log.info("Attempting to send email via MailerSend");
-            log.info("API Key configured: {}", mailerSendConfig.getApiKey() != null && !mailerSendConfig.getApiKey().isEmpty());
             log.info("From Email: {}", mailerSendConfig.getFromEmail());
             log.info("To Email: {}", to);
-            
-            String url = "https://api.mailersend.com/v1/email";
-            
-            Map<String, Object> emailData = Map.of(
-                "from", Map.of(
-                    "email", mailerSendConfig.getFromEmail(),
-                    "name", "General Givers Foundation"
-                ),
-                "to", new Object[]{Map.of(
-                    "email", to,
-                    "name", "User"
-                )},
-                "subject", subject,
-                "html", htmlContent
-            );
 
-            log.info("Sending request to MailerSend API: {}", url);
-            
+            String url = "https://api.mailersend.com/v1/email";
+
+            // Build request body using HashMap for proper JSON serialization
+            Map<String, Object> fromData = new HashMap<>();
+            fromData.put("email", mailerSendConfig.getFromEmail());
+            fromData.put("name", "Generous Givers Family");
+
+            Map<String, Object> toData = new HashMap<>();
+            toData.put("email", to);
+            toData.put("name", "User");
+
+            Map<String, Object> emailData = new HashMap<>();
+            emailData.put("from", fromData);
+            emailData.put("to", List.of(toData));
+            emailData.put("subject", subject);
+            emailData.put("html", htmlContent);
+
             String response = webClient.post()
                     .uri(url)
                     .header(HttpHeaders.AUTHORIZATION, "Bearer " + mailerSendConfig.getApiKey())
@@ -55,9 +57,11 @@ public class MailerSendService {
 
             log.info("Email sent successfully via MailerSend to: {}", to);
             return true;
+        } catch (WebClientResponseException e) {
+            log.error("MailerSend API error - Status: {}, Body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return false;
         } catch (Exception e) {
             log.error("Failed to send email via MailerSend to {}: {}", to, e.getMessage());
-            log.error("Full error: ", e);
             return false;
         }
     }

@@ -99,5 +99,5 @@ app:
       base-url: ${DAR_BASE_URL:https://sandbox.safaricom.co.ke}
 
   mailersend:
-    api-key: ${MAILERSEND_API_KEY:mlsn.370f25b51906b17d4c5f3308fd3b3efdc65586a5dec63a499474cf9c1b26e172}
-    from-email: ${MAILERSEND_FROM_EMAIL:MS_OG3r3S@test-65qngkdkxd8lwr12.mlsender.net}
+    api-key: ${MAILERSEND_API_KEY}
+    from-email: ${MAILERSEND_FROM_EMAIL}
