@@ -27,10 +27,10 @@ public class ContactController {
         log.info("Received contact form submission from: {}", request.getEmail());
 
         try {
-            // Send email to admin
-            emailService.sendContactEmail(request);
+            // Send email to admin (synchronous - must succeed)
+            emailService.sendContactEmailSync(request);
 
-            // Send confirmation to the sender
+            // Send confirmation to the sender (async - best effort)
             emailService.sendContactConfirmation(request);
 
             return ResponseEntity.ok(Map.of(
@@ -41,7 +41,7 @@ public class ContactController {
             log.error("Failed to send contact form emails: {}", e.getMessage());
             return ResponseEntity.badRequest().body(Map.of(
                 "status", "error",
-                "message", "Failed to send your message. Please check your email address and try again."
+                "message", "Failed to send your message. Please check email configuration and try again."
             ));
         }
     }

@@ -2,6 +2,12 @@ spring:
   application:
     name: foundation-system
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 100MB
+
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://db.rxvwlbcnjujkefqclqtl.supabase.co:5432/postgres?sslmode=require}
     username: ${DATABASE_USERNAME:postgres}
@@ -69,6 +75,19 @@ app:
   mailersend:
     api-key: ${MAILERSEND_API_KEY}
     from-email: ${MAILERSEND_FROM_EMAIL}
+
+  upload:
+    dir: ${UPLOAD_DIR:/var/data/uploads}
+
+  base-url: ${BASE_URL:https://generous-givers-backend.onrender.com/api/v1}
+
+  daraja:
+    consumer-key: ${DAR_CONSUMER_KEY:}
+    consumer-secret: ${DAR_CONSUMER_SECRET:}
+    short-code: ${DAR_SHORT_CODE:}
+    passkey: ${DAR_PASSKEY:}
+    callback-url: ${DAR_CALLBACK_URL:https://generous-givers-backend.onrender.com/api/v1/mpesa/callback}
+    base-url: ${DAR_BASE_URL:https://api.safaricom.co.ke}
 
 logging:
   level:

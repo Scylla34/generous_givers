@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { donationService, DonationRequest } from '@/services/donationService';
 import { projectService, Project } from '@/services/projectService';
 import { usePermissions } from '@/hooks/usePermissions';
-import { PermissionButton } from '@/components/ui/permission-button';
+import { PermissionWrapper } from '@/components/ui/permission-button';
 
 const donationSchema = z.object({
   donorName: z.string().min(1, 'Donor name is required'),
@@ -144,7 +144,7 @@ export default function DonationsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Donations</h1>
           <p className="text-gray-600">Track and manage all donations</p>
         </div>
-        <PermissionButton
+        <PermissionWrapper
           resource="donations"
           action="create"
         >
@@ -236,7 +236,7 @@ export default function DonationsPage() {
               </form>
             </DialogContent>
           </Dialog>
-        </PermissionButton>
+        </PermissionWrapper>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

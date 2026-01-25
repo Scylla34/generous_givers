@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Heart, Target, ArrowRight, Check, Phone } from 'lucide-react';
+import { uploadService } from '@/services/uploadService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -306,7 +307,17 @@ export default function DonatePage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {selectedProjectData && (
-              <Card className="border border-gray-200 shadow-sm">
+              <Card className="border border-gray-200 shadow-sm overflow-hidden">
+                {selectedProjectData.poster && (
+                  <div className="h-40 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={uploadService.getDownloadUrl(selectedProjectData.poster)}
+                      alt={selectedProjectData.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardHeader>
                   <CardTitle className="text-lg">{selectedProjectData.title}</CardTitle>
                   <CardDescription>{selectedProjectData.description}</CardDescription>

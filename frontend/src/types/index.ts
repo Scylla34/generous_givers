@@ -17,6 +17,7 @@ export type DonationStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
 export interface User extends Record<string, unknown> {
   id: string
+  memberNumber?: string // Auto-generated member number (GGF001, etc.)
   firstName: string
   lastName: string
   name: string // Computed full name for backward compatibility
@@ -49,6 +50,7 @@ export interface CreateUserRequest {
 
 export interface UserResponse {
   id: string
+  memberNumber?: string // Auto-generated member number (GGF001, etc.)
   firstName: string
   lastName: string
   email: string
@@ -69,6 +71,8 @@ export interface UpdateUserRequest {
   email?: string
   phone?: string
   password?: string
+  role?: UserRole // Allow role change on edit
+  memberJoiningDate?: string // Allow editing member joining date
 }
 
 export interface UpdateProfileRequest {
@@ -97,6 +101,7 @@ export interface Project extends Record<string, unknown> {
   percentFunded: number
   startDate?: string
   endDate?: string
+  poster?: string // Upload ID for project poster image
   createdById?: string
   createdByName?: string
   createdAt: string
@@ -110,6 +115,7 @@ export interface ProjectRequest {
   targetAmount?: number
   startDate?: string
   endDate?: string
+  poster?: string // Upload ID for project poster image
 }
 
 export interface Donation extends Record<string, unknown> {
@@ -138,6 +144,9 @@ export interface ChildrenHome extends Record<string, unknown> {
   id: string
   name: string
   location?: string
+  city?: string
+  town?: string
+  village?: string
   contact?: string
   notes?: string
   createdAt: string
@@ -146,6 +155,9 @@ export interface ChildrenHome extends Record<string, unknown> {
 export interface ChildrenHomeRequest {
   name: string
   location?: string
+  city?: string
+  town?: string
+  village?: string
   contact?: string
   notes?: string
 }
@@ -154,6 +166,9 @@ export interface Visit extends Record<string, unknown> {
   id: string
   visitDate: string
   location?: string
+  city?: string
+  town?: string
+  village?: string
   childrenHomeId?: string
   childrenHomeName?: string
   notes?: string
@@ -167,6 +182,9 @@ export interface Visit extends Record<string, unknown> {
 export interface VisitRequest {
   visitDate: string
   location?: string
+  city?: string
+  town?: string
+  village?: string
   childrenHomeId?: string
   notes?: string
   participants?: string[]
@@ -212,4 +230,33 @@ export interface ApiResponse<T> {
   message: string
   data: T
   timestamp: string
+}
+
+// Module types for file uploads
+export type ModuleType = 'VISIT' | 'CHILDREN_HOME' | 'PROJECT' | 'DONATION' | 'USER' | 'REPORT' | 'OTHER'
+
+export interface Upload extends Record<string, unknown> {
+  id: string
+  fileName: string
+  originalFileName: string
+  fileType?: string
+  fileSize?: number
+  fileUrl: string
+  moduleType: ModuleType
+  moduleId?: string
+  uploadedByName?: string
+  createdAt: string
+}
+
+export interface UploadResponse {
+  id: string
+  fileName: string
+  originalFileName: string
+  fileType?: string
+  fileSize?: number
+  fileUrl: string
+  moduleType: ModuleType
+  moduleId?: string
+  uploadedByName?: string
+  createdAt: string
 }

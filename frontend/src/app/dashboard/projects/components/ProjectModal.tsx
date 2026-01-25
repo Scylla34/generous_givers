@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { X, ImageIcon, Loader2, Trash2 } from 'lucide-react'
 import { Project, ProjectRequest, ProjectStatus } from '@/types'
 import { DatePicker } from '@/components/ui/date-picker'
 import { parseISO, format } from 'date-fns'
+import { uploadService } from '@/services/uploadService'
+import { toast } from 'sonner'
 
 interface ProjectModalProps {
   isOpen: boolean
@@ -21,6 +23,7 @@ interface FormState {
   targetAmount: number
   startDate: Date | undefined
   endDate: Date | undefined
+  poster: string | undefined
 }
 
 const parseDate = (dateString: string | undefined | null): Date | undefined => {
@@ -45,7 +48,10 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
     targetAmount: 0,
     startDate: undefined,
     endDate: undefined,
+    poster: undefined,
   })
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (project) {
@@ -56,6 +62,7 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
         targetAmount: project.targetAmount,
         startDate: parseDate(project.startDate),
         endDate: parseDate(project.endDate),
+        poster: project.poster,
       })
     } else {
       setFormData({
@@ -65,9 +72,55 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
         targetAmount: 0,
         startDate: undefined,
         endDate: undefined,
+        poster: undefined,
       })
     }
   }, [project])
+
+  const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      return
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be less than 5MB')
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const response = await uploadService.upload(file, 'PROJECT')
+      setFormData(prev => ({ ...prev, poster: response.id }))
+      toast.success('Poster uploaded successfully')
+    } catch (error) {
+      console.error('Upload error:', error)
+      toast.error('Failed to upload poster')
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
+  }
+
+  const handleRemovePoster = async () => {
+    if (formData.poster) {
+      try {
+        await uploadService.delete(formData.poster)
+        setFormData(prev => ({ ...prev, poster: undefined }))
+        toast.success('Poster removed')
+      } catch (error) {
+        console.error('Delete error:', error)
+        toast.error('Failed to remove poster')
+      }
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +131,7 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
       targetAmount: formData.targetAmount,
       startDate: formatDateForApi(formData.startDate),
       endDate: formatDateForApi(formData.endDate),
+      poster: formData.poster,
     }
     onSubmit(requestData)
   }
@@ -192,6 +246,57 @@ export function ProjectModal({ isOpen, onClose, onSubmit, project, isLoading }: 
                   onChange={(date) => handleInputChange('endDate', date)}
                   placeholder="Select end date"
                   minDate={formData.startDate}
+                />
+              </div>
+            </div>
+
+            {/* Project Poster */}
+            <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-800">
+                Project Poster
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 hover:border-primary-400 transition-colors">
+                {formData.poster ? (
+                  <div className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={uploadService.getDownloadUrl(formData.poster)}
+                      alt="Project poster"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleRemovePoster}
+                      className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center py-8 cursor-pointer"
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 className="w-10 h-10 text-primary-500 animate-spin mb-2" />
+                        <p className="text-sm text-gray-600">Uploading...</p>
+                      </>
+                    ) : (
+                      <>
+                        <ImageIcon className="w-10 h-10 text-gray-400 mb-2" />
+                        <p className="text-sm font-medium text-gray-700">Click to upload poster image</p>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                      </>
+                    )}
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePosterUpload}
+                  className="hidden"
                 />
               </div>
             </div>

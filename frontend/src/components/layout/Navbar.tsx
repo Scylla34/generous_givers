@@ -9,8 +9,11 @@ import { useState } from 'react'
 
 export default function Navbar() {
   const pathname = usePathname()
-  const { user, clearAuth } = useAuthStore()
+  const { clearAuth, isAuthenticated } = useAuthStore()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // Check if user is authenticated with valid token
+  const isLoggedIn = isAuthenticated()
 
   const navigation = [
     { name: 'Home', href: '/' },
@@ -64,7 +67,7 @@ export default function Navbar() {
 
           {/* Auth Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {user ? (
+            {isLoggedIn ? (
               <>
                 <Link
                   href="/dashboard"
@@ -123,7 +126,7 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="pt-4 border-t mt-4">
-              {user ? (
+              {isLoggedIn ? (
                 <>
                   <Link
                     href="/dashboard"

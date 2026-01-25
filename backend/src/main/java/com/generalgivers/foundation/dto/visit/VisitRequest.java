@@ -15,6 +15,12 @@ public class VisitRequest {
 
     private String location;
 
+    private String city;
+
+    private String town;
+
+    private String village;
+
     private UUID childrenHomeId;
 
     private String notes;

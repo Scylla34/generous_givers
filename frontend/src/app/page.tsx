@@ -119,44 +119,18 @@ export default function Home() {
       {/* Hero Section with Image Slider */}
       <HomeHeroSlider />
 
-      {/* Impact Stats */}
-      <section className="py-16 relative overflow-hidden">
-        <Image
-          src="/children/7.jpg"
-          alt="Impact background"
-          fill
-          className="object-cover -z-10"
-        />
-        <div className="absolute inset-0 bg-black/70 -z-10" />
-        
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12 animate-fade-in">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Our Impact
-            </h2>
-            <p className="text-gray-100 text-lg">
-              Measurable change in the lives of children and families
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { number: '50+', label: 'Children&apos;s Homes Visited' },
-              { number: '1,200+', label: 'Children Reached' },
-              { number: '500+', label: 'Active Members' },
-              { number: '10+', label: 'Years of Service' },
-            ].map((stat, idx) => (
-              <div
-                key={stat.label}
-                className={`text-center bg-white/10 backdrop-blur-sm rounded-lg p-6 shadow-lg hover:shadow-xl hover:bg-white/20 transition-all duration-300 border border-white/20 animate-slide-up`}
-                style={{ animationDelay: `${idx * 100}ms` }}
-              >
-                <div className="text-3xl md:text-4xl font-bold text-white mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-gray-100 text-sm md:text-base">{stat.label}</div>
-              </div>
-            ))}
+      {/* Impact Stats - Using infographic image */}
+      <section className="relative w-full">
+        <div className="container mx-auto px-4 py-8 sm:py-12">
+          <div className="relative w-full max-w-4xl mx-auto">
+            <Image
+              src="/statss/stats.jpeg"
+              alt="Our Impact - Statistics showing our reach and achievements"
+              width={1200}
+              height={800}
+              className="w-full h-auto rounded-lg shadow-lg"
+              priority
+            />
           </div>
         </div>
       </section>

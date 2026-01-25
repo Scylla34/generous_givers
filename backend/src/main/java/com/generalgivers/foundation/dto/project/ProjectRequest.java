@@ -26,4 +26,6 @@ public class ProjectRequest {
     private LocalDate startDate;
 
     private LocalDate endDate;
+
+    private String poster; // Upload ID for project poster image
 }

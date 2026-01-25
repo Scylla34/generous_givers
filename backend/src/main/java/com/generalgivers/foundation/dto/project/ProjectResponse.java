@@ -28,4 +28,5 @@ public class ProjectResponse {
     private UUID createdById;
     private String createdByName;
     private LocalDateTime createdAt;
+    private String poster; // Upload ID for project poster image
 }

@@ -1,8 +1,10 @@
 package com.generalgivers.foundation.controller;
 
+import com.generalgivers.foundation.dto.upload.UploadResponse;
 import com.generalgivers.foundation.dto.user.UpdateProfileRequest;
 import com.generalgivers.foundation.dto.user.UserResponse;
 import com.generalgivers.foundation.service.ProfileService;
+import com.generalgivers.foundation.service.UploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,7 +12,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/profile")
@@ -32,6 +30,7 @@ import java.util.Map;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final UploadService uploadService;
 
     @GetMapping
     @Operation(summary = "Get current user profile", description = "Get current authenticated user's profile information")
@@ -53,49 +52,39 @@ public class ProfileController {
 
     @PostMapping("/picture")
     @Operation(summary = "Upload profile picture", description = "Upload and update user's profile picture")
-    public ResponseEntity<Map<String, String>> uploadProfilePicture(
+    public ResponseEntity<UploadResponse> uploadProfilePicture(
             @RequestParam("file") MultipartFile file,
             Authentication authentication) {
         log.info("Uploading profile picture for user: {}", authentication.getName());
-        
+
         try {
-            String fileName = profileService.uploadProfilePicture(authentication.getName(), file);
-            
-            Map<String, String> response = new HashMap<>();
-            response.put("fileName", fileName);
-            response.put("message", "Profile picture uploaded successfully");
-            
-            return ResponseEntity.ok(response);
+            UploadResponse uploadResponse = profileService.uploadProfilePicture(authentication.getName(), file);
+            return ResponseEntity.ok(uploadResponse);
         } catch (Exception e) {
             log.error("Failed to upload profile picture for user: {}", authentication.getName(), e);
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
+            throw new RuntimeException("Failed to upload profile picture: " + e.getMessage());
         }
     }
 
-    @GetMapping("/picture/{fileName}")
-    @Operation(summary = "Get profile picture", description = "Retrieve user's profile picture")
-    public ResponseEntity<Resource> getProfilePicture(@PathVariable String fileName) {
+    @GetMapping("/picture/{uploadId}")
+    @Operation(summary = "Get profile picture", description = "Retrieve user's profile picture by upload ID")
+    public ResponseEntity<Resource> getProfilePicture(@PathVariable String uploadId) {
         try {
-            Path filePath = Paths.get("uploads/profile-pictures").resolve(fileName).normalize();
-            Resource resource = new UrlResource(filePath.toUri());
-            
-            if (resource.exists() && resource.isReadable()) {
-                String contentType = "image/jpeg";
-                if (fileName.toLowerCase().endsWith(".png")) {
-                    contentType = "image/png";
-                }
-                
-                return ResponseEntity.ok()
-                        .contentType(MediaType.parseMediaType(contentType))
-                        .header(HttpHeaders.CACHE_CONTROL, "max-age=3600")
-                        .body(resource);
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+            UUID id = UUID.fromString(uploadId);
+            Resource resource = uploadService.downloadFile(id);
+            String contentType = uploadService.getContentType(id);
+            String originalFileName = uploadService.getOriginalFileName(id);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CACHE_CONTROL, "max-age=3600")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + originalFileName + "\"")
+                    .body(resource);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid upload ID format: {}", uploadId);
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            log.error("Error retrieving profile picture: {}", fileName, e);
+            log.error("Error retrieving profile picture: {}", uploadId, e);
             return ResponseEntity.notFound().build();
         }
     }

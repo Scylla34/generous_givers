@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import DashboardLayout from '@/components/DashboardLayout'
+import { useTokenRefresh } from '@/hooks/useTokenRefresh'
 
 export default function Layout({
   children,
@@ -13,6 +14,9 @@ export default function Layout({
   const router = useRouter()
   const { user, isAuthenticated } = useAuthStore()
   const [mounted, setMounted] = useState(false)
+
+  // Auto-refresh token every 10 minutes when there's user activity
+  useTokenRefresh()
 
   useEffect(() => {
     setMounted(true)

@@ -1,8 +1,11 @@
 package com.generalgivers.foundation.dto.user;
 
+import com.generalgivers.foundation.entity.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Data
 public class UpdateUserRequest {
@@ -17,4 +20,8 @@ public class UpdateUserRequest {
 
     @Size(min = 8, message = "Password must be at least 8 characters long")
     private String password;
+
+    private UserRole role; // Allow role change on edit
+
+    private LocalDate memberJoiningDate; // Allow editing member joining date
 }

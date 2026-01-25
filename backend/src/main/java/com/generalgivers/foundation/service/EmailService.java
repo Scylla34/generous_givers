@@ -28,24 +28,29 @@ public class EmailService {
     private static final String PRIMARY_DARK = "#1d4ed8";
     private static final String LOGO_URL = "https://generousgiversfamily.netlify.app/logo/logo.jpg";
 
+    /**
+     * Synchronous version - blocks until email is sent.
+     * Use this for critical operations where email must succeed before continuing.
+     */
+    public void sendContactEmailSync(ContactRequest request) {
+        log.info("Sending contact email via MailerSend from: {}", request.getEmail());
+
+        String subject = "[Contact Form] " + request.getSubject();
+        String htmlContent = buildContactEmailHtml(request);
+
+        boolean emailSent = mailerSendService.sendEmail(emailConfig.getContactRecipient(), subject, htmlContent);
+
+        if (!emailSent) {
+            log.error("Failed to send contact email from: {}", request.getEmail());
+            throw new RuntimeException("Email delivery failed - Unable to send contact form submission");
+        }
+
+        log.info("Contact email sent successfully from: {}", request.getEmail());
+    }
+
     @Async
     public void sendContactEmail(ContactRequest request) {
-        try {
-            String subject = "[Contact Form] " + request.getSubject();
-            String htmlContent = buildContactEmailHtml(request);
-            
-            boolean emailSent = mailerSendService.sendEmail(emailConfig.getContactRecipient(), subject, htmlContent);
-            
-            if (emailSent) {
-                log.info("Contact email sent successfully from: {}", request.getEmail());
-            } else {
-                log.error("Failed to send contact email from: {}", request.getEmail());
-                throw new RuntimeException("Contact email delivery failed");
-            }
-        } catch (Exception e) {
-            log.error("Failed to send contact email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send contact email: " + e.getMessage(), e);
-        }
+        sendContactEmailSync(request);
     }
 
     @Async
@@ -116,24 +121,29 @@ public class EmailService {
         sendUserCredentialsSync(recipientEmail, firstName, lastName, temporaryPassword);
     }
 
+    /**
+     * Synchronous version - blocks until email is sent.
+     * Use this for critical operations where email must succeed before continuing.
+     */
+    public void sendNewsletterWelcomeSync(String recipientEmail) {
+        log.info("Sending newsletter welcome email via MailerSend to: {}", recipientEmail);
+
+        String subject = "Welcome to Generous Givers Family Newsletter!";
+        String htmlContent = buildNewsletterWelcomeHtml(recipientEmail);
+
+        boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
+
+        if (!emailSent) {
+            log.error("Failed to send newsletter welcome email to: {}", recipientEmail);
+            throw new RuntimeException("Email delivery failed - Unable to send newsletter welcome to " + recipientEmail);
+        }
+
+        log.info("Newsletter welcome email sent successfully to: {}", recipientEmail);
+    }
+
     @Async
     public void sendNewsletterWelcome(String recipientEmail) {
-        try {
-            String subject = "Welcome to Generous Givers Family Newsletter!";
-            String htmlContent = buildNewsletterWelcomeHtml(recipientEmail);
-            
-            boolean emailSent = mailerSendService.sendEmail(recipientEmail, subject, htmlContent);
-            
-            if (emailSent) {
-                log.info("Newsletter welcome email sent to: {}", recipientEmail);
-            } else {
-                log.error("Failed to send newsletter welcome email to: {}", recipientEmail);
-                throw new RuntimeException("Newsletter welcome email delivery failed");
-            }
-        } catch (Exception e) {
-            log.error("Failed to send newsletter welcome email: {}", e.getMessage());
-            throw new RuntimeException("Failed to send newsletter welcome email: " + e.getMessage(), e);
-        }
+        sendNewsletterWelcomeSync(recipientEmail);
     }
 
     private String buildPasswordResetEmailHtml(String firstName, String lastName, String resetToken) {

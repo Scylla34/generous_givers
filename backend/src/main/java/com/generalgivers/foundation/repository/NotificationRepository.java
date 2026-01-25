@@ -17,13 +17,13 @@ import java.util.UUID;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
 
-    @Query("SELECT n FROM Notification n WHERE n.user.id = :userId OR n.isGlobal = true ORDER BY n.createdAt DESC")
+    @Query("SELECT n FROM Notification n WHERE (n.user IS NOT NULL AND n.user.id = :userId) OR n.isGlobal = true ORDER BY n.createdAt DESC")
     Page<Notification> findByUserIdOrGlobal(@Param("userId") UUID userId, Pageable pageable);
 
-    @Query("SELECT n FROM Notification n WHERE (n.user.id = :userId OR n.isGlobal = true) AND n.isRead = false ORDER BY n.createdAt DESC")
+    @Query("SELECT n FROM Notification n WHERE ((n.user IS NOT NULL AND n.user.id = :userId) OR n.isGlobal = true) AND n.isRead = false ORDER BY n.createdAt DESC")
     List<Notification> findUnreadByUserIdOrGlobal(@Param("userId") UUID userId);
 
-    @Query("SELECT COUNT(n) FROM Notification n WHERE (n.user.id = :userId OR n.isGlobal = true) AND n.isRead = false")
+    @Query("SELECT COUNT(n) FROM Notification n WHERE ((n.user IS NOT NULL AND n.user.id = :userId) OR n.isGlobal = true) AND n.isRead = false")
     long countUnreadByUserIdOrGlobal(@Param("userId") UUID userId);
 
     List<Notification> findByIsGlobalTrueOrderByCreatedAtDesc();
@@ -38,7 +38,7 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     void markAsRead(@Param("id") UUID id, @Param("readAt") LocalDateTime readAt);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt WHERE (n.user.id = :userId OR n.isGlobal = true) AND n.isRead = false")
+    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = :readAt WHERE ((n.user IS NOT NULL AND n.user.id = :userId) OR n.isGlobal = true) AND n.isRead = false")
     void markAllAsReadForUser(@Param("userId") UUID userId, @Param("readAt") LocalDateTime readAt);
 
     @Modifying

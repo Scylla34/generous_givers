@@ -49,6 +49,19 @@ export function ChildrenHomeViewModal({ isOpen, onClose, home }: ChildrenHomeVie
                 </div>
               </div>
 
+              {/* Location Breakdown */}
+              {(home.city || home.town || home.village) && (
+                <div className="flex items-start">
+                  <MapPin className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
+                  <div>
+                    <span className="text-sm text-gray-500">Location Details:</span>
+                    <div className="font-medium text-gray-900">
+                      {[home.village, home.town, home.city].filter(Boolean).join(', ')}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center">
                 <Phone className="w-5 h-5 text-gray-400 mr-3" />
                 <div>

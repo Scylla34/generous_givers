@@ -6,9 +6,9 @@ import { projectService } from '@/services/projectService'
 import Link from 'next/link'
 import { formatCurrency } from '@/lib/format'
 import { HeroImageSlider } from '@/components/HeroImageSlider'
-import { 
-  Heart, 
-  Target, 
+import {
+  Heart,
+  Target,
   TrendingUp,
   Eye,
   Search,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { ProjectStatus } from '@/types'
 import { cn } from '@/lib/utils'
+import { uploadService } from '@/services/uploadService'
 
 export default function ProjectsPage() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -133,13 +134,24 @@ export default function ProjectsPage() {
               onMouseEnter={() => setSelectedProject(project.id)}
               onMouseLeave={() => setSelectedProject(null)}
             >
-              {/* Project Image Placeholder */}
+              {/* Project Image */}
               <div className="relative h-48 bg-gradient-to-br from-primary-400 to-primary-600 overflow-hidden">
-                <div className="absolute inset-0 bg-black/20"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Heart className="w-16 h-16 text-white/80" />
-                </div>
-                
+                {project.poster ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={uploadService.getDownloadUrl(project.poster)}
+                    alt={project.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-black/20"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Heart className="w-16 h-16 text-white/80" />
+                    </div>
+                  </>
+                )}
+
                 {/* Status Badge */}
                 <div className="absolute top-4 right-4">
                   <span className={cn(
@@ -151,7 +163,7 @@ export default function ProjectsPage() {
                     {project.status}
                   </span>
                 </div>
-                
+
                 {/* Hover Overlay */}
                 <div className={cn(
                   "absolute inset-0 bg-primary-600/90 flex items-center justify-center transition-opacity duration-300",

@@ -1,5 +1,5 @@
 import { api } from '@/lib/api'
-import { UserRole } from '@/types'
+import { UserRole, UploadResponse } from '@/types'
 
 export interface UpdateProfileRequest {
   firstName: string
@@ -9,6 +9,7 @@ export interface UpdateProfileRequest {
 
 export interface ProfileResponse {
   id: string
+  memberNumber?: string
   firstName: string
   lastName: string
   name: string
@@ -17,7 +18,7 @@ export interface ProfileResponse {
   role: UserRole
   isActive: boolean
   mustChangePassword: boolean
-  profilePicture?: string
+  profilePicture?: string // Now stores upload ID
   memberJoiningDate?: string
   createdAt: string
   updatedAt: string
@@ -34,11 +35,11 @@ export const profileService = {
     return response.data
   },
 
-  async uploadProfilePicture(file: File): Promise<{ fileName: string; message: string }> {
+  async uploadProfilePicture(file: File): Promise<UploadResponse> {
     const formData = new FormData()
     formData.append('file', file)
-    
-    const response = await api.post<{ fileName: string; message: string }>('/profile/picture', formData, {
+
+    const response = await api.post<UploadResponse>('/profile/picture', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -46,8 +47,9 @@ export const profileService = {
     return response.data
   },
 
-  getProfilePictureUrl(fileName?: string): string | undefined {
-    if (!fileName) return undefined
-    return `${process.env.NEXT_PUBLIC_API_URL}/profile/picture/${fileName}`
+  getProfilePictureUrl(uploadId?: string): string | undefined {
+    if (!uploadId) return undefined
+    // The uploadId is now a UUID that we use to fetch the picture
+    return `${process.env.NEXT_PUBLIC_API_URL}/profile/picture/${uploadId}`
   },
 }
