@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { userService } from '@/services/userService'
 import { CreateUserRequest, User, UserRole, UpdateUserRequest, UserResponse } from '@/types'
-import { Plus, Edit, Trash2, X, Mail, CheckCircle } from 'lucide-react'
+import { Plus, Edit, Trash2, X, Mail, CheckCircle, Hash } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { DatePicker } from '@/components/ui/date-picker'
 import { toast } from 'sonner'
@@ -16,7 +16,7 @@ export default function UsersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [formError, setFormError] = useState('')
-  const [formData, setFormData] = useState<CreateUserRequest>({
+  const [formData, setFormData] = useState<CreateUserRequest & { role: UserRole }>({
     firstName: '',
     lastName: '',
     email: '',
@@ -36,8 +36,8 @@ export default function UsersPage() {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       setIsModalOpen(false)
       resetForm()
-      
-      // Show success message with email status
+
+      // Show success message with email status and member number
       if (response.emailSent) {
         toast.success(
           <div className="space-y-2">
@@ -46,11 +46,15 @@ export default function UsersPage() {
               <span className="font-medium">User created successfully!</span>
             </div>
             <div className="text-sm text-gray-600">
+              <Hash className="w-3 h-3 inline mr-1" />
+              Member Number: <strong>{response.memberNumber}</strong>
+            </div>
+            <div className="text-sm text-gray-600">
               <Mail className="w-3 h-3 inline mr-1" />
               Login credentials sent to {response.email}
             </div>
           </div>,
-          { duration: 5000 }
+          { duration: 6000 }
         )
       } else {
         toast.success('User created successfully!', { duration: 3000 })
@@ -59,20 +63,20 @@ export default function UsersPage() {
           { duration: 8000 }
         )
       }
-      
+
       // Show admin notification
       toast.info(
-        `New user ${response.firstName} ${response.lastName} has been created.`,
+        `New user ${response.firstName} ${response.lastName} (${response.memberNumber}) has been created.`,
         { duration: 4000 }
       )
     },
     onError: (err: unknown) => {
       const errorResponse = err as { response?: { data?: { message?: string } } }
       const errorMessage = errorResponse?.response?.data?.message || 'Failed to create user'
-      
+
       // Use utility function for better error handling
       const friendlyMessage = getUserFriendlyErrorMessage(errorMessage)
-      
+
       if (isEmailDeliveryError(errorMessage)) {
         setFormError(friendlyMessage)
         toast.error(
@@ -133,7 +137,7 @@ export default function UsersPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setFormError('')
-    
+
     if (editingUser) {
       updateMutation.mutate({
         id: editingUser.id,
@@ -141,6 +145,8 @@ export default function UsersPage() {
           name: `${formData.firstName} ${formData.lastName}`,
           email: formData.email,
           phone: formData.phone,
+          role: formData.role,
+          memberJoiningDate: formData.memberJoiningDate || undefined,
         },
       })
     } else {
@@ -156,6 +162,7 @@ export default function UsersPage() {
       email: user.email,
       phone: user.phone || '',
       role: user.role,
+      memberJoiningDate: user.memberJoiningDate || '',
     })
     setIsModalOpen(true)
   }
@@ -168,11 +175,19 @@ export default function UsersPage() {
 
   const columns = [
     {
+      header: 'Member #',
+      accessor: (user: User) => (
+        <span className="font-mono text-sm text-primary-600 font-medium">
+          {user.memberNumber || '-'}
+        </span>
+      ),
+    },
+    {
       header: 'Name',
       accessor: (user: User) => (
         <span className="font-medium text-gray-900">
-          {user.firstName && user.lastName 
-            ? `${user.firstName} ${user.lastName}` 
+          {user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
             : user.name}
         </span>
       ),
@@ -193,7 +208,7 @@ export default function UsersPage() {
       header: 'Role',
       accessor: (user: User) => (
         <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-primary-100 text-primary-800">
-          {user.role.replace('_', ' ')}
+          {user.role.replace(/_/g, ' ')}
         </span>
       ),
     },
@@ -214,7 +229,6 @@ export default function UsersPage() {
     {
       header: 'Actions',
       accessor: (user: User) => {
-        console.log('Rendering actions for user:', user.name); // Debug log
         return (
           <div className="flex gap-2">
             <PermissionButton
@@ -282,7 +296,7 @@ export default function UsersPage() {
       <DataTable
         data={users || []}
         columns={columns}
-        searchPlaceholder="Search users by name, email, or phone..."
+        searchPlaceholder="Search users by name, email, member number..."
         itemsPerPage={10}
       />
 
@@ -290,9 +304,17 @@ export default function UsersPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-gray-900">
-                {editingUser ? 'Edit User' : 'Create New User'}
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">
+                  {editingUser ? 'Edit User' : 'Create New User'}
+                </h2>
+                {editingUser?.memberNumber && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    <Hash className="w-3 h-3 inline mr-1" />
+                    Member Number: <span className="font-mono font-medium">{editingUser.memberNumber}</span>
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => {
                   setIsModalOpen(false)
@@ -310,7 +332,7 @@ export default function UsersPage() {
                   {formError}
                 </div>
               )}
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -382,9 +404,9 @@ export default function UsersPage() {
                 <DatePicker
                   value={formData.memberJoiningDate ? new Date(formData.memberJoiningDate) : undefined}
                   onChange={(date) =>
-                    setFormData({ 
-                      ...formData, 
-                      memberJoiningDate: date ? date.toISOString().split('T')[0] : '' 
+                    setFormData({
+                      ...formData,
+                      memberJoiningDate: date ? date.toISOString().split('T')[0] : ''
                     })
                   }
                   placeholder="Select joining date"
@@ -392,43 +414,42 @@ export default function UsersPage() {
                 />
               </div>
 
-              {!editingUser && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Role *
-                    </label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          role: e.target.value as UserRole,
-                        })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors text-gray-900 bg-white"
-                    >
-                      <option value="COMMITTEE_MEMBER">Committee Member</option>
-                      <option value="ORGANIZING_SECRETARY">Organizing Secretary</option>
-                      <option value="TREASURER">Treasurer</option>
-                      <option value="VICE_SECRETARY">Vice Secretary</option>
-                      <option value="SECRETARY_GENERAL">Secretary General</option>
-                      <option value="VICE_CHAIRPERSON">Vice Chairperson</option>
-                      <option value="CHAIRPERSON">Chairperson</option>
-                      <option value="SUPER_USER">Super User</option>
-                    </select>
-                  </div>
+              {/* Role - Always shown (for both create and edit) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Role *
+                </label>
+                <select
+                  value={formData.role}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      role: e.target.value as UserRole,
+                    })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors text-gray-900 bg-white"
+                >
+                  <option value="COMMITTEE_MEMBER">Committee Member</option>
+                  <option value="ORGANIZING_SECRETARY">Organizing Secretary</option>
+                  <option value="TREASURER">Treasurer</option>
+                  <option value="VICE_SECRETARY">Vice Secretary</option>
+                  <option value="SECRETARY_GENERAL">Secretary General</option>
+                  <option value="VICE_CHAIRPERSON">Vice Chairperson</option>
+                  <option value="CHAIRPERSON">Chairperson</option>
+                  <option value="SUPER_USER">Super User</option>
+                </select>
+              </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="flex items-start gap-2">
-                      <Mail className="w-4 h-4 text-blue-600 mt-0.5" />
-                      <div className="text-sm text-blue-800">
-                        <p className="font-medium">Auto-Generated Password</p>
-                        <p>A temporary password will be automatically generated and sent to the user&apos;s email address. <strong>User creation will fail if the email cannot be delivered.</strong></p>
-                      </div>
+              {!editingUser && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div className="flex items-start gap-2">
+                    <Mail className="w-4 h-4 text-blue-600 mt-0.5" />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-medium">Auto-Generated Password & Member Number</p>
+                      <p>A temporary password will be automatically generated and sent to the user&apos;s email address. A unique member number (e.g., GGF001) will be assigned. <strong>User creation will fail if the email cannot be delivered.</strong></p>
                     </div>
                   </div>
-                </>
+                </div>
               )}
 
               <div className="flex gap-3 pt-4">

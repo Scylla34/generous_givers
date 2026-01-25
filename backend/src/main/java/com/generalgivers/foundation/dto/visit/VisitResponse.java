@@ -18,6 +18,9 @@ public class VisitResponse {
     private UUID id;
     private LocalDate visitDate;
     private String location;
+    private String city;
+    private String town;
+    private String village;
     private UUID childrenHomeId;
     private String childrenHomeName;
     private String notes;

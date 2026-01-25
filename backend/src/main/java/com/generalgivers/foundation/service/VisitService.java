@@ -11,6 +11,7 @@ import com.generalgivers.foundation.repository.ChildrenHomeRepository;
 import com.generalgivers.foundation.repository.UserRepository;
 import com.generalgivers.foundation.repository.VisitRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VisitService {
 
     private final VisitRepository visitRepository;
@@ -28,25 +30,40 @@ public class VisitService {
     private final ChildrenHomeRepository childrenHomeRepository;
     private final NotificationService notificationService;
 
+    @Transactional(readOnly = true)
     public List<VisitResponse> getAllVisits() {
-        return visitRepository.findAll().stream()
-                .map(this::mapToVisitResponse)
-                .collect(Collectors.toList());
+        log.info("Fetching all visits");
+        try {
+            List<Visit> visits = visitRepository.findAll();
+            log.info("Found {} visits", visits.size());
+            return visits.stream()
+                    .map(this::mapToVisitResponse)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            log.error("Error fetching visits: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
+    @Transactional(readOnly = true)
     public VisitResponse getVisitById(UUID id) {
+        log.info("Fetching visit by id: {}", id);
         Visit visit = visitRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Visit", "id", id));
         return mapToVisitResponse(visit);
     }
 
+    @Transactional(readOnly = true)
     public List<VisitResponse> getVisitsByDateRange(LocalDate startDate, LocalDate endDate) {
+        log.info("Fetching visits between {} and {}", startDate, endDate);
         return visitRepository.findByVisitDateBetween(startDate, endDate).stream()
                 .map(this::mapToVisitResponse)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<VisitResponse> getVisitsByChildrenHome(UUID childrenHomeId) {
+        log.info("Fetching visits for children home: {}", childrenHomeId);
         return visitRepository.findByChildrenHomeId(childrenHomeId).stream()
                 .map(this::mapToVisitResponse)
                 .collect(Collectors.toList());
@@ -66,6 +83,9 @@ public class VisitService {
         Visit visit = Visit.builder()
                 .visitDate(request.getVisitDate())
                 .location(request.getLocation())
+                .city(request.getCity())
+                .town(request.getTown())
+                .village(request.getVillage())
                 .childrenHome(childrenHome)
                 .notes(request.getNotes())
                 .participants(request.getParticipants())
@@ -108,6 +128,15 @@ public class VisitService {
         }
         if (request.getLocation() != null) {
             visit.setLocation(request.getLocation());
+        }
+        if (request.getCity() != null) {
+            visit.setCity(request.getCity());
+        }
+        if (request.getTown() != null) {
+            visit.setTown(request.getTown());
+        }
+        if (request.getVillage() != null) {
+            visit.setVillage(request.getVillage());
         }
         if (request.getChildrenHomeId() != null) {
             ChildrenHome childrenHome = childrenHomeRepository.findById(request.getChildrenHomeId())
@@ -168,6 +197,9 @@ public class VisitService {
                 .id(visit.getId())
                 .visitDate(visit.getVisitDate())
                 .location(visit.getLocation())
+                .city(visit.getCity())
+                .town(visit.getTown())
+                .village(visit.getVillage())
                 .childrenHomeId(visit.getChildrenHome() != null ? visit.getChildrenHome().getId() : null)
                 .childrenHomeName(visit.getChildrenHome() != null ? visit.getChildrenHome().getName() : null)
                 .notes(visit.getNotes())

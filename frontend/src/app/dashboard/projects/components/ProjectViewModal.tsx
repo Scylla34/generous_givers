@@ -3,6 +3,7 @@
 import { X, Calendar, DollarSign, Target, TrendingUp } from 'lucide-react'
 import { Project } from '@/types'
 import { formatCurrency, formatDateSafe } from '@/lib/format'
+import { uploadService } from '@/services/uploadService'
 
 interface ProjectViewModalProps {
   isOpen: boolean
@@ -39,6 +40,18 @@ export function ProjectViewModal({ isOpen, onClose, project }: ProjectViewModalP
 
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
           <div className="space-y-6">
+            {/* Poster Image */}
+            {project.poster && (
+              <div className="rounded-lg overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={uploadService.getDownloadUrl(project.poster)}
+                  alt={project.title}
+                  className="w-full h-56 object-cover"
+                />
+              </div>
+            )}
+
             {/* Header */}
             <div>
               <div className="flex items-start justify-between mb-2">

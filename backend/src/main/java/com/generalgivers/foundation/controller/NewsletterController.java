@@ -18,16 +18,16 @@ public class NewsletterController {
     public ResponseEntity<String> subscribe(@RequestParam String email) {
         try {
             log.info("Newsletter subscription request from: {}", email);
-            
-            // Send welcome email to subscriber
-            emailService.sendNewsletterWelcome(email);
-            
+
+            // Send welcome email to subscriber (synchronous - must succeed)
+            emailService.sendNewsletterWelcomeSync(email);
+
             // TODO: Add to newsletter database/service
-            
+
             return ResponseEntity.ok("Successfully subscribed to newsletter!");
         } catch (Exception e) {
             log.error("Failed to subscribe email: {}", e.getMessage());
-            return ResponseEntity.badRequest().body("Failed to subscribe. Please check your email address and try again.");
+            return ResponseEntity.badRequest().body("Failed to subscribe. Please check email configuration and try again.");
         }
     }
 }

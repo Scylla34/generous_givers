@@ -33,6 +33,12 @@ public class Visit {
 
     private String location;
 
+    private String city;
+
+    private String town;
+
+    private String village;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "children_home_id")
     private ChildrenHome childrenHome;

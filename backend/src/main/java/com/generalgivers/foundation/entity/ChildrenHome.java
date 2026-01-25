@@ -29,6 +29,12 @@ public class ChildrenHome {
 
     private String location;
 
+    private String city;
+
+    private String town;
+
+    private String village;
+
     private String contact;
 
     @Column(columnDefinition = "TEXT")

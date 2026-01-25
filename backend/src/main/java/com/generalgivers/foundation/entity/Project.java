@@ -50,6 +50,9 @@ public class Project {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "poster")
+    private String poster; // Stores upload ID for the project poster image
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;

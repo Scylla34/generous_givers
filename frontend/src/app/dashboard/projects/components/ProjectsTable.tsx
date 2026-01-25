@@ -1,10 +1,11 @@
 'use client'
 
-import { Edit, Trash2, Eye } from 'lucide-react'
+import { Edit, Trash2, Eye, ImageIcon } from 'lucide-react'
 import { Project } from '@/types'
 import { formatCurrency } from '@/lib/format'
 import { DataTable } from '@/components/ui/data-table'
 import { PermissionButton } from '@/components/ui/permission-button'
+import { uploadService } from '@/services/uploadService'
 
 interface ProjectsTableProps {
   projects: Project[]
@@ -17,12 +18,26 @@ interface ProjectsTableProps {
 export function ProjectsTable({ projects, onEdit, onDelete, onView, isLoading }: ProjectsTableProps) {
   const columns = [
     {
-      header: 'Title',
+      header: 'Project',
       accessor: (project: Project) => (
-        <div className="min-w-0">
-          <div className="font-medium text-gray-900 truncate">{project.title}</div>
-          <div className="text-sm text-gray-500 line-clamp-2 mt-1">
-            {project.description || 'No description'}
+        <div className="flex items-center gap-3 min-w-0">
+          {project.poster ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={uploadService.getDownloadUrl(project.poster)}
+              alt={project.title}
+              className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <ImageIcon className="w-6 h-6 text-gray-400" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <div className="font-medium text-gray-900 truncate">{project.title}</div>
+            <div className="text-sm text-gray-500 line-clamp-1">
+              {project.description || 'No description'}
+            </div>
           </div>
         </div>
       ),

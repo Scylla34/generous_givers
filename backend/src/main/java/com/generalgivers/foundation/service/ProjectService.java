@@ -67,6 +67,7 @@ public class ProjectService {
                 .fundsRaised(BigDecimal.ZERO)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
+                .poster(request.getPoster())
                 .createdBy(creator)
                 .build();
 
@@ -109,6 +110,9 @@ public class ProjectService {
         }
         if (request.getEndDate() != null) {
             project.setEndDate(request.getEndDate());
+        }
+        if (request.getPoster() != null) {
+            project.setPoster(request.getPoster());
         }
 
         project = projectRepository.save(project);
@@ -164,6 +168,7 @@ public class ProjectService {
                 .createdById(project.getCreatedBy() != null ? project.getCreatedBy().getId() : null)
                 .createdByName(project.getCreatedBy() != null ? project.getCreatedBy().getName() : null)
                 .createdAt(project.getCreatedAt())
+                .poster(project.getPoster())
                 .build();
     }
 

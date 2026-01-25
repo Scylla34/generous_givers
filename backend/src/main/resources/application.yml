@@ -2,6 +2,12 @@ spring:
   application:
     name: foundation-system
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 100MB
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -101,3 +107,8 @@ app:
   mailersend:
     api-key: ${MAILERSEND_API_KEY}
     from-email: ${MAILERSEND_FROM_EMAIL}
+
+  upload:
+    dir: ${UPLOAD_DIR:uploads}
+
+  base-url: ${BASE_URL:http://localhost:8080}

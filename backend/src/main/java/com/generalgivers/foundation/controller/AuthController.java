@@ -47,4 +47,11 @@ public class AuthController {
         passwordResetService.resetPassword(request);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/refresh")
+    @Operation(summary = "Refresh token", description = "Get a new access token using current valid token")
+    public ResponseEntity<AuthResponse> refreshToken(Authentication authentication) {
+        AuthResponse response = authService.refreshToken(authentication.getName());
+        return ResponseEntity.ok(response);
+    }
 }

@@ -1,9 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import Image from 'next/image'
 import { Visit, VisitRequest, ChildrenHome } from '@/types'
-import { X, Calendar, MapPin, Camera, Users } from 'lucide-react'
+import { X, Calendar, MapPin, Camera, Users, Paperclip, FileText } from 'lucide-react'
 import { DatePicker } from '@/components/ui/date-picker'
 import { useDropzone } from 'react-dropzone'
+import { FileUpload } from '@/components/ui/FileUpload'
 
 const toDateInputValue = (date: Date): string => {
   return date.toISOString().split('T')[0]
@@ -24,6 +25,9 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
   const [formData, setFormData] = useState<VisitRequest>({
     visitDate: '',
     location: '',
+    city: '',
+    town: '',
+    village: '',
     childrenHomeId: '',
     notes: '',
     participants: [],
@@ -35,6 +39,9 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
       setFormData({
         visitDate: visit.visitDate,
         location: visit.location || '',
+        city: visit.city || '',
+        town: visit.town || '',
+        village: visit.village || '',
         childrenHomeId: visit.childrenHomeId || '',
         notes: visit.notes || '',
         participants: visit.participants || [],
@@ -51,6 +58,9 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
     setFormData({
       visitDate: '',
       location: '',
+      city: '',
+      town: '',
+      village: '',
       childrenHomeId: '',
       notes: '',
       participants: [],
@@ -77,7 +87,10 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] },
+    accept: {
+      'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
+      'application/pdf': ['.pdf']
+    },
     maxFiles: 10,
   })
 
@@ -152,7 +165,7 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <MapPin className="w-4 h-4 inline mr-2" />
-              Location
+              Location Details
             </label>
             <input
               type="text"
@@ -163,6 +176,52 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900 placeholder-gray-500"
               placeholder="Specific location or address"
             />
+          </div>
+
+          {/* Location Breakdown Fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                City
+              </label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) =>
+                  setFormData({ ...formData, city: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900 placeholder-gray-500"
+                placeholder="City"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Town
+              </label>
+              <input
+                type="text"
+                value={formData.town}
+                onChange={(e) =>
+                  setFormData({ ...formData, town: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900 placeholder-gray-500"
+                placeholder="Town"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Village
+              </label>
+              <input
+                type="text"
+                value={formData.village}
+                onChange={(e) =>
+                  setFormData({ ...formData, village: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900 placeholder-gray-500"
+                placeholder="Village"
+              />
+            </div>
           </div>
 
           <div>
@@ -182,8 +241,8 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Camera className="w-4 h-4 inline mr-2" />
-              Photos
+              <Paperclip className="w-4 h-4 inline mr-2" />
+              Photos & Documents
             </label>
             <div
               {...getRootProps()}
@@ -194,16 +253,19 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
               }`}
             >
               <input {...getInputProps()} />
-              <Camera className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+              <div className="flex justify-center gap-2 mb-2">
+                <Camera className="w-10 h-10 text-gray-400" />
+                <FileText className="w-10 h-10 text-gray-400" />
+              </div>
               {isDragActive ? (
-                <p className="text-sm text-primary-600">Drop the images here...</p>
+                <p className="text-sm text-primary-600">Drop the files here...</p>
               ) : (
                 <div>
                   <p className="text-sm text-gray-600">
-                    Drag & drop images here, or click to select
+                    Drag & drop images or PDFs here, or click to select
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    PNG, JPG, GIF, WebP up to 10 files
+                    PNG, JPG, GIF, WebP, PDF up to 10 files
                   </p>
                 </div>
               )}
@@ -211,20 +273,27 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
 
             {uploadedImages.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mt-4">
-                {uploadedImages.map((img, index) => (
+                {uploadedImages.map((file, index) => (
                   <div key={index} className="relative group">
-                    <Image
-                      src={img}
-                      alt={`Upload ${index + 1}`}
-                      width={96}
-                      height={96}
-                      className="w-full h-24 object-cover rounded-lg border border-gray-200"
-                    />
+                    {file.startsWith('data:application/pdf') ? (
+                      <div className="w-full h-24 flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50">
+                        <FileText className="w-8 h-8 text-red-500" />
+                        <span className="text-xs text-gray-600 mt-1">PDF</span>
+                      </div>
+                    ) : (
+                      <Image
+                        src={file}
+                        alt={`Upload ${index + 1}`}
+                        width={96}
+                        height={96}
+                        className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                      />
+                    )}
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                      title="Remove image"
+                      title="Remove file"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -233,6 +302,25 @@ export function VisitModal({ isOpen, onClose, onSubmit, visit, childrenHomes, is
               </div>
             )}
           </div>
+
+          {/* File Attachments - only shown when editing an existing visit */}
+          {visit && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                <Paperclip className="w-4 h-4 inline mr-2" />
+                File Attachments
+              </label>
+              <p className="text-xs text-gray-500 mb-2">
+                Upload documents, spreadsheets, or any other files related to this visit
+              </p>
+              <FileUpload
+                moduleType="VISIT"
+                moduleId={visit.id}
+                maxFiles={20}
+                showExistingFiles={true}
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4">
             <button

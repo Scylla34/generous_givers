@@ -1,9 +1,27 @@
 'use client'
 
 import Image from 'next/image'
-import { Visit } from '@/types'
-import { X, Calendar, MapPin, Users, Camera } from 'lucide-react'
+import { Visit, UploadResponse } from '@/types'
+import { X, Calendar, MapPin, Users, Camera, Paperclip, Download, File, FileText, Video, Music, Image as ImageIcon } from 'lucide-react'
 import { formatDateSafe } from '@/lib/format'
+import { useQuery } from '@tanstack/react-query'
+import { uploadService } from '@/services/uploadService'
+
+const getFileIcon = (fileType?: string) => {
+  if (!fileType) return <File className="w-5 h-5 text-gray-400" />
+  if (fileType.startsWith('image/')) return <ImageIcon className="w-5 h-5 text-blue-500" />
+  if (fileType.startsWith('video/')) return <Video className="w-5 h-5 text-purple-500" />
+  if (fileType.startsWith('audio/')) return <Music className="w-5 h-5 text-green-500" />
+  if (fileType.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />
+  return <File className="w-5 h-5 text-gray-400" />
+}
+
+const formatFileSize = (bytes?: number): string => {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
 
 interface VisitViewModalProps {
   isOpen: boolean
@@ -12,6 +30,13 @@ interface VisitViewModalProps {
 }
 
 export function VisitViewModal({ isOpen, onClose, visit }: VisitViewModalProps) {
+  // Fetch file attachments for this visit
+  const { data: attachments = [] } = useQuery({
+    queryKey: ['uploads', 'VISIT', visit?.id],
+    queryFn: () => visit ? uploadService.getByModule('VISIT', visit.id) : Promise.resolve([]),
+    enabled: isOpen && !!visit?.id,
+  })
+
   if (!isOpen || !visit) return null
 
   return (
@@ -63,6 +88,19 @@ export function VisitViewModal({ isOpen, onClose, visit }: VisitViewModalProps) 
                       <span className="text-sm text-gray-500">Location:</span>
                       <div className="font-medium text-gray-900">
                         {visit.location}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Location Breakdown */}
+                {(visit.city || visit.town || visit.village) && (
+                  <div className="flex items-start">
+                    <MapPin className="w-5 h-5 text-gray-400 mr-3 mt-0.5" />
+                    <div>
+                      <span className="text-sm text-gray-500">Location Details:</span>
+                      <div className="font-medium text-gray-900">
+                        {[visit.village, visit.town, visit.city].filter(Boolean).join(', ')}
                       </div>
                     </div>
                   </div>
@@ -130,6 +168,45 @@ export function VisitViewModal({ isOpen, onClose, visit }: VisitViewModalProps) 
             </div>
           )}
         </div>
+
+        {/* File Attachments */}
+        {attachments.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Paperclip className="w-5 h-5" />
+              File Attachments ({attachments.length})
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {attachments.map((file: UploadResponse) => (
+                <div
+                  key={file.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {getFileIcon(file.fileType)}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-700 truncate">
+                        {file.originalFileName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatFileSize(file.fileSize)}
+                      </p>
+                    </div>
+                  </div>
+                  <a
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 hover:bg-gray-200 rounded flex-shrink-0"
+                    title="Download"
+                  >
+                    <Download className="w-4 h-4 text-gray-600" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
           <button

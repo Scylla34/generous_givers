@@ -16,6 +16,9 @@ export function ChildrenHomeModal({ isOpen, onClose, onSubmit, home, isLoading }
   const [formData, setFormData] = useState<ChildrenHomeRequest>({
     name: '',
     location: '',
+    city: '',
+    town: '',
+    village: '',
     contact: '',
     notes: '',
   })
@@ -25,6 +28,9 @@ export function ChildrenHomeModal({ isOpen, onClose, onSubmit, home, isLoading }
       setFormData({
         name: home.name,
         location: home.location || '',
+        city: home.city || '',
+        town: home.town || '',
+        village: home.village || '',
         contact: home.contact || '',
         notes: home.notes || '',
       })
@@ -37,6 +43,9 @@ export function ChildrenHomeModal({ isOpen, onClose, onSubmit, home, isLoading }
     setFormData({
       name: '',
       location: '',
+      city: '',
+      town: '',
+      village: '',
       contact: '',
       notes: '',
     })
@@ -83,15 +92,55 @@ export function ChildrenHomeModal({ isOpen, onClose, onSubmit, home, isLoading }
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <MapPin className="w-4 h-4 inline mr-2" />
-              Location
+              Location / Address
             </label>
             <input
               type="text"
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900"
-              placeholder="Enter location or address"
+              placeholder="Enter full address"
             />
+          </div>
+
+          {/* Location Breakdown */}
+          <div className="grid grid-cols-3 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                City
+              </label>
+              <input
+                type="text"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900"
+                placeholder="City"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Town
+              </label>
+              <input
+                type="text"
+                value={formData.town}
+                onChange={(e) => setFormData({ ...formData, town: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900"
+                placeholder="Town"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Village
+              </label>
+              <input
+                type="text"
+                value={formData.village}
+                onChange={(e) => setFormData({ ...formData, village: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none bg-white text-gray-900"
+                placeholder="Village"
+              />
+            </div>
           </div>
 
           <div>

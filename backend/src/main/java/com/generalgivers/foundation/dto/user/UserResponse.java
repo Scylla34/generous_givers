@@ -15,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserResponse {
     private UUID id;
+    private String memberNumber; // Auto-generated member number (GGF001, etc.)
     private String firstName;
     private String lastName;
     private String name; // Computed full name for backward compatibility

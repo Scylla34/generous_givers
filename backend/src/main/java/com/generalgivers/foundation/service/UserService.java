@@ -25,6 +25,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
+    private static final String MEMBER_NUMBER_PREFIX = "GGF";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -59,7 +61,10 @@ public class UserService {
 
         // Generate temporary password
         String temporaryPassword = PasswordGenerator.generateTemporaryPassword();
-        
+
+        // Generate unique member number
+        String memberNumber = generateNextMemberNumber();
+
         User user = User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -67,13 +72,14 @@ public class UserService {
                 .passwordHash(passwordEncoder.encode(temporaryPassword))
                 .phone(request.getPhone())
                 .role(request.getRole())
+                .memberNumber(memberNumber)
                 .memberJoiningDate(request.getMemberJoiningDate())
                 .isActive(true)
                 .mustChangePassword(true) // Force password change on first login
                 .build();
 
         user = userRepository.save(user);
-        
+
         // Send credentials via email - REQUIRED for user creation (synchronous call)
         try {
             emailService.sendUserCredentialsSync(
@@ -89,17 +95,17 @@ public class UserService {
             userRepository.delete(user);
             throw new RuntimeException("User creation failed: Unable to send credentials email to " + user.getEmail() + ". Please check email configuration and try again.");
         }
-        
+
         // Create notification for admin users
         try {
-            String notificationMessage = String.format("New user %s %s has been created and notified via email.", 
-                user.getFirstName(), user.getLastName());
-            
+            String notificationMessage = String.format("New user %s %s (%s) has been created and notified via email.",
+                user.getFirstName(), user.getLastName(), memberNumber);
+
             // Send notification to all admin users
             List<User> adminUsers = userRepository.findByRoleIn(
                 List.of(UserRole.SUPER_USER, UserRole.CHAIRPERSON, UserRole.SECRETARY_GENERAL)
             );
-            
+
             for (User adminUser : adminUsers) {
                 notificationService.createUserNotification(
                     "New User Created",
@@ -111,11 +117,11 @@ public class UserService {
         } catch (Exception e) {
             log.error("Failed to create user creation notification: {}", e.getMessage());
         }
-        
+
         UserResponse response = mapToUserResponse(user);
         response.setTemporaryPassword(temporaryPassword);
         response.setEmailSent(true);
-        
+
         return response;
     }
 
@@ -146,6 +152,17 @@ public class UserService {
             user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         }
 
+        // Handle role change
+        if (request.getRole() != null) {
+            user.setRole(request.getRole());
+            log.info("User {} role updated to {}", user.getEmail(), request.getRole());
+        }
+
+        // Handle member joining date change
+        if (request.getMemberJoiningDate() != null) {
+            user.setMemberJoiningDate(request.getMemberJoiningDate());
+        }
+
         user = userRepository.save(user);
         return mapToUserResponse(user);
     }
@@ -173,9 +190,29 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Generates the next member number in the format GGF001, GGF002, etc.
+     */
+    private String generateNextMemberNumber() {
+        String maxMemberNumber = userRepository.findMaxMemberNumber();
+
+        int nextNumber = 1;
+        if (maxMemberNumber != null && maxMemberNumber.startsWith(MEMBER_NUMBER_PREFIX)) {
+            try {
+                String numberPart = maxMemberNumber.substring(MEMBER_NUMBER_PREFIX.length());
+                nextNumber = Integer.parseInt(numberPart) + 1;
+            } catch (NumberFormatException e) {
+                log.warn("Could not parse member number: {}, starting from 1", maxMemberNumber);
+            }
+        }
+
+        return String.format("%s%03d", MEMBER_NUMBER_PREFIX, nextNumber);
+    }
+
     private UserResponse mapToUserResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
+                .memberNumber(user.getMemberNumber())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .name(user.getName()) // Computed full name
@@ -184,6 +221,8 @@ public class UserService {
                 .role(user.getRole())
                 .isActive(user.getIsActive())
                 .mustChangePassword(user.getMustChangePassword())
+                .memberJoiningDate(user.getMemberJoiningDate())
+                .profilePicture(user.getProfilePicture())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .build();

@@ -59,13 +59,30 @@ public class NotificationService {
         return getUnreadCountForUser(user.getId());
     }
 
+    @Transactional
     public void markAsRead(UUID notificationId, String userEmail) {
-        markAsRead(notificationId);
+        log.info("Marking notification {} as read for user {}", notificationId, userEmail);
+        try {
+            notificationRepository.markAsRead(notificationId, LocalDateTime.now());
+            log.info("Successfully marked notification {} as read", notificationId);
+        } catch (Exception e) {
+            log.error("Error marking notification {} as read: {}", notificationId, e.getMessage(), e);
+            throw e;
+        }
     }
 
+    @Transactional
     public void markAllAsRead(String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
-        markAllAsReadForUser(user.getId());
+        log.info("Marking all notifications as read for user {}", userEmail);
+        try {
+            User user = userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + userEmail));
+            notificationRepository.markAllAsReadForUser(user.getId(), LocalDateTime.now());
+            log.info("Successfully marked all notifications as read for user {}", userEmail);
+        } catch (Exception e) {
+            log.error("Error marking all notifications as read for user {}: {}", userEmail, e.getMessage(), e);
+            throw e;
+        }
     }
 
     private NotificationResponse mapToResponse(Notification notification) {

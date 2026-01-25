@@ -31,4 +31,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     long countByIsActiveTrue();
 
     List<User> findTop2ByOrderByCreatedAtDesc();
+
+    // For member number generation
+    @org.springframework.data.jpa.repository.Query("SELECT MAX(u.memberNumber) FROM User u WHERE u.memberNumber IS NOT NULL")
+    String findMaxMemberNumber();
 }

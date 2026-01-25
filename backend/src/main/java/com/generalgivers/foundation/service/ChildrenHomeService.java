@@ -43,6 +43,9 @@ public class ChildrenHomeService {
         ChildrenHome childrenHome = ChildrenHome.builder()
                 .name(request.getName())
                 .location(request.getLocation())
+                .city(request.getCity())
+                .town(request.getTown())
+                .village(request.getVillage())
                 .contact(request.getContact())
                 .notes(request.getNotes())
                 .build();
@@ -68,6 +71,15 @@ public class ChildrenHomeService {
         }
         if (request.getLocation() != null) {
             childrenHome.setLocation(request.getLocation());
+        }
+        if (request.getCity() != null) {
+            childrenHome.setCity(request.getCity());
+        }
+        if (request.getTown() != null) {
+            childrenHome.setTown(request.getTown());
+        }
+        if (request.getVillage() != null) {
+            childrenHome.setVillage(request.getVillage());
         }
         if (request.getContact() != null) {
             childrenHome.setContact(request.getContact());
@@ -105,6 +117,9 @@ public class ChildrenHomeService {
                 .id(childrenHome.getId())
                 .name(childrenHome.getName())
                 .location(childrenHome.getLocation())
+                .city(childrenHome.getCity())
+                .town(childrenHome.getTown())
+                .village(childrenHome.getVillage())
                 .contact(childrenHome.getContact())
                 .notes(childrenHome.getNotes())
                 .createdAt(childrenHome.getCreatedAt())

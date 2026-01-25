@@ -16,6 +16,9 @@ public class ChildrenHomeResponse {
     private UUID id;
     private String name;
     private String location;
+    private String city;
+    private String town;
+    private String village;
     private String contact;
     private String notes;
     private LocalDateTime createdAt;
