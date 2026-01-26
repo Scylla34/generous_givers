@@ -192,9 +192,12 @@ export default function AboutPage(): React.ReactElement {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {[
+                { name: 'Founder', image: '/leadership/founder.jpeg', description: 'Founder of the generous givers family' },
                 { name: 'Chairperson', image: '/leadership/chairperson.jpg', description: 'Provides overall leadership and strategic direction' },
                 { name: 'Vice Chairperson', image: '/leadership/vice_chair.jpg', description: 'Supports the Chairperson and assumes leadership duties' },
                 { name: 'Secretary General', image: '/leadership/sec_gen.jpg', description: 'Maintains records, coordinates communications' },
+                { name: 'Organizing Secretary', image: '/leadership/treasuerer.jpg', description: 'Contributes to various committees and projects' },
+                { name: 'Digital Strategist', image: '/leadership/sec_gen.jpg', description: 'Strategises and manages the digital space' },
                 { name: 'Treasurer', image: '/leadership/treasuerer.jpg', description: 'Manages finances and maintains donor confidence' },
               ].map((member, idx) => (
                 <div

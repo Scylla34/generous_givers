@@ -197,20 +197,30 @@ export default function GetInvolvedPage(): React.ReactElement {
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { category: 'School Supplies', items: 'Books, notebooks, pens, uniforms, backpacks' },
-              { category: 'Clothing', items: 'Seasonal wear, shoes, undergarments' },
-              { category: 'Medical Items', items: 'First aid supplies, toiletries, medications' },
-              { category: 'Household Goods', items: 'Bedding, utensils, cleaning supplies' },
-              { category: 'Furniture', items: 'Chairs, tables, storage units' },
-              { category: 'Electronics', items: 'Learning tablets, educational software' },
+              { category: 'School Supplies', items: 'Books, notebooks, pens, uniforms, backpacks', image: '/what we need/school supplies.jpg' },
+              { category: 'Clothing', items: 'Seasonal wear, shoes, undergarments', image: '/what we need/Clothing.jpg' },
+              { category: 'Medical Items', items: 'First aid supplies, toiletries, medications', image: '/what we need/Medical Items.jpg' },
+              { category: 'Household Goods', items: 'Bedding, utensils, cleaning supplies', image: '/what we need/Household Goods.jpg' },
+              { category: 'Furniture', items: 'Chairs, tables, storage units', image: '/what we need/Furniture.jpg' },
+              { category: 'Electronics', items: 'Learning tablets, educational software', image: '/what we need/Electronics.jpg' },
             ].map((item, idx) => (
               <div
                 key={item.category}
-                className="bg-white border border-gray-200 rounded-lg p-6 hover:border-primary-600 transition animate-scale-in"
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:border-primary-600 transition animate-scale-in group"
                 style={{ animationDelay: `${idx * 80}ms` }}
               >
-                <h3 className="font-bold text-gray-900 mb-2">{item.category}</h3>
-                <p className="text-sm text-gray-600">{item.items}</p>
+                <div className="relative h-48 overflow-hidden">
+                  <Image
+                    src={item.image}
+                    alt={item.category}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+                <div className="p-6">
+                  <h3 className="font-bold text-gray-900 mb-2">{item.category}</h3>
+                  <p className="text-sm text-gray-600">{item.items}</p>
+                </div>
               </div>
             ))}
           </div>

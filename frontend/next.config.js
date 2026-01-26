@@ -25,15 +25,6 @@ const nextConfig = {
   experimental: {
     // Enable optimized package imports - reduces bundle size
     optimizePackageImports: ['lucide-react', 'date-fns', '@tanstack/react-query', 'recharts'],
-    // Enable faster builds
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
   },
 
   // Headers for better caching
