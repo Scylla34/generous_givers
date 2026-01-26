@@ -15,6 +15,29 @@ export type ProjectStatus = 'DRAFT' | 'PLANNING' | 'ACTIVE' | 'ON_HOLD' | 'COMPL
 
 export type DonationStatus = 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED'
 
+export interface Event extends Record<string, unknown> {
+  id: string
+  title: string
+  description?: string
+  startDateTime: string
+  endDateTime: string
+  colorCategory: string
+  reminderMinutes: number
+  reminderSent: boolean
+  createdById: string
+  createdByName: string
+  createdAt: string
+}
+
+export interface EventRequest {
+  title: string
+  description?: string
+  startDateTime: string
+  endDateTime: string
+  colorCategory?: string
+  reminderMinutes?: number
+}
+
 export interface User extends Record<string, unknown> {
   id: string
   memberNumber?: string // Auto-generated member number (GGF001, etc.)

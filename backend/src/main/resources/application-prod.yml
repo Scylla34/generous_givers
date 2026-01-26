@@ -76,6 +76,10 @@ app:
     api-key: ${MAILERSEND_API_KEY}
     from-email: ${MAILERSEND_FROM_EMAIL}
 
+  resend:
+    api-key: ${RESEND_API_KEY}
+    from-email: ${RESEND_FROM_EMAIL}
+
   upload:
     dir: ${UPLOAD_DIR:/var/data/uploads}
 

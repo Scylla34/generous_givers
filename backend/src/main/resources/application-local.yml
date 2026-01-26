@@ -95,6 +95,10 @@ app:
     contact-recipient: ${CONTACT_RECIPIENT:teddscylla@gmail.com}
     from-name: Generous Givers Family
 
+  resend:
+    api-key: ${RESEND_API_KEY}
+    from-email: ${RESEND_FROM_EMAIL} 
+
   daraja:
     consumer-key: ${DAR_CONSUMER_KEY:}
     consumer-secret: ${DAR_CONSUMER_SECRET:}
