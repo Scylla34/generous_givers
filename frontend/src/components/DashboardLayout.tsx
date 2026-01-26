@@ -18,6 +18,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Calendar,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { profileService } from '@/services/profileService'
@@ -74,6 +75,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       name: 'Donations',
       href: '/dashboard/donations',
       icon: DollarSign,
+    },
+    {
+      name: 'Calendar',
+      href: '/dashboard/calendar',
+      icon: Calendar,
     },
     {
       name: 'Children Homes',

@@ -37,7 +37,18 @@ export default function NotificationsPage() {
 
   const { data: notificationsData, isLoading } = useQuery({
     queryKey: ['notifications', 'paginated', page, filter],
-    queryFn: () => notificationService.getNotifications(page, 20),
+    queryFn: () => {
+      if (filter === 'unread') {
+        return notificationService.getUnreadNotifications().then(notifications => ({
+          notifications,
+          currentPage: 0,
+          totalPages: 1,
+          totalElements: notifications.length,
+          hasMore: false
+        }));
+      }
+      return notificationService.getNotifications(page, 20);
+    },
   });
 
   const markAsReadMutation = useMutation({
@@ -54,9 +65,7 @@ export default function NotificationsPage() {
     },
   });
 
-  const filteredNotifications = notificationsData?.notifications.filter(n =>
-    filter === 'all' || !n.isRead
-  ) || [];
+  const filteredNotifications = notificationsData?.notifications || [];
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -68,26 +77,24 @@ export default function NotificationsPage() {
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
           <Select value={filter} onValueChange={(value: 'all' | 'unread') => setFilter(value)}>
-            <SelectTrigger className="w-28 sm:w-32 text-sm bg-white text-gray-900 border-gray-300">
+            <SelectTrigger className="w-28 sm:w-32 text-sm bg-white text-gray-900 border-gray-300 hover:border-primary-500 focus:border-primary-500 focus:ring-2 focus:ring-primary-500">
               <Filter className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
               <SelectValue placeholder="Filter" />
             </SelectTrigger>
-            <SelectContent className="bg-white border-gray-200">
-              <SelectItem value="all" className="text-gray-900">All</SelectItem>
-              <SelectItem value="unread" className="text-gray-900">Unread</SelectItem>
+            <SelectContent className="bg-white border-gray-200 shadow-lg">
+              <SelectItem value="all" className="text-gray-900 hover:bg-primary-50 focus:bg-primary-50">All</SelectItem>
+              <SelectItem value="unread" className="text-gray-900 hover:bg-primary-50 focus:bg-primary-50">Unread</SelectItem>
             </SelectContent>
           </Select>
-          <Button
+          <button
             onClick={() => markAllAsReadMutation.mutate()}
             disabled={markAllAsReadMutation.isPending}
-            variant="outline"
-            size="sm"
-            className="text-xs sm:text-sm whitespace-nowrap"
+            className="px-3 py-2 text-xs sm:text-sm bg-white border border-gray-300 rounded-md hover:bg-primary-50 hover:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-700 hover:text-primary-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 sm:gap-2"
           >
-            <CheckCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            <CheckCheck className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden xs:inline sm:inline">Mark all read</span>
             <span className="xs:hidden sm:hidden">Read all</span>
-          </Button>
+          </button>
         </div>
       </div>
 
